@@ -65,3 +65,9 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
 - `total-time-display` の初期値 `3:15` も同様の直書き（再生開始後に上書きされる）
 - `narration` は `prepareSpeechText()` を通してから読み上げられる。
   記号や英単語の読みがおかしいときはここを見る
+- **Online TTS の `Audio` 要素（`fallbackAudioElement`）は 1 個を使い回す。**
+  再生ボタンのクリックの中で unlock しているので、`null` にして作り直すと
+  Android Chrome で自動再生がブロックされて鳴らなくなる（TODO-002）
+- **Android では `chromeResumeTimer` の `pause()`/`resume()` を動かさない。**
+  デスクトップ Chrome 向けの回避策で、Android Chrome では `resume()` で
+  戻らず、読み上げが 5 秒ほどで止まる（TODO-002）

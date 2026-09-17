@@ -1115,6 +1115,35 @@
         let voiceEngineMode = 'speech'; // 'speech' or 'online'
         let fallbackAudioElement = null;
         let chromeResumeTimer = null;
+        // Android Chrome does not recover from speechSynthesis.pause()/resume(),
+        // and blocks Audio.play() outside a user gesture more strictly than desktop.
+        const isAndroid = /Android/.test(navigator.userAgent);
+        // 8 samples of silence, used only to unlock the shared Audio element
+        const SILENT_WAV = 'data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA';
+
+        // Create the one Audio element for Online TTS inside a user gesture and
+        // unlock it. Called from the play button; does nothing on later clicks.
+        function unlockFallbackAudio() {
+            if (fallbackAudioElement) return;
+            try {
+                fallbackAudioElement = new Audio(SILENT_WAV);
+                fallbackAudioElement.volume = 0;
+                const p = fallbackAudioElement.play();
+                if (p && p.then) {
+                    p.then(() => {
+                        fallbackAudioElement.pause();
+                        fallbackAudioElement.volume = 1;
+                    }).catch(() => {
+                        fallbackAudioElement.volume = 1;
+                    });
+                } else {
+                    fallbackAudioElement.pause();
+                    fallbackAudioElement.volume = 1;
+                }
+            } catch(e) {
+                console.warn("Audio unlock failed:", e);
+            }
+        }
         let slideTransitionTimeout = null;
 
         // Total calculated presentation duration
@@ -1202,8 +1231,10 @@
                 } catch(e) {}
             }
             if (fallbackAudioElement) {
+                // 要素は捨てない（作り直すと再生ボタンで得た unlock が消える）
                 fallbackAudioElement.pause();
-                fallbackAudioElement = null;
+                fallbackAudioElement.onended = null;
+                fallbackAudioElement.onerror = null;
             }
             speechActive = false;
         }
@@ -1322,8 +1353,10 @@
                         }
                     }, safetyTime);
 
+                    // Desktop Chrome stops long utterances after ~15s; pause()/resume()
+                    // works around it. On Android it stops the speech for good.
                     if (chromeResumeTimer) clearInterval(chromeResumeTimer);
-                    chromeResumeTimer = setInterval(() => {
+                    if (!isAndroid) chromeResumeTimer = setInterval(() => {
                         if (window.speechSynthesis && window.speechSynthesis.speaking) {
                             window.speechSynthesis.pause();
                             window.speechSynthesis.resume();
@@ -1345,11 +1378,15 @@
             const cleanText = text.substring(0, 180);
             const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ja&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
 
-            if (fallbackAudioElement) {
-                fallbackAudioElement.pause();
+            if (!fallbackAudioElement) {
+                // No play button press yet (autoplay will likely be blocked)
+                fallbackAudioElement = new Audio();
             }
-
-            fallbackAudioElement = new Audio(ttsUrl);
+            fallbackAudioElement.pause();
+            fallbackAudioElement.onended = null;
+            fallbackAudioElement.onerror = null;
+            fallbackAudioElement.src = ttsUrl;
+            fallbackAudioElement.load();
             fallbackAudioElement.playbackRate = Math.min(2.0, getEffectiveSpeed());
 
             let finished = false;
@@ -1560,6 +1597,7 @@
                         window.speechSynthesis.speak(dummyUtterance);
                     } catch(e) {}
                 }
+                unlockFallbackAudio();
                 togglePlay();
             });
 
