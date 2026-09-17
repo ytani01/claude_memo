@@ -26,6 +26,7 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
 - **読み上げ**: 2 系統を `toggle-voice-engine-btn` で切り替える。
   `speech` = Web Speech API（`SpeechSynthesisUtterance`）、
   `online` = Google Translate TTS の URL を `Audio` で再生（180 文字で切る）。
+  既定は `online`。
   どちらも読み終わりのイベントが来ないことがあるので、`duration` から
   計算した安全タイマーで次へ進める作りになっている
 

@@ -271,7 +271,7 @@
             <button id="toggle-voice-engine-btn" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
                 <i class="fa-solid fa-volume-high text-lime-400"></i>
                 <span class="hidden sm:inline text-slate-300 font-medium">音声エンジン:</span>
-                <span id="speech-status-indicator" class="text-lime-400 font-bold font-mono">Web Speech API</span>
+                <span id="speech-status-indicator" class="text-sky-400 font-bold font-mono">Online Voice</span>
                 <span class="hidden sm:inline text-[10px] bg-slate-950 text-sky-400 px-1.5 py-0.5 rounded border border-slate-800">切替</span>
             </button>
         </div>
@@ -1114,7 +1114,7 @@
         const baseSpeedMultiplier = 1.4;
         const getEffectiveSpeed = () => playbackRate * baseSpeedMultiplier;
 
-        let voiceEngineMode = 'speech'; // 'speech' or 'online'
+        let voiceEngineMode = 'online'; // 'online' or 'speech'
         let fallbackAudioElement = null;
         // Bumped by stopSpeech(); an in-flight chunk queue with an old id stops.
         let speechRunId = 0;
@@ -1642,11 +1642,11 @@
                 toggleVoiceEngineBtn.addEventListener('click', () => {
                     if (voiceEngineMode === 'speech') {
                         voiceEngineMode = 'online';
-                        speechStatusIndicator.textContent = "Online Voice (Fallback)";
+                        speechStatusIndicator.textContent = "Online Voice";
                         speechStatusIndicator.className = "text-sky-400 font-bold font-mono";
                     } else {
                         voiceEngineMode = 'speech';
-                        speechStatusIndicator.textContent = "Web Speech API (標準)";
+                        speechStatusIndicator.textContent = "Web Speech API";
                         speechStatusIndicator.className = "text-lime-400 font-bold font-mono";
                     }
                     if (isPlaying) {
