@@ -12,31 +12,48 @@
 **この項目で直すところまでやる**（2026-09-18 に利用者と決めた）。
 
 調査メモは `archives/agents/TODO-002/main-investigation.md`。
+**ただし、そこに書いた原因は 2 つとも外れていた。** 実機で直らず、
+調べ直して分かったのが下の 2 つ（コミット `acf6ad1`）。
 
-**分かっている原因**:
-- **Online TTS が鳴らない** — 自動再生のブロック。再生ボタンのハンドラ
-  （`claude_memo.html:1546`）は Web Speech API だけを unlock しており、
-  `Audio` 要素は unlock していない。`speakOnlineTTS()` は毎回
-  `new Audio(url)` を作り、`setTimeout` や読み終わりイベントの中から
-  `play()` するので Android Chrome では reject される。
-  直し方: 再生ボタンを押した瞬間に `Audio` を 1 つ unlock し、
-  以後は `src` の差し替えで使い回す
-- **Web Speech が途中で途切れる** — `chromeResumeTimer`
-  （`claude_memo.html:1322`）の 5 秒ごとの `pause()` / `resume()`。
-  デスクトップ Chrome 向けの回避策が Android Chrome では戻ってこない。
-  直し方: Android では pause/resume を呼ばない
+**原因（実測で確かめたもの）**:
+- **Online TTS が鳴らない** — Google Translate TTS は **Referer が付いた
+  要求に 404 を返す**（Referer 無しなら 200 `audio/mpeg`）。ブラウザは
+  既定の referrer policy で origin だけの Referer を必ず送るので、
+  **PC でも Android でも鳴らない**。`<audio>` には `referrerpolicy` 属性が
+  無いので、`<head>` に `<meta name="referrer" content="no-referrer">` を
+  置いてページ全体で止めた
+- **Web Speech が途中で切れる** — Chrome は **PC も Android も**、
+  長い発話を 15 秒ほどで打ち切る。`splitForSpeech()` で 40 文字程度に
+  分け、順に読ませる。`stopSpeech()` で `speechRunId` を進め、
+  古いキューが動き続けないようにした
+
+**外した見立て**（同じ道を辿らないこと）:
+- `chromeResumeTimer` の 5 秒ごとの `pause()`/`resume()` が原因 — 違った。
+  実際に切れるのは 15 秒。Android で止めたら、元の 15 秒制限が出ただけ。
+  分割にしたので、この回避策ごと削除した
+- 自動再生のブロックで Online TTS が鳴らない — 違った。
+  `Audio` 要素の unlock（`unlockFallbackAudio()`）は残してあるが、
+  これだけでは鳴らない
+- 「Google 側のブロックではない」— **判断を誤った**。`curl` を Referer
+  無しで叩いて 200 を見ていた。ブラウザは必ず Referer を送る。
+  **外部サービスを叩く確認は、ブラウザと同じヘッダで試すこと**
 
 **潰した候補**（蒸し返さないこと）:
 - 180 文字の切り詰め — 読み変換後で最長 164 文字。切り捨ては 0 枚
 - safety timeout の早発火 — 21〜29 秒に対し読み上げは 13〜19 秒
 - `duration` で先に進む — 再生ループは頭打ちにするだけ
-- Google 側のブロック — 同じ URL が HTTP 200 / `audio/mpeg` を返す
 
-- **実機での確認は利用者にお願いする。** どちらの原因もエミュレーションでは
-  再現しないので、直したものを実機で見てもらう必要がある
+- **実機での確認は利用者にお願いする。** ヘッドレスのブラウザでは
+  外部の音声を読み込めず、日本語の音声エンジンも無いので、
+  読み上げそのものは確かめられない
 - 完了条件: Android Chrome で、Web Speech が最後まで読み切り、
   Online TTS も鳴ること。PC での読み上げが今までどおりであること
-- **着手は TODO-001 を決着させてから**（同じファイルを同時に触ると競合する）
+- **2 回目の修正（`acf6ad1`）の実機確認待ち。**
+
+**見送った指摘**（`archives/agents/TODO-002/reviewer-report-2.md`）:
+- safety timeout の余裕をチャンク間の間が食う（最大 6 分割で間 1 つ 600ms）。
+  実機で切れなければそのまま
+- `speechActive` が未使用（変更前から）
 
 | | 分担 | モデル |
 |---|---|---|
