@@ -207,27 +207,6 @@
                 transform: scale(var(--vp-scale, 1));
                 transform-origin: top left;
             }
-            /* 擬似フルスクリーン中は裏のページをスクロールさせない。暗幕と
-               同じくスマホ限定にしてある（PC でスクロールバーが消えると、
-               100vw 基準のレターボックスが横にずれる。TODO-001）。 */
-            body.fs-lock {
-                overflow: hidden;
-            }
-            /* 縦画面ではレターボックスの上下が余るので暗幕を敷く。box-shadow だと
-               ヒットテストの対象にならず、裏のヘッダーやチャプター一覧に
-               タップが当たってしまうので、実体のある要素にしている。
-               タップでフルスクリーンを抜ける（ハンドラは JS 側）。 */
-            #viewport-stage.is-fullscreen::before {
-                content: '';
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(2, 6, 23, 0.92);
-                touch-action: none;
-                z-index: -1;
-            }
             /* ラッパーが fixed のレターボックスになり、外枠（#viewport-frame）は
                その中で 16:9 のまま。中身は 960x540 を --vp-scale で縮めた
                ものを据え置く。クラスは JS が付ける（:has() を使うと非対応
@@ -245,6 +224,36 @@
                 margin: 0 !important;
                 z-index: 1 !important;
                 padding: 1.5rem !important;
+            }
+        }
+
+        /* 暗幕と裏のスクロール止めは、幅が狭いときに加えてタッチ画面でも効かせる。
+           横持ちのスマホ（844x390 など）は幅が 768 以上で PC 扱いになるが、
+           フルスクリーン中のボタンは箱の裏で押せず、物理キーボードも無いので、
+           暗幕が出ないと再読み込みしか出口が無くなる（TODO-003）。
+           マウスの PC には掛けない。PC で裏をスクロール禁止にするとスクロール
+           バーが消え、裏のページとレターボックスが横に動く（TODO-003）。
+           なお暗幕の帯は画面の比率で決まり、16:9 ちょうどの画面では 0px に
+           なる。そこでは抜けられないままだが、対応しないと決めた（TODO-003）。 */
+        @media screen and (max-width: 767.98px), screen and (pointer: coarse) {
+            /* 擬似フルスクリーン中は裏のページをスクロールさせない。 */
+            body.fs-lock {
+                overflow: hidden;
+            }
+            /* レターボックスの余白に暗幕を敷く。box-shadow だとヒットテストの
+               対象にならず、裏のヘッダーやチャプター一覧にタップが当たって
+               しまうので、実体のある要素にしている。
+               タップでフルスクリーンを抜ける（ハンドラは JS 側）。 */
+            #viewport-stage.is-fullscreen::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(2, 6, 23, 0.92);
+                touch-action: none;
+                z-index: -1;
             }
         }
     </style>
@@ -1701,7 +1710,7 @@
             });
 
             // 擬似フルスクリーンの入り切り。ラッパー側のクラスは CSS の
-            // レターボックスと、768px 未満の暗幕が使う。
+            // レターボックスと、狭い画面・タッチ画面の暗幕が使う。
             const stage = document.getElementById('viewport-stage');
             const setFullscreen = (on) => {
                 const viewport = document.getElementById('player-viewport');
