@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Translate TTS returns 404 when a Referer is sent (TODO-002) -->
+    <meta name="referrer" content="no-referrer">
     <title>Claude Code 活用法 - プレゼン動画プレイヤー</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1114,10 +1116,8 @@
 
         let voiceEngineMode = 'speech'; // 'speech' or 'online'
         let fallbackAudioElement = null;
-        let chromeResumeTimer = null;
-        // Android Chrome does not recover from speechSynthesis.pause()/resume(),
-        // and blocks Audio.play() outside a user gesture more strictly than desktop.
-        const isAndroid = /Android/.test(navigator.userAgent);
+        // Bumped by stopSpeech(); an in-flight chunk queue with an old id stops.
+        let speechRunId = 0;
         // 8 samples of silence, used only to unlock the shared Audio element
         const SILENT_WAV = 'data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
@@ -1209,6 +1209,30 @@
                 .replace(/auto-mode/gi, 'オートモード');
         }
 
+        // Android/desktop Chrome cut long utterances off after ~15s, so the
+        // narration is spoken as short chunks in sequence (TODO-002).
+        function splitForSpeech(text, maxLen = 40, minLen = 20) {
+            const chars = [...text];
+            const isWordChar = (c) => c !== undefined && /[A-Za-z0-9]/.test(c);
+            const parts = [];
+            let buf = '';
+            for (let i = 0; i < chars.length; i++) {
+                const ch = chars[i];
+                const next = chars[i + 1];
+                buf += ch;
+                // 40 文字に達しても、英単語の途中と句読点の直前では切らない
+                const forced = buf.length >= maxLen &&
+                    !(isWordChar(ch) && isWordChar(next)) &&
+                    !(next !== undefined && '。、！？'.includes(next));
+                if ((buf.length >= minLen && '。、！？'.includes(ch)) || forced) {
+                    parts.push(buf);
+                    buf = '';
+                }
+            }
+            if (buf.trim()) parts.push(buf);
+            return parts.length ? parts : [text];
+        }
+
         // Format seconds to M:SS
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
@@ -1221,10 +1245,7 @@
                 clearTimeout(slideTransitionTimeout);
                 slideTransitionTimeout = null;
             }
-            if (chromeResumeTimer) {
-                clearInterval(chromeResumeTimer);
-                chromeResumeTimer = null;
-            }
+            speechRunId++;
             if ('speechSynthesis' in window) {
                 try {
                     window.speechSynthesis.cancel();
@@ -1263,6 +1284,7 @@
 
         function speakCurrentNarration() {
             stopSpeech();
+            const runId = speechRunId;
             if (!isPlaying) {
                 updateWaveState(false, "一時停止中");
                 return;
@@ -1288,17 +1310,11 @@
 
             if ('speechSynthesis' in window) {
                 setTimeout(() => {
-                    if (!isPlaying || isMuted) return;
+                    if (!isPlaying || isMuted || runId !== speechRunId) return;
 
                     try {
                         window.speechSynthesis.resume();
                     } catch(e) {}
-
-                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                    utterance.lang = 'ja-JP';
-                    utterance.rate = Math.min(2.0, getEffectiveSpeed() * 0.95); // ほんの少しゆったりとしたテンポ感
-                    utterance.pitch = 0.85; // ピッチを0.85に下げ、しっとりとした落ち着きと色気のある低めのトーンに調整
-                    utterance.volume = 1.0;
 
                     const voices = window.speechSynthesis.getVoices();
                     // 落ち着いた優艶な日本語女性音声を優先検索（Nanami, Haruka, Kyoko, Yuka, Sakura, Ayumi, Google 日本語 等）
@@ -1311,59 +1327,61 @@
                         !/ichiro|otoya|hattori|keita|daichi|takumi|male|男性/i.test(v.name)
                     ) || voices.find(v => v.lang && (v.lang.includes('ja') || v.lang.includes('JP')));
 
-                    if (femaleJaVoice) {
-                        utterance.voice = femaleJaVoice;
-                    }
-
+                    const chunks = splitForSpeech(textToSpeak);
                     let finished = false;
+
                     const handleEnd = () => {
-                        if (finished) return;
+                        if (finished || runId !== speechRunId) return;
                         finished = true;
-                        if (chromeResumeTimer) clearInterval(chromeResumeTimer);
                         onSlideAudioFinished();
                     };
 
-                    utterance.onstart = () => {
-                        speechActive = true;
-                        updateWaveState(true, "朗読中 (Web Speech)");
-                    };
+                    const speakChunk = (i) => {
+                        if (finished || runId !== speechRunId || !isPlaying || isMuted) return;
 
-                    utterance.onend = () => {
-                        handleEnd();
-                    };
-
-                    utterance.onerror = (e) => {
-                        console.warn("SpeechSynthesis error, falling back to Online TTS:", e);
-                        speechActive = false;
-                        if (chromeResumeTimer) clearInterval(chromeResumeTimer);
-                        if (!finished) {
-                            finished = true;
-                            speakOnlineTTS(textToSpeak);
+                        const utterance = new SpeechSynthesisUtterance(chunks[i]);
+                        utterance.lang = 'ja-JP';
+                        utterance.rate = Math.min(2.0, getEffectiveSpeed() * 0.95); // ほんの少しゆったりとしたテンポ感
+                        utterance.pitch = 0.85; // ピッチを0.85に下げ、しっとりとした落ち着きと色気のある低めのトーンに調整
+                        utterance.volume = 1.0;
+                        if (femaleJaVoice) {
+                            utterance.voice = femaleJaVoice;
                         }
+
+                        utterance.onstart = () => {
+                            speechActive = true;
+                            updateWaveState(true, "朗読中 (Web Speech)");
+                        };
+
+                        utterance.onend = () => {
+                            if (i + 1 < chunks.length) {
+                                speakChunk(i + 1);
+                            } else {
+                                handleEnd();
+                            }
+                        };
+
+                        utterance.onerror = (e) => {
+                            console.warn("SpeechSynthesis error, falling back to Online TTS:", e);
+                            speechActive = false;
+                            if (finished || runId !== speechRunId) return;
+                            finished = true; // 分割した数だけ落ちないように 1 回だけ
+                            speakOnlineTTS(textToSpeak);
+                        };
+
+                        window.speechSynthesis.speak(utterance);
                     };
 
-                    window.speechSynthesis.speak(utterance);
+                    speakChunk(0);
 
                     // Safety timeout in case SpeechSynthesis hangs without firing onend
                     const safetyTime = Math.max(6000, (textToSpeak.length / 4.5 / getEffectiveSpeed()) * 1000 + 3000);
                     slideTransitionTimeout = setTimeout(() => {
-                        if (!finished && isPlaying) {
+                        if (!finished && isPlaying && runId === speechRunId) {
                             console.warn("Safety timeout triggered for speech end");
                             handleEnd();
                         }
                     }, safetyTime);
-
-                    // Desktop Chrome stops long utterances after ~15s; pause()/resume()
-                    // works around it. On Android it stops the speech for good.
-                    if (chromeResumeTimer) clearInterval(chromeResumeTimer);
-                    if (!isAndroid) chromeResumeTimer = setInterval(() => {
-                        if (window.speechSynthesis && window.speechSynthesis.speaking) {
-                            window.speechSynthesis.pause();
-                            window.speechSynthesis.resume();
-                        } else {
-                            clearInterval(chromeResumeTimer);
-                        }
-                    }, 5000);
 
                 }, 50);
             } else {

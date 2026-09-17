@@ -68,6 +68,9 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
 - **Online TTS の `Audio` 要素（`fallbackAudioElement`）は 1 個を使い回す。**
   再生ボタンのクリックの中で unlock しているので、`null` にして作り直すと
   Android Chrome で自動再生がブロックされて鳴らなくなる（TODO-002）
-- **Android では `chromeResumeTimer` の `pause()`/`resume()` を動かさない。**
-  デスクトップ Chrome 向けの回避策で、Android Chrome では `resume()` で
-  戻らず、読み上げが 5 秒ほどで止まる（TODO-002）
+- **Web Speech は `splitForSpeech()` で 40 文字程度に分けて順に読ませる。**
+  Chrome は PC も Android も、長い発話を 15 秒ほどで打ち切る。
+  1 つにまとめると途中で切れる（TODO-002）
+- **`<meta name="referrer" content="no-referrer">` を外さない。**
+  Google Translate TTS は Referer が付いた要求に 404 を返すので、
+  外すと Online TTS が鳴らなくなる（TODO-002）
