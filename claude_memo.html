@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code 活用法 - プレゼン動画プレイヤー</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Urbanist:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#020617',
+                            card: '#0f172a',
+                            border: '#1e293b',
+                            accent: '#38bdf8',
+                            lime: '#bef264',
+                            sub: '#94a3b8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans JP', 'sans-serif'],
+                        heading: ['Urbanist', 'Noto Sans JP', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            font-family: 'Noto Sans JP', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 16:9 Slide Canvas Container with Container Queries */
+        .video-viewport {
+            aspect-ratio: 16 / 9;
+            position: relative;
+            background-color: #0f172a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            container-type: inline-size;
+            container-name: viewport;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Custom Scrollbar for sidebar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        /* Slide Transition Effects */
+        .slide-fade-enter {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Audio Wave Visualizer Animation */
+        .wave-bar {
+            width: 3px;
+            background-color: #bef264;
+            border-radius: 2px;
+            animation: wave 1.2s ease-in-out infinite alternate;
+        }
+        .wave-bar:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+        .wave-bar:nth-child(2) { height: 85%; animation-delay: 0.3s; }
+        .wave-bar:nth-child(3) { height: 60%; animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { height: 100%; animation-delay: 0.4s; }
+        .wave-bar:nth-child(5) { height: 50%; animation-delay: 0.15s; }
+
+        @keyframes wave {
+            0% { transform: scaleY(0.3); }
+            100% { transform: scaleY(1.1); }
+        }
+
+        .paused .wave-bar {
+            animation-play-state: paused;
+            transform: scaleY(0.2);
+        }
+
+        /* Pseudo Fullscreen Overlay Fallback - Fixed 16:9 Ratio Centered */
+        .video-viewport.pseudo-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: calc(100vh * (16 / 9)) !important;
+            max-height: calc(100vw * (9 / 16)) !important;
+            margin: auto !important;
+            z-index: 9999 !important;
+            border-radius: 0 !important;
+            aspect-ratio: 16 / 9 !important;
+            box-shadow: 0 0 80px rgba(0, 0, 0, 0.95) !important;
+            padding: 1.5rem !important;
+        }
+
+        /* Mobile: drop the fixed 16:9 box so the clamp() minimum font sizes fit
+           instead of overflowing a ~215px-tall viewport. */
+        @media screen and (max-width: 640px) {
+            .video-viewport {
+                aspect-ratio: auto;
+                min-height: 60vh;
+            }
+            /* 多カラムのスライドは端末幅に合わせて段数を減らす */
+            #slide-canvas .grid-cols-2,
+            #slide-canvas .grid-cols-3 {
+                grid-template-columns: minmax(0, 1fr);
+            }
+            #slide-canvas .grid-cols-4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            /* 横スクロールで見せるピル類は潰さない */
+            #slide-canvas .overflow-x-auto .inline-flex {
+                flex-shrink: 0;
+            }
+            /* 見出しだけ折り返しを許可（端末幅のターミナル再現は横スクロールのまま） */
+            #slide-canvas h1.whitespace-nowrap {
+                white-space: normal;
+            }
+            /* 縦持ちの擬似フルスクリーンは 16:9 のレターボックスだと中身が入らない */
+            .video-viewport.pseudo-fullscreen {
+                aspect-ratio: auto !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                overflow-y: auto !important;
+                padding: 1rem !important;
+            }
+            /* Subtitle banner: flow at the bottom instead of covering the slide */
+            #subtitle-banner {
+                position: static;
+                margin-top: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Top Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2 sticky top-0 z-50">
+        <div class="flex items-center space-x-3 min-w-0">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-lime-400 flex items-center justify-center text-slate-950 font-bold">
+                <i class="fa-solid fa-play text-sm"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm sm:text-base text-slate-100 flex items-center gap-2">
+                    私の Claude Code の使い方
+                    <span class="hidden sm:inline text-xs font-normal bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full">AI Presentation Video</span>
+                </h1>
+                <p class="hidden sm:block text-xs text-slate-400">インタラクティブ・プレゼンテーション動画プレイヤー</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 flex-shrink-0">
+            <!-- Voice Selector / Engine Toggle Button -->
+            <button id="toggle-voice-engine-btn" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                <i class="fa-solid fa-volume-high text-lime-400"></i>
+                <span class="hidden sm:inline text-slate-300 font-medium">音声エンジン:</span>
+                <span id="speech-status-indicator" class="text-lime-400 font-bold font-mono">Web Speech API</span>
+                <span class="hidden sm:inline text-[10px] bg-slate-950 text-sky-400 px-1.5 py-0.5 rounded border border-slate-800">切替</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl w-full mx-auto p-4 md:p-6 flex-grow flex flex-col gap-4">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+            
+            <!-- Video Player Column (3 Cols) -->
+            <div class="lg:col-span-3 flex flex-col gap-3">
+                
+                <!-- Viewport Container -->
+                <div class="video-viewport border border-slate-800 flex flex-col justify-between p-4 md:p-6 relative select-none" id="player-viewport">
+                    
+                    <!-- Background Glow Overlay -->
+                    <div class="absolute -top-24 -right-24 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-lime-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <!-- Top Slide Header Info -->
+                    <div class="flex items-center justify-between text-sm md:text-base font-mono text-slate-400 z-10 mb-1 flex-shrink-0">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-lime-400 animate-pulse"></span>
+                            <span id="slide-category" class="text-sky-400 font-bold uppercase tracking-widest text-xs md:text-sm">CLAUDE CODE WORKFLOW</span>
+                        </div>
+                        <div class="bg-slate-800/80 px-3 py-1 rounded text-slate-300 border border-slate-700/50">
+                            SLIDE <span id="slide-num" class="text-lime-400 font-bold">01</span> / <span id="total-slides">17</span>
+                        </div>
+                    </div>
+
+                    <!-- Slide Canvas Main Body (Dynamic Injection) -->
+                    <div id="slide-canvas" class="flex-grow z-10 slide-fade-enter overflow-hidden flex flex-col justify-center my-auto py-1">
+                        <!-- Dynamic slide content will be rendered here -->
+                    </div>
+
+                    <!-- Bottom Subtitle / Narration Banner overlay on Video Screen (Floating Overlay) -->
+                    <div id="subtitle-banner" class="z-30 bg-slate-950/95 backdrop-blur border border-sky-500/40 rounded-xl p-3 shadow-2xl flex items-center gap-3 absolute bottom-3 left-4 right-4 hidden">
+                        <div class="flex items-center gap-1 h-6 md:h-7 px-2 bg-slate-900 rounded border border-slate-800 flex-shrink-0 paused" id="wave-container">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
+                        <div class="flex-grow min-w-0">
+                            <div class="text-xs text-sky-400 font-bold uppercase tracking-wider flex items-center justify-between mb-1">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-comment-dots"></i> ナレーション字幕</span>
+                                <span id="audio-status-badge" class="text-xs bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded font-mono">停止中</span>
+                            </div>
+                            <p id="caption-text" class="text-sm md:text-base text-slate-100 font-medium leading-relaxed transition-all line-clamp-2 overflow-hidden">
+                                ここにナレーションテキストが表示されます...
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Video Controls Panel -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-3 shadow-lg">
+                    
+                    <!-- Seekbar Track -->
+                    <div class="flex items-center gap-3">
+                        <span id="current-time-display" class="font-mono text-xs text-sky-400 font-bold w-10 text-right">0:00</span>
+                        
+                        <div class="relative flex-grow h-3 bg-slate-800 rounded-full cursor-pointer group" id="seekbar-container">
+                            <!-- Progress fill -->
+                            <div id="progress-bar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-sky-400 to-lime-400 rounded-full w-0 transition-all duration-75"></div>
+                            <!-- Thumb handle -->
+                            <div id="progress-thumb" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow border-2 border-sky-500 opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%;"></div>
+                        </div>
+
+                        <span id="total-time-display" class="font-mono text-xs text-slate-400 w-10">3:15</span>
+                    </div>
+
+                    <!-- Main Buttons Row -->
+                    <div class="flex items-center justify-between gap-y-2 flex-wrap pt-1">
+                        
+                        <div class="flex items-center gap-2">
+                            <!-- Prev Slide Button -->
+                            <button id="prev-btn" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition border border-slate-700">
+                                <i class="fa-solid fa-backward-step"></i>
+                            </button>
+
+                            <!-- Play/Pause Button -->
+                            <button id="play-btn" class="w-12 h-12 rounded-xl bg-gradient-to-r from-sky-400 to-lime-400 hover:opacity-90 text-slate-950 flex items-center justify-center font-bold text-lg transition shadow-lg shadow-sky-500/20">
+                                <i class="fa-solid fa-play ml-0.5" id="play-icon"></i>
+                            </button>
+
+                            <!-- Next Slide Button -->
+                            <button id="next-btn" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition border border-slate-700">
+                                <i class="fa-solid fa-forward-step"></i>
+                            </button>
+
+                            <!-- Auto-Replay Toggle -->
+                            <button id="restart-btn" class="ml-2 text-slate-400 hover:text-slate-200 text-xs flex items-center gap-1 bg-slate-800/50 hover:bg-slate-800 px-3 py-2 rounded-lg border border-slate-800">
+                                <i class="fa-solid fa-rotate-left"></i> 最初から
+                            </button>
+                        </div>
+
+                        <!-- Slide Title Preview -->
+                        <div class="hidden md:flex flex-col text-center">
+                            <span class="text-[10px] text-slate-400 uppercase tracking-widest">再生中スライド</span>
+                            <span id="control-title-preview" class="text-xs font-bold text-lime-400 truncate max-w-[220px]">1. タイトル</span>
+                        </div>
+
+                        <!-- Right Options -->
+                        <div class="flex items-center gap-2">
+                            <!-- Subtitle / Caption Toggle Button -->
+                            <button id="toggle-caption-btn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-400 font-bold px-2.5 py-2 rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="字幕の表示/非表示">
+                                <i class="fa-solid fa-closed-captioning" id="caption-icon"></i>
+                                <span class="hidden sm:inline">字幕</span>
+                            </button>
+
+                            <!-- Speed Selector -->
+                            <button id="speed-btn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-sky-400 font-mono font-bold px-3 py-2 rounded-lg transition">
+                                1.0x
+                            </button>
+
+                            <!-- Mute Button -->
+                            <button id="mute-btn" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm border border-slate-700">
+                                <i class="fa-solid fa-volume-high" id="mute-icon"></i>
+                            </button>
+
+                            <!-- Fullscreen Button -->
+                            <button id="fullscreen-btn" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm border border-slate-700">
+                                <i class="fa-solid fa-expand"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Sidebar Playlist / Agenda (1 Col) -->
+            <div id="sidebar" class="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col h-[520px] shadow-lg">
+                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+                    <h2 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-rectangle-list text-sky-400"></i> チャプター一覧
+                    </h2>
+                    <span class="text-xs text-slate-500 font-mono" id="playlist-count">17 Slides</span>
+                </div>
+
+                <!-- Playlist Scroll Container -->
+                <div class="flex-grow overflow-y-auto space-y-2 pr-1" id="playlist-items">
+                    <!-- Dynamic playlist item buttons injected via JS -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-950 py-3 text-center text-xs text-slate-500">
+        Claude Code Interactive Presentation Video &copy; 2026 | Audio-Synced Presentation Engine
+    </footer>
+
+    <script>
+        const slideData = [
+            // Slide 1
+            {
+                id: 1,
+                category: 'CLAUDE CODE WORKFLOW',
+                title: '私の Claude Code の使い方',
+                duration: 12,
+                narration: 'みなさんこんにちは。今回は、私が日常的に実践している Claude Code の具体的な使い方や工夫についてご紹介します。ネット上の知見を参考にしながら自分なりにアレンジして試行錯誤を重ねている段階ですので、使い方の一例としてご覧いただければ幸いです。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col items-start justify-center h-full px-[4cqw] py-[1.5cqw] space-y-[1.5cqw]">
+                            <span class="text-sky-400 font-bold tracking-widest flex items-center gap-[1cqw]" style="font-size: clamp(1rem, 2.1cqw, 1.5rem);">
+                                <i class="fa-solid fa-terminal text-lime-400"></i> WORKFLOW PRESENTATION
+                            </span>
+                            <h1 class="font-extrabold text-slate-50 leading-tight whitespace-nowrap" style="font-size: clamp(1.8rem, 5cqw, 3.8rem);">
+                                私の <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-lime-400">Claude Code</span> の使い方
+                            </h1>
+                            <p class="text-slate-200 font-medium leading-relaxed" style="font-size: clamp(1.15rem, 2.8cqw, 2.1rem);">
+                                ネット上の情報をもとに、自分なりにアレンジして試行錯誤中です。
+                            </p>
+                            <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl px-[2cqw] py-[1.2cqw] flex items-center gap-[1.2cqw] mt-[0.8cqw]">
+                                <i class="fa-solid fa-circle-info text-sky-400" style="font-size: clamp(1.1rem, 2.4cqw, 1.8rem);"></i>
+                                <span class="text-slate-200 font-medium" style="font-size: clamp(0.95rem, 2cqw, 1.45rem);">使い方の一例としてご紹介させていただきます | 2026-09</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 2
+            {
+                id: 2,
+                category: 'COMMAND OVERVIEW',
+                title: '主なコマンド一覧',
+                duration: 13,
+                narration: 'このあとの説明で頻繁に登場する主なコマンドです。話題が変わったら文脈を捨てるスラッシュクリア、TODO項目を完了まで自動で走らせるスラッシュゴール、環境チェック用のスラッシュドクター、スマホ連携用のスラッシュリモートコントロール、そしてアカウント切替用のスラッシュログインなどが基本になります。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-terminal text-lime-400"></i> 主なコマンド一覧
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[1.8cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.8cqw]">
+                                    <div class="text-lime-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.6cqw, 2.0rem);">/clear</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.1cqw, 1.55rem);">話題が変わったら文脈を捨てる</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.8cqw]">
+                                    <div class="text-sky-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.6cqw, 2.0rem);">/goal TODO-NNN</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.1cqw, 1.55rem);">TODO 項目を完了まで走らせる</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.8cqw]">
+                                    <div class="text-lime-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.6cqw, 2.0rem);">/doctor</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.1cqw, 1.55rem);">設定の点検 (Anthropic 推奨)</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.8cqw]">
+                                    <div class="text-sky-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.6cqw, 2.0rem);">/rc (/login)</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.1cqw, 1.55rem);">スマホアプリから操作・アカウント切り替え</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 3
+            {
+                id: 3,
+                category: 'CURRENT CHALLENGES',
+                title: '現状の課題',
+                duration: 10,
+                narration: '現在感じている課題は大きく2点あります。1つ目は、長時間の開発に伴うトークン消費をもっと効果的に削減したいこと。2つ目は、日々のメモに愛用している Obsidian と Claude Code のスムーズな連携方法を模索中であることです。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> 現状の課題
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[2.2cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw] flex flex-col justify-between">
+                                    <div class="text-rose-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"><i class="fa-solid fa-coins"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">トークン消費の削減</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">長時間の開発において、トークン消費をもっと効果的に節約する運用を模索中。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw] flex flex-col justify-between">
+                                    <div class="text-purple-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"><i class="fa-solid fa-note-sticky"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">Obsidian メモアプリ連携</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">日々のナレッジを蓄積している Obsidian と AI のシームレスな連携方法の確立。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 4
+            {
+                id: 4,
+                category: 'ENVIRONMENT SETUP',
+                title: '利用環境とセットアップ',
+                duration: 14,
+                narration: '私の利用環境のポイントは、Claude Code のセッションを常に起動しっぱなしにできる点です。常時稼働の Raspberry Pi 5 上で tmux を起動し、その中で Claude Code を動かしています。PC やスマホから SSH でログインすれば、いつでも以前のセッションを再開できます。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-server text-lime-400"></i> 利用環境
+                            </h2>
+                            <div class="bg-sky-950/40 border border-sky-500/40 rounded-xl p-[1.4cqw] mb-[1.5cqw] text-sky-300 font-bold flex items-center gap-[1.2cqw]" style="font-size: clamp(1.05rem, 2.3cqw, 1.7rem);">
+                                <i class="fa-solid fa-lightbulb text-lime-400" style="font-size: clamp(1.3rem, 2.8cqw, 2.1rem);"></i>
+                                <span>ポイント: Claude Code のセッションは、起動しっぱなしにできる</span>
+                            </div>
+                            <div class="grid grid-cols-4 gap-[1.4cqw] mb-[1.5cqw]">
+                                <div class="bg-slate-800/60 p-[1.4cqw] rounded-xl border border-slate-700 text-center">
+                                    <div class="text-slate-400 font-bold uppercase mb-[0.4cqw]" style="font-size: clamp(0.82rem, 1.6cqw, 1.2rem);">マシン</div>
+                                    <div class="text-slate-100 font-bold" style="font-size: clamp(1.05rem, 2.2cqw, 1.6rem);">Raspberry Pi 5</div>
+                                    <div class="text-lime-400 mt-[0.4cqw] font-bold" style="font-size: clamp(0.82rem, 1.6cqw, 1.2rem);">24時間常時稼働</div>
+                                </div>
+                                <div class="bg-slate-800/60 p-[1.4cqw] rounded-xl border border-slate-700 text-center">
+                                    <div class="text-slate-400 font-bold uppercase mb-[0.4cqw]" style="font-size: clamp(0.82rem, 1.6cqw, 1.2rem);">セッション維持</div>
+                                    <div class="text-slate-100 font-bold" style="font-size: clamp(1.05rem, 2.2cqw, 1.6rem);">tmux</div>
+                                    <div class="text-sky-400 mt-[0.4cqw] font-bold" style="font-size: clamp(0.82rem, 1.6cqw, 1.2rem);">常時セッション保持</div>
+                                </div>
+                                <div class="bg-slate-800/60 p-[1.4cqw] rounded-xl border border-slate-700 text-center">
+                                    <div class="text-slate-400 font-bold uppercase mb-[0.4cqw]" style="font-size: clamp(0.82rem, 1.6cqw, 1.2rem);">エディタ</div>
+                                    <div class="text-slate-100 font-bold" style="font-size: clamp(1.05rem, 2.2cqw, 1.6rem);">Emacs</div>
+                                    <div class="text-slate-400 mt-[0.4cqw]" style="font-size: clamp(0.82rem, 1.6cqw, 1.2rem);">(たまに Neovim)</div>
+                                </div>
+                                <div class="bg-slate-800/60 p-[1.4cqw] rounded-xl border border-slate-700 text-center">
+                                    <div class="text-slate-400 font-bold uppercase mb-[0.4cqw]" style="font-size: clamp(0.82rem, 1.6cqw, 1.2rem);">SSH端末</div>
+                                    <div class="text-slate-100 font-bold" style="font-size: clamp(1.05rem, 2.2cqw, 1.6rem);">Alacritty</div>
+                                    <div class="text-slate-400 mt-[0.4cqw]" style="font-size: clamp(0.82rem, 1.6cqw, 1.2rem);">マルチ端末接続</div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900 border border-slate-800 rounded-xl p-[1.2cqw] text-center text-slate-200 font-mono font-bold" style="font-size: clamp(0.98rem, 2.1cqw, 1.55rem);">
+                                SSHで Raspberry Pi 5 にログイン &rarr; tmux を起動 &rarr; その中で claude を起動
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 5
+            {
+                id: 5,
+                category: 'NATURAL DIALOGUE',
+                title: '自然な日本語で対話する',
+                duration: 12,
+                narration: '対話は「○○したい」とシンプルに伝えるだけで十分です。プロンプトをガチガチに作り込む必要はなく、基本は auto-mode で AI に任せます。足りない情報は AI から質問してくれます。プロンプトエンジニアリングよりも、共通のルール作りが重要だと感じています。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-comments text-lime-400"></i> 自然な日本語で対話
+                            </h2>
+                            <div class="grid grid-cols-3 gap-[2cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw] flex flex-col justify-between">
+                                    <div class="text-sky-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-comment-dots"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">「○○したい」で十分</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">指示文を作り込まず、一言伝えて AI と壁打ち対話。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw] flex flex-col justify-between">
+                                    <div class="text-lime-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-robot"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">AI を縛らず、任せる</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">基本は auto-mode。足りない情報は AI から聞かせる。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw] flex flex-col justify-between">
+                                    <div class="text-amber-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-gears"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">プロンプトよりルール</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">大事なのはプロンプトエンジニアリングよりルール設定。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 6
+            {
+                id: 6,
+                category: 'TOKEN SAVING',
+                title: 'トークン節約に効くコマンド：/clear',
+                duration: 12,
+                narration: 'トークン節約に最も手軽で効くのがスラッシュクリアです。話題が変わったりコミットが終わったタイミングで、文脈をリセットします。AI自身にクリアの適切なタイミングを判定させて、スラッシュクリアできますと言わせるルールも組み込んでいます。なお、要約の脱落を防ぐためスラッシュコンパクトはほとんど使いません。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-broom text-lime-400"></i> トークン節約に効くコマンド /clear
+                            </h2>
+                            <div class="space-y-[1.2cqw] text-slate-200">
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.4cqw] flex items-start gap-[1.2cqw]">
+                                    <i class="fa-solid fa-circle-check text-lime-400 mt-[0.2cqw] flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);" class="font-medium">
+                                        <strong class="text-slate-100 font-mono text-lime-400">/clear</strong> で話題が変わったら即リセット。文脈を消してトークンを削減。
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.4cqw] flex items-start gap-[1.2cqw]">
+                                    <i class="fa-solid fa-code-commit text-sky-400 mt-[0.2cqw] flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);" class="font-medium">
+                                        目安は <strong>Git のコミット直後</strong> や一区切りついたタイミング。
+                                    </div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.4cqw] flex items-start gap-[1.2cqw]">
+                                    <i class="fa-solid fa-brain text-purple-400 mt-[0.2cqw] flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);" class="font-medium">
+                                        適切なタイミングを AI に判定させて <strong>「/clear できます」</strong> と提案させる。
+                                    </div>
+                                </div>
+                                <div class="bg-rose-950/40 border border-rose-500/40 rounded-xl p-[1.1cqw] text-rose-300 flex items-center gap-[1cqw] font-medium" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">
+                                    <i class="fa-solid fa-triangle-exclamation text-rose-400 flex-shrink-0" style="font-size: clamp(1.1rem, 2.2cqw, 1.6rem);"></i>
+                                    <span>※ 情報要約による脱落を防ぐため <code class="bg-slate-900 px-[0.6cqw] py-[0.2cqw] rounded text-rose-300 font-mono">/compact</code> はほとんど使わない</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 7
+            {
+                id: 7,
+                category: 'AI CONFIGURATION',
+                title: 'AI の設定も AI にやってもらう',
+                duration: 12,
+                narration: 'CLAUDE.md などの設定ファイルは、人間が手で編集しないようにしています。人間が書いた曖昧さや矛盾がそのままハルシネーションの原因になるため、修正も AI に指示して書かせます。プラグインや MCP の設定も任せつつ、入れ過ぎに注意してスラッシュドクターで点検しています。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-sliders text-lime-400"></i> AI の設定も AI にやってもらう
+                            </h2>
+                            <div class="grid grid-cols-3 gap-[2cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
+                                    <div class="text-sky-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-file-code"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">CLAUDE.md 自作禁止</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">人間が書いた矛盾がハルシネーションの元。修正も AI に書かせる。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
+                                    <div class="text-lime-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-plug"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">plugin / MCP 管理</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">プラグインの設定も AI に任せる。ただし入れ過ぎには十分注意。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
+                                    <div class="text-amber-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-user-doctor"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">/doctor で点検</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">設定の矛盾や環境の健康状態を Anthropic 推奨コマンドで定期チェック。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 8
+            {
+                id: 8,
+                category: 'PLUGINS & MCP',
+                title: '実際に使っている plugin と MCP',
+                duration: 14,
+                narration: '実際に導入しているプラグインと MCP です。Python の型チェックを行う pyright-lsp や、過剰な実装を止める ponytail、コード構造を効率よく検索する codegraph などが活躍しています。数を増やせばいいわけではないため、使っていないものは見直しています。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-puzzle-piece text-lime-400"></i> 実際に使っている plugin と MCP
+                            </h2>
+                            <div class="overflow-x-auto rounded-xl border border-slate-700/80">
+                                <table class="w-full text-left text-slate-200" style="font-size: clamp(0.92rem, 2.0cqw, 1.45rem);">
+                                    <thead class="bg-slate-800 text-sky-400 font-bold border-b border-slate-700">
+                                        <tr>
+                                            <th class="p-[1cqw]">種類</th>
+                                            <th class="p-[1cqw]">名前</th>
+                                            <th class="p-[1cqw]">用途</th>
+                                            <th class="p-[1cqw]">呼び出し回数</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-800 bg-slate-900/40 font-medium">
+                                        <tr><td class="p-[1cqw]">plugin</td><td class="p-[1cqw] font-mono font-bold text-lime-400">pyright-lsp</td><td class="p-[1cqw]">Python の型と定義を渡す</td><td class="p-[1cqw] font-mono">1173 回</td></tr>
+                                        <tr><td class="p-[1cqw]">plugin</td><td class="p-[1cqw] font-mono font-bold text-lime-400">ponytail</td><td class="p-[1cqw]">過剰な実装を止める (YAGNI)</td><td class="p-[1cqw] font-mono">651 回</td></tr>
+                                        <tr><td class="p-[1cqw]">MCP</td><td class="p-[1cqw] font-mono font-bold text-sky-400">codegraph</td><td class="p-[1cqw]">コード構造を引く。grepより安い</td><td class="p-[1cqw] font-mono">常用</td></tr>
+                                        <tr><td class="p-[1cqw]">MCP</td><td class="p-[1cqw] font-mono font-bold text-sky-400">Claude Docs</td><td class="p-[1cqw]">資料作成</td><td class="p-[1cqw] font-mono">常用</td></tr>
+                                        <tr><td class="p-[1cqw]">plugin</td><td class="p-[1cqw] font-mono text-slate-400">claude-code-setup</td><td class="p-[1cqw]">設定の相談</td><td class="p-[1cqw] font-mono">2 回</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-slate-400 mt-[1cqw] text-right font-medium" style="font-size: clamp(0.8rem, 1.6cqw, 1.15rem);">※ 呼び出し回数は ~/.claude.json pluginUsage より抽出</p>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 9
+            {
+                id: 9,
+                category: 'TASK MANAGEMENT',
+                title: '【最重要】TODO.md によるタスク管理',
+                duration: 14,
+                narration: '運用の中で最も重要なのが TODO.md によるタスク管理です。作業に着手する前に必ず項目を立てることで、万が一セッションが切れても TODO.md から確実に再開できます。利用者の要望から AI が TODO を起草し、承認後にスラッシュゴールで完走させます。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.2cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-list-check text-lime-400"></i> 【最重要】TODO.md によるタスク管理
+                            </h2>
+                            <p class="text-slate-200 mb-[2cqw] font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">着手前に必ず項目を立てるので、セッションが切れても TODO.md から再開できる。</p>
+                            <div class="grid grid-cols-4 gap-[1.5cqw] items-center text-center">
+                                <div class="bg-slate-800/80 border border-sky-500/50 p-[1.5cqw] rounded-xl">
+                                    <div class="text-sky-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">1. 要望</div>
+                                    <div class="text-slate-100 font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">「○○したい」</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">利用者の一言</div>
+                                </div>
+                                <div class="bg-slate-800/80 border border-lime-500 p-[1.5cqw] rounded-xl shadow-lg shadow-lime-500/10">
+                                    <div class="text-lime-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">2. 起草・承認</div>
+                                    <div class="text-lime-400 font-mono font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">TODO.md</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">AI起草 / 利用者承認</div>
+                                </div>
+                                <div class="bg-slate-800/80 border border-sky-500/50 p-[1.5cqw] rounded-xl">
+                                    <div class="text-sky-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">3. 完走</div>
+                                    <div class="text-slate-100 font-mono font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">/goal</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">完了まで自動走破</div>
+                                </div>
+                                <div class="bg-slate-800/80 border border-slate-700 p-[1.5cqw] rounded-xl">
+                                    <div class="text-slate-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">4. 保存</div>
+                                    <div class="text-slate-300 font-mono my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">archives/</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">決着・目次保存</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 10
+            {
+                id: 10,
+                category: 'TASK MANAGEMENT RULES',
+                title: 'TODO.md 運用の具体ルール',
+                duration: 12,
+                narration: 'TODO.md 運用のルールとしては、大きな作業も小さな作業も例外なくすべて項目化します。そしてスラッシュゴールで一気に完走させます。ファイルを無駄に分割せず TODO.md 一本に集約し、運用のルール自体も AI と相談しながらブラッシュアップしていきます。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-clipboard-list text-lime-400"></i> TODO.md 運用の具体ルール
+                            </h2>
+                            <div class="space-y-[1.2cqw] text-slate-200 font-medium">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-check-double text-lime-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>すべての作業を例外なく項目化:</strong> 大小問わず必ず TODO に起草</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-person-running text-sky-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong class="font-mono text-sky-400">/goal TODO-NNN</strong> で完了まで止まらず走らせる</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-file text-amber-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>ファイル分割をしない:</strong> plan.md や task.md に分けず TODO.md 1本に集約</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-seedling text-purple-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>ルール自体も AI と直す:</strong> <span class="font-mono bg-slate-900 px-[0.5cqw] py-[0.1cqw] rounded text-slate-200" style="font-size: clamp(0.85rem, 1.7cqw, 1.25rem);">~/.claude/CLAUDE.md</span> へ自動反映</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 11
+            {
+                id: 11,
+                category: 'MULTI-AGENT WORKFLOW',
+                title: 'マルチエージェントで役割分担',
+                duration: 14,
+                narration: 'マルチエージェントで役割分担を行っています。全体指揮とレビューには知能の高い Opus を、実装や検証には高速な Sonnet を、日本語校正には Haiku を割り当てています。直接ファイルを編集できるのは main と implementer だけに制限し、コストと精度の最適化を図っています。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-network-wired text-lime-400"></i> マルチエージェントで役割分担
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[1.8cqw] items-center">
+                                <div class="bg-sky-950/60 border border-sky-500/60 p-[2cqw] rounded-xl text-center">
+                                    <div class="text-sky-400 font-bold mb-[0.6cqw]" style="font-size: clamp(1.25rem, 2.6cqw, 1.9rem);">main (Opus / リーダー役)</div>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.0cqw, 1.45rem);">割り振り / 進行管理 / 最終報告<br><span class="text-lime-400 font-bold mt-[0.4cqw] inline-block">※ リポジトリ編集権限あり</span></p>
+                                </div>
+                                <div class="space-y-[1cqw]">
+                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
+                                        <span><strong class="text-lime-400">implementer</strong> (Sonnet)</span>
+                                        <span class="text-slate-200">実装・修正 (編集権限あり)</span>
+                                    </div>
+                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
+                                        <span><strong class="text-sky-400">reviewer</strong> (Opus)</span>
+                                        <span class="text-slate-200">コードをレビュー</span>
+                                    </div>
+                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
+                                        <span><strong class="text-lime-400">verifier</strong> (Sonnet)</span>
+                                        <span class="text-slate-200">動かして動作検証</span>
+                                    </div>
+                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
+                                        <span><strong class="text-rose-400">wording</strong> (Haiku)</span>
+                                        <span class="text-slate-200">日本語に校正</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 12
+            {
+                id: 12,
+                category: 'TASK MANAGEMENT',
+                title: 'TODO.md の実際の記述例',
+                duration: 14,
+                narration: 'こちらが TODO.md の実際の記述例です。ヘッダー部分に残数の管理状況や次回発行IDを記録し、タスクごとに担当エージェント、実施する具体的なステップ、ツールによる検証結果やコミット後のクリア手順まで明記します。決着したタスクはアーカイブファイルへ集約し、コンテキスト量を最小限に保ちます。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.3rem, 2.8cqw, 2.1rem);">
+                                <i class="fa-solid fa-file-lines text-lime-400"></i> TODO.md の実際の記述例
+                            </h2>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-[1.4cqw] font-mono text-slate-200 leading-normal space-y-[0.7cqw] overflow-hidden shadow-inner" style="font-size: clamp(0.82rem, 1.75cqw, 1.3cqw);">
+                                <div class="text-sky-400 font-bold border-b border-slate-800 pb-[0.4cqw] flex justify-between items-center">
+                                    <span># TODO.md - Claude Code Task Board</span>
+                                    <span class="text-slate-400 font-normal" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">v2.4</span>
+                                </div>
+                                <div class="text-slate-300" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">ステータス: 進行中 (残1件 / 累計 55 件完了) · 次回 ID: TODO-057</div>
+                                
+                                <div class="text-lime-400 font-bold pt-[0.2cqw]">## [進行中] TODO-056 モジュール構成とクラス構成の刷新</div>
+                                <div class="text-sky-300 bg-slate-900/80 px-[0.7cqw] py-[0.15cqw] rounded border border-slate-800 inline-block" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">
+                                    担当: main (Opus/設計) &rarr; implementer (Sonnet/実装) &rarr; verifier (Sonnet/検証)
+                                </div>
+                                
+                                <div class="text-slate-200 pl-[0.8cqw] space-y-[0.4cqw]">
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-lime-400 font-bold">[x]</span> <span>責務・依存関係の抽出と設計書作成 (<code class="text-amber-300">docs/design-4.md</code>)</span></div>
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-lime-400 font-bold">[x]</span> <span>インターフェース定義とリファクタリング実施 (<code class="text-sky-300">pyright-lsp</code> にて型検証)</span></div>
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-amber-400 font-bold">[/]</span> <span>単体テスト実行と結果検証 (<code class="text-lime-300 font-bold">pytest tests/ --cov</code>)</span></div>
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-slate-400">[ ]</span> <span>Git コミット作成後に <code class="text-sky-400 font-bold">/clear</code> を実行してセッションリセット</span></div>
+                                </div>
+
+                                <div class="text-slate-300 font-bold pt-[0.2cqw] border-t border-slate-800/80">## 完了済みアーカイブ</div>
+                                <div class="text-slate-400 pl-[0.8cqw]" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">
+                                    <div>- TODO-001 ~ TODO-055: <span class="underline text-slate-300">archives/todo/2026-09-history.md</span> へ移動・集約済み</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 13
+            {
+                id: 13,
+                category: 'MOBILE INTEGRATION',
+                title: 'スマホ連携：/rc',
+                duration: 11,
+                narration: 'スラッシュリモートコントロールを使うことで、スマホの Claude アプリからラズパイのセッションに接続できます。TODO.md による運用ルールが固まっているため、出先からの短い指示でも AI が自律的に作業を進めてくれます。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-mobile-screen-button text-lime-400"></i> スマホ連携 /rc
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[2.2cqw] items-center">
+                                <div class="space-y-[1.5cqw] text-slate-200">
+                                    <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.8cqw]">
+                                        <div class="text-lime-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">/rc (remote-control)</div>
+                                        <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);" class="font-medium">スマホの Claude アプリと接続。出先で状況確認も指示出しも可能。</div>
+                                    </div>
+                                    <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.8cqw]">
+                                        <div class="text-sky-400 font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">自律的な進捗</div>
+                                        <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);" class="font-medium">TODO.md の運用ルールが固まっていれば、短文指示でタスクが完了。</div>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 border border-slate-800 rounded-xl p-[2.5cqw] text-center">
+                                    <i class="fa-solid fa-mobile-button text-sky-400 mb-[1.2cqw] animate-bounce" style="font-size: clamp(3.5rem, 7cqw, 5.5rem);"></i>
+                                    <div class="text-slate-100 font-bold leading-relaxed" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">外出先から命令投下 &rarr; ラズパイの Claude Code が実行</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 14
+            {
+                id: 14,
+                category: 'TOKEN LIMIT SOLUTION',
+                title: 'トークン上限対策：複数アカウント運用',
+                duration: 11,
+                narration: 'トークン制限に達した場合は、月単位で複数アカウントを利用します。解約忘れを防ぐために契約直後に解約手続きを行い、限界に達したらスラッシュログインで別アカウントに切り替えます。作業セッションはそのままでスムーズに継続可能です。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-users text-lime-400"></i> トークン不足のときは月単位で複数アカウント
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[2.2cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw]">
+                                    <i class="fa-solid fa-calendar-xmark text-rose-400 mb-[1.2cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"></i>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">契約直後に即解約</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">解約し忘れによる無駄な自動更新を確実に防ぐテクニック。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw]">
+                                    <i class="fa-solid fa-right-left text-sky-400 mb-[1.2cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"></i>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">/login でスムーズ切替</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">限界に達してもアカウントを切り替えて作業セッションはそのまま継続可能。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 15
+            {
+                id: 15,
+                category: 'TIPS & TRICKS',
+                title: '知っておくと便利な小技',
+                duration: 12,
+                narration: '便利なおすすめ小技です。プロンプト入力中に Ctrl-G を押すと愛用の外部エディタが起動し、長い指示を落ち着いて書くことができます。また ccstatusline を使うと、ステータスラインに残トークンやモデル情報が常時表示されて非常に重宝しています。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.4cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-lightbulb text-lime-400"></i> 知っておくと便利な小技
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[1.4cqw] mb-[1.2cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw]">
+                                    <div class="text-lime-400 font-mono font-bold mb-[0.4cqw] flex items-center gap-[0.5cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">
+                                        <i class="fa-solid fa-keyboard text-lime-400"></i> Ctrl-G
+                                    </div>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.92rem, 1.9cqw, 1.4rem);">プロンプト入力中に Ctrl-G で外部エディタが立ち上がる。使い慣れたエディタで長文指示を落ち着いて書ける。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw]">
+                                    <div class="text-sky-400 font-mono font-bold mb-[0.4cqw] flex items-center gap-[0.5cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">
+                                        <i class="fa-solid fa-sliders text-sky-400"></i> ccstatusline
+                                    </div>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.92rem, 1.9cqw, 1.4rem);"><code class="bg-slate-900 px-[0.5cqw] py-[0.1cqw] rounded text-sky-300 font-mono" style="font-size: clamp(0.82rem, 1.7cqw, 1.25rem);">npx ccstatusline@latest</code> でステータスラインをカスタマイズ。残トークンやモデルを可視化。</p>
+                                </div>
+                            </div>
+
+                            <!-- PDFスライド15ページ目の実機スクリーンショット完全忠実再現領域 -->
+                            <div class="bg-[#141414] border border-slate-700/80 rounded-xl overflow-hidden shadow-xl relative">
+                                <div class="p-[1.4cqw] font-mono overflow-x-auto whitespace-nowrap select-none" style="font-size: clamp(0.8rem, 1.65cqw, 1.2rem);">
+                                    <!-- Top terminal line with prompt and divider -->
+                                    <div class="text-slate-200 font-bold border-b border-slate-700/80 pb-[0.4cqw] mb-[0.8cqw] flex items-center">
+                                        <span>&gt;</span>
+                                    </div>
+
+                                    <!-- Pill Badges Line -->
+                                    <div class="flex items-center gap-[1cqw] my-[0.4cqw]">
+                                        <!-- Pill 1: Opus 5 | medium -->
+                                        <div class="inline-flex items-center rounded-full overflow-hidden font-bold shadow-md" style="font-size: clamp(0.75rem, 1.55cqw, 1.15rem);">
+                                            <span class="bg-[#0084ff] text-white pl-[0.8cqw] pr-[0.4cqw] py-[0.15cqw] flex items-center">Opus 5</span>
+                                            <svg class="w-[0.5cqw] h-[1.2cqw] fill-[#0084ff] bg-[#c59500] shrink-0" viewBox="0 0 8 16"><path d="M0 0 L8 8 L0 16 Z"/></svg>
+                                            <span class="bg-[#c59500] text-slate-950 pl-[0.4cqw] pr-[0.8cqw] py-[0.15cqw] flex items-center">medium</span>
+                                        </div>
+
+                                        <!-- Pill 2: 5h | 0% | [Loading] -->
+                                        <div class="inline-flex items-center rounded-full overflow-hidden font-bold shadow-md" style="font-size: clamp(0.75rem, 1.55cqw, 1.15rem);">
+                                            <span class="bg-[#4d4d4d] text-slate-100 pl-[0.8cqw] pr-[0.4cqw] py-[0.15cqw] flex items-center">5h</span>
+                                            <svg class="w-[0.5cqw] h-[1.2cqw] fill-[#4d4d4d] bg-[#00b4a2] shrink-0" viewBox="0 0 8 16"><path d="M0 0 L8 8 L0 16 Z"/></svg>
+                                            <span class="bg-[#00b4a2] text-slate-950 px-[0.4cqw] py-[0.15cqw] flex items-center">0%</span>
+                                            <svg class="w-[0.5cqw] h-[1.2cqw] fill-[#00b4a2] bg-[#e2e8f0] shrink-0" viewBox="0 0 8 16"><path d="M0 0 L8 8 L0 16 Z"/></svg>
+                                            <span class="bg-[#e2e8f0] text-slate-900 pl-[0.4cqw] pr-[0.8cqw] py-[0.15cqw] flex items-center">[Loading]</span>
+                                        </div>
+
+                                        <!-- Pill 3: Week | 14% | 09-22 16:00 -->
+                                        <div class="inline-flex items-center rounded-full overflow-hidden shadow-md" style="font-size: clamp(0.75rem, 1.55cqw, 1.15rem);">
+                                            <span class="bg-[#0084ff] text-white pl-[0.8cqw] pr-[0.4cqw] py-[0.15cqw] flex items-center font-bold">Week</span>
+                                            <svg class="w-[0.5cqw] h-[1.2cqw] fill-[#0084ff] bg-[#c59500] shrink-0" viewBox="0 0 8 16"><path d="M0 0 L8 8 L0 16 Z"/></svg>
+                                            <span class="bg-[#c59500] text-slate-950 px-[0.4cqw] py-[0.15cqw] flex items-center font-bold">14%</span>
+                                            <svg class="w-[0.5cqw] h-[1.2cqw] fill-[#c59500] bg-[#4d4d4d] shrink-0" viewBox="0 0 8 16"><path d="M0 0 L8 8 L0 16 Z"/></svg>
+                                            <span class="bg-[#4d4d4d] text-slate-100 pl-[0.4cqw] pr-[0.8cqw] py-[0.15cqw] flex items-center font-mono">09-22 16:00</span>
+                                        </div>
+
+                                        <!-- Pill 4: master | ✗ * -->
+                                        <div class="inline-flex items-center rounded-full overflow-hidden font-bold shadow-md" style="font-size: clamp(0.75rem, 1.55cqw, 1.15rem);">
+                                            <span class="bg-[#00b4a2] text-slate-950 pl-[0.8cqw] pr-[0.4cqw] py-[0.15cqw] flex items-center">master</span>
+                                            <svg class="w-[0.5cqw] h-[1.2cqw] fill-[#00b4a2] bg-[#e2e8f0] shrink-0" viewBox="0 0 8 16"><path d="M0 0 L8 8 L0 16 Z"/></svg>
+                                            <span class="bg-[#e2e8f0] text-slate-950 pl-[0.4cqw] pr-[0.8cqw] py-[0.15cqw] flex items-center">✗ *</span>
+                                        </div>
+
+                                        <!-- Pill 5: wifi on -->
+                                        <div class="inline-flex items-center rounded-full bg-[#0084ff] text-white px-[0.8cqw] py-[0.15cqw] font-bold shadow-md" style="font-size: clamp(0.75rem, 1.55cqw, 1.15rem);">
+                                            <i class="fa-solid fa-wifi mr-[0.4cqw]" style="font-size: clamp(0.65rem, 1.2cqw, 0.95rem);"></i>on
+                                        </div>
+                                    </div>
+
+                                    <!-- Bottom Auto mode line -->
+                                    <div class="flex items-center gap-[0.4cqw] pt-[0.4cqw] font-mono" style="font-size: clamp(0.8rem, 1.65cqw, 1.2rem);">
+                                        <span class="text-amber-400 font-bold">▸▸ auto mode on</span>
+                                        <span class="text-slate-400">(shift+tab to cycle) · ← for agents</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 16
+            {
+                id: 16,
+                category: 'OTHER AI TOOLS',
+                title: 'OpenAI Codex との共存について',
+                duration: 12,
+                narration: 'OpenAI Codex との併用についても試行中です。git worktree を利用してブランチと作業ディレクトリを完全に分けることで、混乱や干渉を防いでいます。また Codex の環境設定も Codex 自身に行わせる運用にしています。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-code-branch text-lime-400"></i> Codex との共存について
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[2.2cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw]">
+                                    <i class="fa-solid fa-code-fork text-sky-400 mb-[1.2cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"></i>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">git worktree で環境分離</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">お試しで OpenAI Codex を併用。ブランチと作業空間を分けて干渉を防止。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw]">
+                                    <i class="fa-solid fa-gears text-lime-400 mb-[1.2cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"></i>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">Codex の設定は Codex 自体に</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">Codex の環境設定も Codex 自身に行わせる。※ Astra はトークン消費が激しいため不使用。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 17
+            {
+                id: 17,
+                category: 'SUMMARY & CONCLUSION',
+                title: 'まとめ',
+                duration: 15,
+                narration: 'まとめです。Raspberry Pi 5 と tmux による常時稼働、こまめなスラッシュクリア、TODO.md への一元管理、そして役割に応じたモデル分散が私の現在の運用スタイルです。自己流で手探りの部分も多いため、ぜひ皆さんのご意見やアドバイス、ダメ出しなどをコメントで教えていただけると嬉しいです。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-flag-checkered text-lime-400"></i> まとめ
+                            </h2>
+                            <div class="space-y-[1.1cqw] text-slate-200 mb-[1.4cqw] font-medium">
+                                <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-server text-lime-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
+                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>Raspberry Pi 5 + ssh + tmux:</strong> 常時起動環境でいつでも復帰可能</span>
+                                </div>
+                                <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-broom text-sky-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
+                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>話題が変わったら /clear:</strong> 一番手軽で最も効果的なトークン節約術</span>
+                                </div>
+                                <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-handshake text-amber-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
+                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>AI を縛らず、頼って任せる:</strong> 指示の矛盾をなくしルール設定を重視</span>
+                                </div>
+                                <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-list-check text-purple-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
+                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>TODO.md にすべて集める:</strong> セッションが切れてもスマホから継続</span>
+                                </div>
+                            </div>
+                            <div class="bg-sky-950/60 border border-sky-500/60 rounded-xl p-[1cqw] text-center text-sky-300 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">
+                                ※ ここで説明したやり方は私の自己流です。ぜひ皆さんのご意見・ダメ出し・コメントをお願いいたします！
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        ];
+
+        let currentIndex = 0;
+        let isPlaying = false;
+        let isMuted = false;
+        let playbackRate = 1.0;
+        let currentSlideElapsedTime = 0;
+        let animationFrameId = null;
+        let lastFrameTimestamp = null;
+        let speechActive = false;
+        let showCaptions = false; // Subtitles hidden by default
+
+        // Base speed multiplier (1.0x in UI corresponds to 1.4x actual speed)
+        const baseSpeedMultiplier = 1.4;
+        const getEffectiveSpeed = () => playbackRate * baseSpeedMultiplier;
+
+        let voiceEngineMode = 'speech'; // 'speech' or 'online'
+        let fallbackAudioElement = null;
+        let chromeResumeTimer = null;
+        let slideTransitionTimeout = null;
+
+        // Total calculated presentation duration
+        const totalDurationSeconds = slideData.reduce((acc, curr) => acc + curr.duration, 0);
+
+        // Calculate offset start time for each slide
+        const slideStartTimes = [];
+        let accumTime = 0;
+        slideData.forEach(slide => {
+            slideStartTimes.push(accumTime);
+            accumTime += slide.duration;
+        });
+
+        // DOM Element Cache
+        const slideCanvas = document.getElementById('slide-canvas');
+        const slideCategory = document.getElementById('slide-category');
+        const slideNum = document.getElementById('slide-num');
+        const totalSlides = document.getElementById('total-slides');
+        const captionText = document.getElementById('caption-text');
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const speedBtn = document.getElementById('speed-btn');
+        const muteBtn = document.getElementById('mute-btn');
+        const muteIcon = document.getElementById('mute-icon');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressThumb = document.getElementById('progress-thumb');
+        const currentTimeDisplay = document.getElementById('current-time-display');
+        const totalTimeDisplay = document.getElementById('total-time-display');
+        const controlTitlePreview = document.getElementById('control-title-preview');
+        const waveContainer = document.getElementById('wave-container');
+        const audioStatusBadge = document.getElementById('audio-status-badge');
+        const playlistItemsContainer = document.getElementById('playlist-items');
+        const speechStatusIndicator = document.getElementById('speech-status-indicator');
+        const toggleVoiceEngineBtn = document.getElementById('toggle-voice-engine-btn');
+        const subtitleBanner = document.getElementById('subtitle-banner');
+        const toggleCaptionBtn = document.getElementById('toggle-caption-btn');
+        const captionIcon = document.getElementById('caption-icon');
+
+        // Pronunciation map for Japanese Speech Engine
+        function prepareSpeechText(text) {
+            if (!text) return "";
+            return text
+                .replace(/TODO\.md/gi, 'トゥードゥー ドット エムディー')
+                .replace(/TODO-([0-9]+)/gi, 'トゥードゥー $1')
+                .replace(/TODO/gi, 'トゥードゥー')
+                .replace(/ccstatusline/gi, 'シーシー ステータス ライン')
+                .replace(/\/clear/gi, 'スラッシュ クリア')
+                .replace(/\/goal/gi, 'スラッシュ ゴール')
+                .replace(/\/doctor/gi, 'スラッシュ ドクター')
+                .replace(/\/rc/gi, 'スラッシュ アールシー')
+                .replace(/\/login/gi, 'スラッシュ ログイン')
+                .replace(/Claude Code/gi, 'クロード コード')
+                .replace(/Claude/gi, 'クロード')
+                .replace(/tmux/gi, 'ティーマックス')
+                .replace(/pyright-lsp/gi, 'パイライト エルエスピー')
+                .replace(/ponytail/gi, 'ポニーテール')
+                .replace(/codegraph/gi, 'コードグラフ')
+                .replace(/git worktree/gi, 'ギット ワークツリー')
+                .replace(/auto-mode/gi, 'オートモード');
+        }
+
+        // Format seconds to M:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function stopSpeech() {
+            if (slideTransitionTimeout) {
+                clearTimeout(slideTransitionTimeout);
+                slideTransitionTimeout = null;
+            }
+            if (chromeResumeTimer) {
+                clearInterval(chromeResumeTimer);
+                chromeResumeTimer = null;
+            }
+            if ('speechSynthesis' in window) {
+                try {
+                    window.speechSynthesis.cancel();
+                } catch(e) {}
+            }
+            if (fallbackAudioElement) {
+                fallbackAudioElement.pause();
+                fallbackAudioElement = null;
+            }
+            speechActive = false;
+        }
+
+        function onSlideAudioFinished() {
+            if (!isPlaying) return;
+            speechActive = false;
+            updateWaveState(true, "朗読完了");
+
+            if (slideTransitionTimeout) {
+                clearTimeout(slideTransitionTimeout);
+                slideTransitionTimeout = null;
+            }
+
+            // 1.0 second pause after speech ends before advancing slide
+            slideTransitionTimeout = setTimeout(() => {
+                if (!isPlaying) return;
+                if (currentIndex < slideData.length - 1) {
+                    renderSlide(currentIndex + 1, true);
+                } else {
+                    pausePresentation();
+                    audioStatusBadge.textContent = "再生完了";
+                }
+            }, 1000);
+        }
+
+        function speakCurrentNarration() {
+            stopSpeech();
+            if (!isPlaying) {
+                updateWaveState(false, "一時停止中");
+                return;
+            }
+
+            if (isMuted) {
+                updateWaveState(false, "消音中");
+                const slide = slideData[currentIndex];
+                const muteWaitMs = (slide.duration / getEffectiveSpeed()) * 1000;
+                slideTransitionTimeout = setTimeout(() => {
+                    onSlideAudioFinished();
+                }, muteWaitMs);
+                return;
+            }
+
+            const slide = slideData[currentIndex];
+            const textToSpeak = prepareSpeechText(slide.narration);
+
+            if (voiceEngineMode === 'online') {
+                speakOnlineTTS(textToSpeak);
+                return;
+            }
+
+            if ('speechSynthesis' in window) {
+                setTimeout(() => {
+                    if (!isPlaying || isMuted) return;
+
+                    try {
+                        window.speechSynthesis.resume();
+                    } catch(e) {}
+
+                    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                    utterance.lang = 'ja-JP';
+                    utterance.rate = Math.min(2.0, getEffectiveSpeed() * 0.95); // ほんの少しゆったりとしたテンポ感
+                    utterance.pitch = 0.85; // ピッチを0.85に下げ、しっとりとした落ち着きと色気のある低めのトーンに調整
+                    utterance.volume = 1.0;
+
+                    const voices = window.speechSynthesis.getVoices();
+                    // 落ち着いた優艶な日本語女性音声を優先検索（Nanami, Haruka, Kyoko, Yuka, Sakura, Ayumi, Google 日本語 等）
+                    const femaleJaVoice = voices.find(v => 
+                        v.lang && (v.lang.includes('ja') || v.lang.includes('JP')) &&
+                        /nanami|haruka|kyoko|yuka|sakura|ayumi|mayu|mizuki|female|女性|google/i.test(v.name) &&
+                        !/ichiro|otoya|hattori|keita|daichi|takumi|male|男性/i.test(v.name)
+                    ) || voices.find(v => 
+                        v.lang && (v.lang.includes('ja') || v.lang.includes('JP')) &&
+                        !/ichiro|otoya|hattori|keita|daichi|takumi|male|男性/i.test(v.name)
+                    ) || voices.find(v => v.lang && (v.lang.includes('ja') || v.lang.includes('JP')));
+
+                    if (femaleJaVoice) {
+                        utterance.voice = femaleJaVoice;
+                    }
+
+                    let finished = false;
+                    const handleEnd = () => {
+                        if (finished) return;
+                        finished = true;
+                        if (chromeResumeTimer) clearInterval(chromeResumeTimer);
+                        onSlideAudioFinished();
+                    };
+
+                    utterance.onstart = () => {
+                        speechActive = true;
+                        updateWaveState(true, "朗読中 (Web Speech)");
+                    };
+
+                    utterance.onend = () => {
+                        handleEnd();
+                    };
+
+                    utterance.onerror = (e) => {
+                        console.warn("SpeechSynthesis error, falling back to Online TTS:", e);
+                        speechActive = false;
+                        if (chromeResumeTimer) clearInterval(chromeResumeTimer);
+                        if (!finished) {
+                            finished = true;
+                            speakOnlineTTS(textToSpeak);
+                        }
+                    };
+
+                    window.speechSynthesis.speak(utterance);
+
+                    // Safety timeout in case SpeechSynthesis hangs without firing onend
+                    const safetyTime = Math.max(6000, (textToSpeak.length / 4.5 / getEffectiveSpeed()) * 1000 + 3000);
+                    slideTransitionTimeout = setTimeout(() => {
+                        if (!finished && isPlaying) {
+                            console.warn("Safety timeout triggered for speech end");
+                            handleEnd();
+                        }
+                    }, safetyTime);
+
+                    if (chromeResumeTimer) clearInterval(chromeResumeTimer);
+                    chromeResumeTimer = setInterval(() => {
+                        if (window.speechSynthesis && window.speechSynthesis.speaking) {
+                            window.speechSynthesis.pause();
+                            window.speechSynthesis.resume();
+                        } else {
+                            clearInterval(chromeResumeTimer);
+                        }
+                    }, 5000);
+
+                }, 50);
+            } else {
+                speakOnlineTTS(textToSpeak);
+            }
+        }
+
+        function speakOnlineTTS(text) {
+            if (!text || isMuted || !isPlaying) return;
+            updateWaveState(true, "朗読中 (Online Voice)");
+
+            const cleanText = text.substring(0, 180);
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ja&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+
+            if (fallbackAudioElement) {
+                fallbackAudioElement.pause();
+            }
+
+            fallbackAudioElement = new Audio(ttsUrl);
+            fallbackAudioElement.playbackRate = Math.min(2.0, getEffectiveSpeed());
+
+            let finished = false;
+            const handleEnd = () => {
+                if (finished) return;
+                finished = true;
+                onSlideAudioFinished();
+            };
+
+            fallbackAudioElement.onended = () => {
+                handleEnd();
+            };
+
+            fallbackAudioElement.onerror = (err) => {
+                console.warn("Online Audio TTS error:", err);
+                const muteWaitMs = (slideData[currentIndex].duration / getEffectiveSpeed()) * 1000;
+                slideTransitionTimeout = setTimeout(handleEnd, muteWaitMs);
+            };
+
+            fallbackAudioElement.play().catch(e => {
+                console.warn("Audio play blocked by browser interaction policy:", e);
+                const muteWaitMs = (slideData[currentIndex].duration / getEffectiveSpeed()) * 1000;
+                slideTransitionTimeout = setTimeout(handleEnd, muteWaitMs);
+            });
+        }
+
+        function renderSlide(index, resetOffset = true) {
+            if (index < 0 || index >= slideData.length) return;
+            currentIndex = index;
+            if (resetOffset) {
+                currentSlideElapsedTime = 0;
+            }
+            const slide = slideData[currentIndex];
+
+            // Render main slide HTML
+            slideCanvas.classList.remove('slide-fade-enter');
+            void slideCanvas.offsetWidth; // Reflow trigger
+            slideCanvas.classList.add('slide-fade-enter');
+            slideCanvas.innerHTML = slide.render();
+
+            // Update UI headers & captions
+            slideCategory.textContent = slide.category;
+            slideNum.textContent = String(slide.id).padStart(2, '0');
+            controlTitlePreview.textContent = `${slide.id}. ${slide.title}`;
+            captionText.textContent = slide.narration;
+
+            // Sync seek bar view
+            updateProgressDisplay();
+
+            // Sync sidebar list state
+            updatePlaylistSelection();
+
+            // Speak narration if currently active
+            if (isPlaying) {
+                speakCurrentNarration();
+            }
+        }
+
+        function updateProgressDisplay() {
+            const currentTotalSecs = Math.min(
+                totalDurationSeconds,
+                slideStartTimes[currentIndex] + currentSlideElapsedTime
+            );
+            const progressPct = Math.min(100, (currentTotalSecs / totalDurationSeconds) * 100);
+
+            progressBar.style.width = `${progressPct}%`;
+            progressThumb.style.left = `${progressPct}%`;
+            currentTimeDisplay.textContent = formatTime(currentTotalSecs);
+        }
+
+        function updateWaveState(active, statusText) {
+            if (active) {
+                waveContainer.classList.remove('paused');
+                if (statusText) audioStatusBadge.textContent = statusText;
+                audioStatusBadge.className = "text-[9px] bg-slate-800 text-lime-400 border border-slate-700 px-1.5 py-0.5 rounded font-mono font-bold";
+            } else {
+                waveContainer.classList.add('paused');
+                if (statusText) audioStatusBadge.textContent = statusText;
+                audioStatusBadge.className = "text-[9px] bg-slate-800 text-slate-400 border border-slate-700 px-1.5 py-0.5 rounded font-mono";
+            }
+        }
+
+        function playbackLoop(timestamp) {
+            if (!isPlaying) return;
+
+            if (!lastFrameTimestamp) {
+                lastFrameTimestamp = timestamp;
+            }
+
+            const deltaTime = (timestamp - lastFrameTimestamp) / 1000;
+            lastFrameTimestamp = timestamp;
+
+            // Advance time based on effective speed multiplier
+            currentSlideElapsedTime += deltaTime * getEffectiveSpeed();
+
+            // Cap elapsed time visually to slide duration until audio event triggers transition
+            const currentSlide = slideData[currentIndex];
+            if (currentSlideElapsedTime > currentSlide.duration) {
+                currentSlideElapsedTime = currentSlide.duration;
+            }
+
+            updateProgressDisplay();
+
+            animationFrameId = requestAnimationFrame(playbackLoop);
+        }
+
+        function playPresentation() {
+            isPlaying = true;
+            playIcon.classList.remove('fa-play', 'ml-0.5');
+            playIcon.classList.add('fa-pause');
+            
+            lastFrameTimestamp = null;
+            animationFrameId = requestAnimationFrame(playbackLoop);
+            
+            speakCurrentNarration();
+        }
+
+        function pausePresentation() {
+            isPlaying = false;
+            playIcon.classList.remove('fa-pause');
+            playIcon.classList.add('fa-play', 'ml-0.5');
+            
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            
+            stopSpeech();
+            updateWaveState(false, "一時停止中");
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                pausePresentation();
+            } else {
+                playPresentation();
+            }
+        }
+
+        function initPlaylist() {
+            playlistItemsContainer.innerHTML = '';
+            totalSlides.textContent = slideData.length;
+            totalTimeDisplay.textContent = formatTime(totalDurationSeconds);
+
+            slideData.forEach((slide, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between text-xs ${
+                    idx === currentIndex
+                        ? 'bg-sky-950/60 border-sky-500/50 text-sky-300 font-bold'
+                        : 'bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                }`;
+                btn.id = `playlist-item-${idx}`;
+                btn.innerHTML = `
+                    <div class="flex items-center gap-2.5 truncate pr-2">
+                        <span class="font-mono text-[10px] ${idx === currentIndex ? 'text-lime-400' : 'text-slate-500'}">${String(slide.id).padStart(2, '0')}</span>
+                        <span class="truncate">${slide.title}</span>
+                    </div>
+                    <i class="fa-solid ${idx === currentIndex ? 'fa-volume-high text-lime-400' : 'fa-chevron-right text-slate-600'} text-[10px]"></i>
+                `;
+                btn.onclick = () => {
+                    renderSlide(idx, true);
+                };
+                playlistItemsContainer.appendChild(btn);
+            });
+        }
+
+        function updatePlaylistSelection() {
+            slideData.forEach((_, idx) => {
+                const item = document.getElementById(`playlist-item-${idx}`);
+                if (!item) return;
+                if (idx === currentIndex) {
+                    item.className = 'w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between text-xs bg-sky-950/60 border-sky-500/50 text-sky-300 font-bold';
+                    item.querySelector('i').className = 'fa-solid fa-volume-high text-lime-400 text-[10px]';
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    item.className = 'w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between text-xs bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200';
+                    item.querySelector('i').className = 'fa-solid fa-chevron-right text-slate-600 text-[10px]';
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            playBtn.addEventListener('click', () => {
+                // Direct user gesture unlock for Web Speech API in Chrome/Safari iFrames
+                if ('speechSynthesis' in window) {
+                    try {
+                        window.speechSynthesis.resume();
+                        const dummyUtterance = new SpeechSynthesisUtterance('');
+                        dummyUtterance.volume = 0;
+                        window.speechSynthesis.speak(dummyUtterance);
+                    } catch(e) {}
+                }
+                togglePlay();
+            });
+
+            // Toggle Subtitle Banner visibility
+            toggleCaptionBtn.addEventListener('click', () => {
+                showCaptions = !showCaptions;
+                if (showCaptions) {
+                    subtitleBanner.classList.remove('hidden');
+                    toggleCaptionBtn.classList.remove('text-slate-400');
+                    toggleCaptionBtn.classList.add('text-lime-400', 'border-lime-500/50');
+                    captionIcon.classList.remove('text-slate-400');
+                    captionIcon.classList.add('text-lime-400');
+                } else {
+                    subtitleBanner.classList.add('hidden');
+                    toggleCaptionBtn.classList.add('text-slate-400');
+                    toggleCaptionBtn.classList.remove('text-lime-400', 'border-lime-500/50');
+                    captionIcon.classList.add('text-slate-400');
+                    captionIcon.classList.remove('text-lime-400');
+                }
+            });
+
+            // Toggle Audio Engine Mode (Web Speech API <-> Online Voice)
+            if (toggleVoiceEngineBtn) {
+                toggleVoiceEngineBtn.addEventListener('click', () => {
+                    if (voiceEngineMode === 'speech') {
+                        voiceEngineMode = 'online';
+                        speechStatusIndicator.textContent = "Online Voice (Fallback)";
+                        speechStatusIndicator.className = "text-sky-400 font-bold font-mono";
+                    } else {
+                        voiceEngineMode = 'speech';
+                        speechStatusIndicator.textContent = "Web Speech API (標準)";
+                        speechStatusIndicator.className = "text-lime-400 font-bold font-mono";
+                    }
+                    if (isPlaying) {
+                        speakCurrentNarration();
+                    }
+                });
+            }
+
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    renderSlide(currentIndex - 1, true);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < slideData.length - 1) {
+                    renderSlide(currentIndex + 1, true);
+                }
+            });
+
+            restartBtn.addEventListener('click', () => {
+                renderSlide(0, true);
+                if (isPlaying) playPresentation();
+            });
+
+            // Speed multiplier options with 1.0x set as the new baseline (fast standard speed)
+            const speedOptions = [0.75, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0];
+            speedBtn.addEventListener('click', () => {
+                let nextIdx = speedOptions.indexOf(playbackRate) + 1;
+                if (nextIdx >= speedOptions.length || nextIdx < 0) {
+                    nextIdx = 0;
+                }
+                playbackRate = speedOptions[nextIdx];
+
+                const label = Number.isInteger(playbackRate) ? `${playbackRate}.0x` : `${playbackRate}x`;
+                speedBtn.textContent = label;
+                if (isPlaying) {
+                    speakCurrentNarration();
+                }
+            });
+
+            muteBtn.addEventListener('click', () => {
+                isMuted = !isMuted;
+                if (isMuted) {
+                    muteIcon.className = 'fa-solid fa-volume-xmark text-rose-400';
+                    stopSpeech();
+                    updateWaveState(false, "消音中");
+                } else {
+                    muteIcon.className = 'fa-solid fa-volume-high';
+                    if (isPlaying) speakCurrentNarration();
+                }
+            });
+
+            fullscreenBtn.addEventListener('click', () => {
+                const viewport = document.getElementById('player-viewport');
+                viewport.classList.toggle('pseudo-fullscreen');
+                const fsIcon = fullscreenBtn.querySelector('i');
+                if (viewport.classList.contains('pseudo-fullscreen')) {
+                    fsIcon.className = 'fa-solid fa-compress';
+                } else {
+                    fsIcon.className = 'fa-solid fa-expand';
+                }
+            });
+
+            // Listen for keyboard shortcuts (Space, Arrow keys, Fullscreen, Mute, Escape)
+            document.addEventListener('keydown', (e) => {
+                // Do not trigger shortcuts if focus is inside text inputs
+                if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+                if (e.key === ' ' || e.code === 'Space') {
+                    e.preventDefault();
+                    if ('speechSynthesis' in window) {
+                        try {
+                            window.speechSynthesis.resume();
+                        } catch(err) {}
+                    }
+                    togglePlay();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (currentIndex < slideData.length - 1) {
+                        renderSlide(currentIndex + 1, true);
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (currentIndex > 0) {
+                        renderSlide(currentIndex - 1, true);
+                    }
+                } else if (e.key === 'f' || e.key === 'F') {
+                    e.preventDefault();
+                    fullscreenBtn.click();
+                } else if (e.key === 'm' || e.key === 'M') {
+                    e.preventDefault();
+                    muteBtn.click();
+                } else if (e.key === 'Escape') {
+                    const viewport = document.getElementById('player-viewport');
+                    if (viewport && viewport.classList.contains('pseudo-fullscreen')) {
+                        viewport.classList.remove('pseudo-fullscreen');
+                        const fsIcon = fullscreenBtn.querySelector('i');
+                        if (fsIcon) fsIcon.className = 'fa-solid fa-expand';
+                    }
+                }
+            });
+
+            // Seekbar click interaction
+            document.getElementById('seekbar-container').addEventListener('click', (e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+                const targetSec = ratio * totalDurationSeconds;
+
+                // Determine target slide index and relative offset
+                let accumulated = 0;
+                let targetIndex = 0;
+                let slideOffset = 0;
+
+                for (let i = 0; i < slideData.length; i++) {
+                    if (accumulated + slideData[i].duration >= targetSec) {
+                        targetIndex = i;
+                        slideOffset = targetSec - accumulated;
+                        break;
+                    }
+                    accumulated += slideData[i].duration;
+                }
+
+                currentSlideElapsedTime = slideOffset;
+                renderSlide(targetIndex, false);
+            });
+        }
+
+        // Preload voices for Web Speech API
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
+        function startApp() {
+            initPlaylist();
+            renderSlide(0, true);
+            setupEventListeners();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startApp);
+        } else {
+            startApp();
+        }
+    </script>
+</body>
+</html>
