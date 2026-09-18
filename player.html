@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Translate TTS returns 404 when a Referer is sent (TODO-002) -->
+    <meta name="referrer" content="no-referrer">
+    <!-- deckConfig.title で上書きされる（TODO-041） -->
+    <title>プレゼン動画プレイヤー</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans JP', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #020617;
+            color: #f8fafc;
+            font-family: 'Noto Sans JP', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 16:9 Slide Canvas Container with Container Queries */
+        .video-viewport {
+            aspect-ratio: 16 / 9;
+            position: relative;
+            background-color: #0f172a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            container-type: inline-size;
+            container-name: viewport;
+        }
+
+        /* タップ/クリックで再生と一時停止を切り替えたときの反応（TODO-005）。
+           大きさは cqw で取る。スマホでは枠ごと --vp-scale で縮むので、
+           px 直書きだと小さい画面で大きすぎる（TODO-001）。 */
+        #tap-feedback-icon {
+            font-size: clamp(28px, 9cqw, 96px);
+            color: rgba(248, 250, 252, 0.9);
+            text-shadow: 0 4px 24px rgba(2, 6, 23, 0.8);
+            opacity: 0;
+        }
+        #tap-feedback-icon.is-shown {
+            animation: tapFeedback 2s ease-out forwards;
+        }
+
+        /* 出したあと 1.5 秒はそのままで、最後の 0.5 秒で消す（TODO-006）。 */
+        @keyframes tapFeedback {
+            0% { opacity: 0.9; transform: scale(0.8); }
+            10% { opacity: 0.9; transform: scale(1); }
+            75% { opacity: 0.9; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.3); }
+        }
+
+        /* Custom Scrollbar for sidebar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        /* Slide Transition Effects */
+        .slide-fade-enter {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Audio Wave Visualizer Animation */
+        .wave-bar {
+            width: 3px;
+            background-color: #bef264;
+            border-radius: 2px;
+            animation: wave 1.2s ease-in-out infinite alternate;
+        }
+        .wave-bar:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+        .wave-bar:nth-child(2) { height: 85%; animation-delay: 0.3s; }
+        .wave-bar:nth-child(3) { height: 60%; animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { height: 100%; animation-delay: 0.4s; }
+        .wave-bar:nth-child(5) { height: 50%; animation-delay: 0.15s; }
+
+        @keyframes wave {
+            0% { transform: scaleY(0.3); }
+            100% { transform: scaleY(1.1); }
+        }
+
+        .paused .wave-bar {
+            animation-play-state: paused;
+            transform: scaleY(0.2);
+        }
+
+        /* Pseudo Fullscreen Overlay Fallback - Fixed 16:9 Ratio Centered */
+        /* 画面中央の 16:9 レターボックスはこのラッパーが担う。中身も字幕も
+           この箱を基準に置けるので、100dvh からレターボックスの位置を
+           計算する必要が無い（TODO-001）。
+           高さは dvh で取る。スマホの 100vh は URL バーを含んだ高さなので、
+           横持ち（幅 768 以上で PC 側の経路に入る）で 16:9 の箱が画面の下へ
+           はみ出す（TODO-004）。dvh 非対応のブラウザ用に vh の行を先に置く。 */
+        #viewport-stage.is-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            max-width: calc(100vh * (16 / 9));
+            max-width: calc(100dvh * (16 / 9));
+            max-height: calc(100vw * (9 / 16));
+            margin: auto;
+            z-index: 9999;
+        }
+
+        .video-viewport.pseudo-fullscreen {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none !important;
+            max-height: none !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: 0 0 80px rgba(0, 0, 0, 0.95) !important;
+            padding: 1.5rem !important;
+        }
+
+        /* 16:9 の外枠と字幕バナーの土台。字幕は縮小の影響を受けないよう枠の
+           外に置いてあるので、PC で枠に重ねる基準はこのラッパーが持つ。 */
+        #viewport-stage {
+            position: relative;
+        }
+
+        /* 字幕は枠に重ねず、画面幅によらず枠の下へ流す（TODO-035）。
+           通常表示ではクラスの mt-3 だけで足りるので、ここには擬似
+           フルスクリーン中の位置だけを書く。ラッパーがレターボックス
+           そのものなので、top: 100% がそのまま枠の下端になる（暗幕の上）。 */
+        #viewport-stage.is-fullscreen > #subtitle-banner {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+        }
+
+        /* 16:9 の外枠（#viewport-frame）は、マウスの PC では素通し。
+           ブロック要素のまま幅いっぱいに広がるので、ここでの指定は要らない。
+           狭い画面とタッチ画面でだけ、下の @media が縮小の土台にする。 */
+
+        /* Mobile: 中身は PC と同じ 960x540 のまま描き、全体を transform で
+           縮小する。cqw と clamp() は常に 960px 基準で解決されるので、
+           スライド本文は PC と同じ組み方のまま小さくなる。ただし枠の中の
+           固定 px のクロームは、768px 未満で md: が効かない分（text-xs 等の
+           小さい方）がさらに縮むので、PC の見た目と同じ比率にはならない。
+           幅の境界は Tailwind の md: に合わせた。
+           タッチ画面にも掛けるのは、横持ちのスマホ（844x390 など）が幅 768 以上で
+           PC 扱いになるため（TODO-009）。フルスクリーンの箱はレターボックスで
+           960x540 より小さいので、縮小しないと clamp() の下限 px が効いて本文が
+           縮まなくなり、枠内の上段（SLIDE 01 / 17 の行）に重なる。 */
+        @media screen and (max-width: 767.98px), screen and (pointer: coarse) {
+            #viewport-frame {
+                position: relative;
+                aspect-ratio: 16 / 9;
+                /* 横持ちのスマホ（844x390 など）では、幅いっぱいに広げると
+                   16:9 の高さが画面に収まらない。高さの上限は JS
+                   （setupViewportScale）が枠の上端の実測から max-width として
+                   入れる。ヘッダーの高さは幅で変わり、640〜712px の帯では
+                   折り返して伸びるので、CSS に定数で書くとその帯でずれる
+                   （TODO-011）。max-width が入ったときに枠を中央へ置くため、
+                   margin-inline だけここに置く。 */
+                margin-inline: auto;
+                /* --vp-scale を入れる JS が動かなかったときでも、960px の
+                   中身を枠内に閉じ込めるための保険。マウスの PC では
+                   overflow を触らない（.video-viewport の影が枠で
+                   切られてしまうため）。 */
+                overflow: hidden;
+            }
+            /* Tailwind の relative / p-4 に勝つよう id セレクタで書く */
+            #player-viewport {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 960px;
+                height: 540px;
+                max-width: none;
+                padding: 1.5rem;
+                transform: scale(var(--vp-scale, 1));
+                transform-origin: top left;
+            }
+            /* ラッパーが fixed のレターボックスになり、外枠（#viewport-frame）は
+               その中で 16:9 のまま。中身は 960x540 を --vp-scale で縮めた
+               ものを据え置く。クラスは JS が付ける（:has() を使うと非対応
+               ブラウザでルールごと落ちて無反応になる。TODO-001）。 */
+            .video-viewport.pseudo-fullscreen {
+                right: auto !important;
+                bottom: auto !important;
+                width: 960px !important;
+                height: 540px !important;
+                z-index: 1 !important;
+            }
+
+            /* 暗幕と裏のスクロール止めも同じ条件。
+               フルスクリーン中のボタンは箱の裏で押せず、物理キーボードも
+               無いので、暗幕が出ないと再読み込みしか出口が無くなる（TODO-003）。
+               マウスの PC には掛けない。PC で裏をスクロール禁止にするとスクロール
+               バーが消え、裏のページとレターボックスが横に動く（TODO-003）。
+               なお暗幕の帯は画面の比率で決まり、16:9 ちょうどの画面では 0px に
+               なる。そこでは抜けられないままだが、対応しないと決めた（TODO-003）。 */
+            /* 擬似フルスクリーン中は裏のページをスクロールさせない。 */
+            body.fs-lock {
+                overflow: hidden;
+            }
+            /* レターボックスの余白に暗幕を敷く。box-shadow だとヒットテストの
+               対象にならず、裏のヘッダーやチャプター一覧にタップが当たって
+               しまうので、実体のある要素にしている。
+               タップでフルスクリーンを抜ける（ハンドラは JS 側）。 */
+            #viewport-stage.is-fullscreen::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(2, 6, 23, 0.92);
+                touch-action: none;
+                z-index: -1;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Top Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2 sticky top-0 z-50">
+        <div class="flex items-center space-x-3 min-w-0">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-lime-400 flex items-center justify-center text-slate-950 font-bold">
+                <i class="fa-solid fa-play text-sm"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm sm:text-base text-slate-100 flex items-center gap-2">
+                    <span id="deck-heading"></span>
+                    <span class="hidden sm:inline text-xs font-normal bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full">AI Presentation Video</span>
+                </h1>
+                <p class="hidden sm:block text-xs text-slate-400">インタラクティブ・プレゼンテーション動画プレイヤー</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 flex-shrink-0">
+            <!-- Voice Selector / Engine Toggle Button -->
+            <button id="toggle-voice-engine-btn" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg text-xs transition cursor-pointer">
+                <i class="fa-solid fa-volume-high text-lime-400"></i>
+                <span class="hidden sm:inline text-slate-300 font-medium">音声エンジン:</span>
+                <span id="speech-status-indicator" class="text-sky-400 font-bold font-mono">Online Voice</span>
+                <span class="hidden sm:inline text-[10px] bg-slate-950 text-sky-400 px-1.5 py-0.5 rounded border border-slate-800">切替</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl w-full mx-auto p-4 md:p-6 flex-grow flex flex-col gap-4">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+            
+            <!-- Video Player Column (3 Cols) -->
+            <div class="lg:col-span-3 flex flex-col gap-3">
+                
+                <!-- Viewport Stage: 16:9 の外枠と、縮小の影響を受けない字幕バナーを並べる -->
+                <div id="viewport-stage">
+                    <!-- Viewport Container (16:9 の外枠。スマホではこの中で縮小する) -->
+                    <div id="viewport-frame">
+                        <div class="video-viewport border border-slate-800 flex flex-col justify-between p-4 md:p-6 relative select-none" id="player-viewport">
+
+                            <!-- Background Glow Overlay -->
+                            <div class="absolute -top-24 -right-24 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                            <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-lime-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                            <!-- Top Slide Header Info -->
+                            <div class="flex items-center justify-end text-sm md:text-base font-mono text-slate-400 z-10 mb-1 flex-shrink-0">
+                                <div class="bg-slate-800/80 px-3 py-1 rounded text-slate-300 border border-slate-700/50">
+                                    SLIDE <span id="slide-num" class="text-lime-400 font-bold">01</span> / <span id="total-slides"></span>
+                                </div>
+                            </div>
+
+                            <!-- Slide Canvas Main Body (Dynamic Injection) -->
+                            <div id="slide-canvas" class="flex-grow z-10 slide-fade-enter overflow-hidden flex flex-col justify-center my-auto py-1">
+                                <!-- Dynamic slide content will be rendered here -->
+                            </div>
+
+                            <!-- タップ/クリックで切り替えたときだけ一瞬出る ▶ / ‖（TODO-005）。
+                                 枠のクリックを塞がないよう pointer-events-none。 -->
+                            <div class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                                <i id="tap-feedback-icon" class="fa-solid fa-play"></i>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Bottom Subtitle / Narration Banner。
+                         縮小の対象は #viewport-frame の中だけなので、字幕はその外に
+                         置いて等倍のまま読めるようにしている（TODO-001）。
+                         画面幅によらず枠の下へ流す（TODO-035）。 -->
+                    <div id="subtitle-banner" class="z-30 bg-slate-950/95 backdrop-blur border border-sky-500/40 rounded-xl p-3 shadow-2xl flex items-center gap-3 mt-3 hidden">
+                        <div class="flex items-center gap-1 h-6 md:h-7 px-2 bg-slate-900 rounded border border-slate-800 flex-shrink-0 paused" id="wave-container">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
+                        <div class="flex-grow min-w-0">
+                            <div class="text-xs text-sky-400 font-bold uppercase tracking-wider flex items-center justify-between mb-1">
+                                <span class="flex items-center gap-1"><i class="fa-solid fa-comment-dots"></i> ナレーション字幕</span>
+                                <span id="audio-status-badge" class="text-xs bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded font-mono">停止中</span>
+                            </div>
+                            <p id="caption-text" class="text-sm md:text-base text-slate-100 font-medium leading-relaxed transition-all">
+                                ここにナレーションテキストが表示されます...
+                            </p>
+                        </div>
+                    </div>
+                </div><!-- /#viewport-stage -->
+
+                <!-- Video Controls Panel -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col gap-3 shadow-lg">
+                    
+                    <!-- Seekbar Track -->
+                    <div class="flex items-center gap-3">
+                        <span id="current-time-display" class="font-mono text-xs text-sky-400 font-bold w-10 text-right">0:00</span>
+                        
+                        <div class="relative flex-grow h-3 bg-slate-800 rounded-full cursor-pointer group" id="seekbar-container">
+                            <!-- Progress fill -->
+                            <div id="progress-bar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-sky-400 to-lime-400 rounded-full w-0 transition-all duration-75"></div>
+                            <!-- Thumb handle -->
+                            <div id="progress-thumb" class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow border-2 border-sky-500 opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%;"></div>
+                        </div>
+
+                        <span id="total-time-display" class="font-mono text-xs text-slate-400 w-10">--:--</span>
+                    </div>
+
+                    <!-- Main Buttons Row -->
+                    <div class="flex items-center justify-between gap-y-2 flex-wrap pt-1">
+                        
+                        <div class="flex items-center gap-2">
+                            <!-- Prev Slide Button -->
+                            <button id="prev-btn" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition border border-slate-700">
+                                <i class="fa-solid fa-backward-step"></i>
+                            </button>
+
+                            <!-- Play/Pause Button -->
+                            <button id="play-btn" class="w-12 h-12 rounded-xl bg-gradient-to-r from-sky-400 to-lime-400 hover:opacity-90 text-slate-950 flex items-center justify-center font-bold text-lg transition shadow-lg shadow-sky-500/20">
+                                <i class="fa-solid fa-play ml-0.5" id="play-icon"></i>
+                            </button>
+
+                            <!-- Next Slide Button -->
+                            <button id="next-btn" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center transition border border-slate-700">
+                                <i class="fa-solid fa-forward-step"></i>
+                            </button>
+
+                            <!-- Auto-Replay Toggle -->
+                            <button id="restart-btn" class="ml-2 text-slate-400 hover:text-slate-200 text-xs flex items-center gap-1 bg-slate-800/50 hover:bg-slate-800 px-3 py-2 rounded-lg border border-slate-800">
+                                <i class="fa-solid fa-rotate-left"></i> 最初から
+                            </button>
+                        </div>
+
+                        <!-- Slide Title Preview -->
+                        <div class="hidden md:flex flex-col text-center">
+                            <span class="text-[10px] text-slate-400 uppercase tracking-widest">再生中スライド</span>
+                            <span id="control-title-preview" class="text-xs font-bold text-lime-400 truncate max-w-[220px]">1. タイトル</span>
+                        </div>
+
+                        <!-- Right Options -->
+                        <div class="flex items-center gap-2">
+                            <!-- Subtitle / Caption Toggle Button -->
+                            <button id="toggle-caption-btn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-400 font-bold px-2.5 py-2 rounded-lg transition flex items-center gap-1.5 cursor-pointer" title="字幕の表示/非表示">
+                                <i class="fa-solid fa-closed-captioning" id="caption-icon"></i>
+                                <span class="hidden sm:inline">字幕</span>
+                            </button>
+
+                            <!-- Speed Selector -->
+                            <select id="speed-select" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-sky-400 font-mono font-bold px-3 py-2 rounded-lg transition cursor-pointer" title="再生速度">
+                                <option value="0.75">速度 0.75x</option>
+                                <option value="1" selected>速度 1.0x</option>
+                                <option value="1.25">速度 1.25x</option>
+                                <option value="1.5">速度 1.5x</option>
+                                <option value="2">速度 2.0x</option>
+                            </select>
+
+                            <!-- Pause After Narration -->
+                            <select id="pause-select" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-sky-400 font-mono font-bold px-3 py-2 rounded-lg transition cursor-pointer" title="ナレーション終了後の待ち時間">
+                                <option value="1">待ち 1秒</option>
+                                <option value="2" selected>待ち 2秒</option>
+                                <option value="3">待ち 3秒</option>
+                            </select>
+
+                            <!-- Mute Button -->
+                            <button id="mute-btn" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm border border-slate-700">
+                                <i class="fa-solid fa-volume-high" id="mute-icon"></i>
+                            </button>
+
+                            <!-- Fullscreen Button -->
+                            <button id="fullscreen-btn" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm border border-slate-700">
+                                <i class="fa-solid fa-expand"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Sidebar Playlist / Agenda (1 Col) -->
+            <div id="sidebar" class="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col h-[520px] shadow-lg">
+                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+                    <h2 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-rectangle-list text-sky-400"></i> チャプター一覧
+                    </h2>
+                    <span class="text-xs text-slate-500 font-mono" id="playlist-count"></span>
+                </div>
+
+                <!-- Playlist Scroll Container -->
+                <div class="flex-grow overflow-y-auto space-y-2 pr-1" id="playlist-items">
+                    <!-- Dynamic playlist item buttons injected via JS -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ?deck=<名前> で読み込むスライドのデータを選ぶ（TODO-041）。
+         下の再生エンジンより先に読む必要があるので document.write を使う。 -->
+    <script>
+        const deckName = (new URLSearchParams(location.search).get('deck')
+            || 'claude-memo').replace(/[^\w-]/g, '');
+        document.write(`<script src="slides-${deckName}.js"><\/script>`);
+    </script>
+
+    <script>
+        // デッキの読み込みに失敗したら、白画面ではなく理由を出して止める（TODO-041）。
+        // この下は読み込み時に slideData を読むので、ここで止めないと間に合わない
+        if (typeof slideData === 'undefined') {
+            const canvas = document.getElementById('slide-canvas');
+            canvas.className = 'flex-grow z-10 flex items-center justify-center'
+                + ' text-slate-200 text-sm';
+            canvas.textContent =
+                `スライドのデータ slides-${deckName}.js を読み込めませんでした。`;
+            throw new Error(`deck not found: ${deckName}`);
+        }
+
+        let currentIndex = 0;
+        let isPlaying = false;
+        let isMuted = false;
+        let playbackRate = 1.0;
+        // ナレーション終了後、次のスライドへ移るまでの待ち（秒）。覚えない（TODO-021）
+        let pauseSeconds = 2;
+        let currentSlideElapsedTime = 0;
+        let animationFrameId = null;
+        let lastFrameTimestamp = null;
+        let showCaptions = false; // Subtitles hidden by default
+
+        // Base speed multiplier (1.0x in UI corresponds to 1.4x actual speed)
+        const BASE_SPEED_MULTIPLIER = 1.4;
+        const getEffectiveSpeed = () => playbackRate * BASE_SPEED_MULTIPLIER;
+
+        const MS_PER_SECOND = 1000;
+        const SECONDS_PER_MINUTE = 60;
+        // 進行バーの幅（%）の上限
+        const PROGRESS_MAX_PERCENT = 100;
+        // スライドの原寸（CSS の 16:9 の幅）。縮小率の基準
+        const SLIDE_BASE_WIDTH_PX = 960;
+        const SLIDE_ASPECT_RATIO = 16 / 9;
+
+        // SpeechSynthesis も Audio も rate はこの辺りが上限（超えると無視される）
+        const MAX_SPEECH_RATE = 2.0;
+        // Web Speech はほんの少しゆったりしたテンポにする
+        const WEB_SPEECH_RATE_FACTOR = 0.95;
+        // 低めのトーンにするためのピッチ
+        const WEB_SPEECH_PITCH = 0.85;
+        // getVoices() が揃うのを待つための、発話開始前の遅延
+        const SPEECH_START_DELAY_MS = 50;
+        // SpeechSynthesis が onend を返さないときの安全タイマー（TODO-019）。
+        // 読み上げの所要は「文字数 ÷ 毎秒の文字数 ÷ 速度」で見積もる
+        const SPEECH_SAFETY_MIN_MS = 6000;
+        const SPEECH_CHARS_PER_SECOND = 4.5;
+        const SPEECH_SAFETY_MARGIN_MS = 3000;
+        // Online TTS の onended が来ないときの受け皿に足す余裕
+        const TTS_END_MARGIN_MS = 3000;
+        // Google の translate_tts が 1 回で読める長さの上限
+        const TTS_MAX_CHARS = 180;
+
+        let voiceEngineMode = 'online'; // 'online' or 'speech'
+        let fallbackAudioElement = null;
+        // Bumped by stopSpeech(); an in-flight chunk queue with an old id stops.
+        let speechRunId = 0;
+        // 8 samples of silence, used only to unlock the shared Audio element
+        const SILENT_WAV = 'data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA';
+
+        // Create the one Audio element for Online TTS inside a user gesture and
+        // unlock it. Called from the play button; does nothing on later clicks.
+        function unlockFallbackAudio() {
+            if (fallbackAudioElement) return;
+            try {
+                fallbackAudioElement = new Audio(SILENT_WAV);
+                fallbackAudioElement.volume = 0;
+                fallbackAudioElement.play().then(() => {
+                    fallbackAudioElement.pause();
+                    fallbackAudioElement.volume = 1;
+                }).catch(() => {
+                    fallbackAudioElement.volume = 1;
+                });
+            } catch(e) {
+                console.warn("Audio unlock failed:", e);
+            }
+        }
+        let slideTransitionTimeout = null;
+        // 読み終わり後の待ちを始めた時刻。待ち中でなければ null（TODO-021）
+        let pauseStartedAt = null;
+
+        // 各スライドの尺は、ナレーションの長さ＋読み終わり後の待ち（TODO-020）
+        const slideSpan = index => slideData[index].duration + pauseSeconds;
+
+        let totalDurationSeconds = 0;
+        let slideStartTimes = [];
+
+        // 待ち秒数を変えると全体の尺も各スライドの開始時刻も変わるので、
+        // プルダウンの change から呼び直す（TODO-020）
+        function recalcTimeline() {
+            let accumTime = 0;
+            slideStartTimes = slideData.map((slide, idx) => {
+                const start = accumTime;
+                accumTime += slideSpan(idx);
+                return start;
+            });
+            totalDurationSeconds = accumTime;
+        }
+        recalcTimeline();
+
+        // DOM Element Cache
+        const slideCanvas = document.getElementById('slide-canvas');
+        const slideNum = document.getElementById('slide-num');
+        const totalSlides = document.getElementById('total-slides');
+        const playlistCount = document.getElementById('playlist-count');
+        const captionText = document.getElementById('caption-text');
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const speedSelect = document.getElementById('speed-select');
+        const pauseSelect = document.getElementById('pause-select');
+        const muteBtn = document.getElementById('mute-btn');
+        const muteIcon = document.getElementById('mute-icon');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressThumb = document.getElementById('progress-thumb');
+        const currentTimeDisplay = document.getElementById('current-time-display');
+        const totalTimeDisplay = document.getElementById('total-time-display');
+        const controlTitlePreview = document.getElementById('control-title-preview');
+        const waveContainer = document.getElementById('wave-container');
+        const audioStatusBadge = document.getElementById('audio-status-badge');
+        const playlistItemsContainer = document.getElementById('playlist-items');
+        const speechStatusIndicator = document.getElementById('speech-status-indicator');
+        const toggleVoiceEngineBtn = document.getElementById('toggle-voice-engine-btn');
+        const subtitleBanner = document.getElementById('subtitle-banner');
+        const toggleCaptionBtn = document.getElementById('toggle-caption-btn');
+        const captionIcon = document.getElementById('caption-icon');
+
+        // Pronunciation map for Japanese Speech Engine
+        function prepareSpeechText(text) {
+            if (!text) return "";
+            return text
+                .replace(/TODO\.md/gi, 'トゥードゥー ドット エムディー')
+                .replace(/TODO-([0-9]+)/gi, 'トゥードゥー $1')
+                .replace(/TODO/gi, 'トゥードゥー')
+                .replace(/ccstatusline/gi, 'シーシー ステータス ライン')
+                .replace(/\/clear/gi, 'スラッシュ クリア')
+                .replace(/\/goal/gi, 'スラッシュ ゴール')
+                .replace(/\/doctor/gi, 'スラッシュ ドクター')
+                .replace(/\/rc/gi, 'スラッシュ アールシー')
+                .replace(/\/login/gi, 'スラッシュ ログイン')
+                .replace(/Claude Code/gi, 'クロード コード')
+                .replace(/Claude/gi, 'クロード')
+                .replace(/tmux/gi, 'ティーマックス')
+                .replace(/pyright-lsp/gi, 'パイライト エルエスピー')
+                .replace(/ponytail/gi, 'ポニーテール')
+                .replace(/codegraph/gi, 'コードグラフ')
+                .replace(/git worktree/gi, 'ギット ワークツリー')
+                .replace(/auto-mode/gi, 'オートモード')
+                .replace(/考え方/g, 'かんがえかた')
+                .replace(/使い方/g, 'つかいかた')
+                .replace(/\bmain\b/gi, 'メイン')
+                .replace(/\bimplementer\b/gi, 'インプリメンター');
+        }
+
+        // Android/desktop Chrome cut long utterances off after ~15s, so the
+        // narration is spoken as short chunks in sequence (TODO-002).
+        function splitForSpeech(text, maxLen = 40, minLen = 20) {
+            const chars = [...text];
+            const isWordChar = (c) => c !== undefined && /[A-Za-z0-9]/.test(c);
+            const parts = [];
+            let buf = '';
+            for (let i = 0; i < chars.length; i++) {
+                const ch = chars[i];
+                const next = chars[i + 1];
+                buf += ch;
+                // 40 文字に達しても、英単語の途中と句読点の直前では切らない
+                const forced = buf.length >= maxLen &&
+                    !(isWordChar(ch) && isWordChar(next)) &&
+                    !(next !== undefined && '。、！？'.includes(next));
+                if ((buf.length >= minLen && '。、！？'.includes(ch)) || forced) {
+                    parts.push(buf);
+                    buf = '';
+                }
+            }
+            if (buf.trim()) parts.push(buf);
+            return parts.length ? parts : [text];
+        }
+
+        // Format seconds to M:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / SECONDS_PER_MINUTE);
+            const secs = Math.floor(seconds % SECONDS_PER_MINUTE);
+            return `${mins}:${String(secs).padStart(2, '0')}`;
+        }
+
+        function stopSpeech() {
+            pauseStartedAt = null;
+            if (slideTransitionTimeout) {
+                clearTimeout(slideTransitionTimeout);
+                slideTransitionTimeout = null;
+            }
+            speechRunId++;
+            if ('speechSynthesis' in window) {
+                try {
+                    window.speechSynthesis.cancel();
+                } catch(e) {}
+            }
+            if (fallbackAudioElement) {
+                // 要素は捨てない（作り直すと再生ボタンで得た unlock が消える）
+                fallbackAudioElement.pause();
+                fallbackAudioElement.onended = null;
+                fallbackAudioElement.onerror = null;
+                fallbackAudioElement.onloadedmetadata = null;
+            }
+        }
+
+        function onSlideAudioFinished() {
+            if (!isPlaying) return;
+            updateWaveState(true, "朗読完了");
+            pauseStartedAt = performance.now();
+            schedulePauseTransition();
+        }
+
+        // 読み終わりからスライド切り替えまでの待ち（プルダウンで 1〜3 秒）。
+        // 待ちの最中にプルダウンを変えたときも呼ばれ、残りを計算し直す（TODO-021）
+        function schedulePauseTransition() {
+            if (slideTransitionTimeout) {
+                clearTimeout(slideTransitionTimeout);
+                slideTransitionTimeout = null;
+            }
+
+            const remainMs = Math.max(0, pauseSeconds * MS_PER_SECOND - (performance.now() - pauseStartedAt));
+            slideTransitionTimeout = setTimeout(() => {
+                slideTransitionTimeout = null;
+                pauseStartedAt = null;
+                if (!isPlaying) return;
+                if (currentIndex < slideData.length - 1) {
+                    renderSlide(currentIndex + 1, true);
+                } else {
+                    pausePresentation();
+                    audioStatusBadge.textContent = "再生完了";
+                }
+            }, remainMs);
+        }
+
+        function speakCurrentNarration() {
+            stopSpeech();
+            const runId = speechRunId;
+            if (!isPlaying) {
+                updateWaveState(false, "一時停止中");
+                return;
+            }
+
+            if (isMuted) {
+                updateWaveState(false, "消音中");
+                const slide = slideData[currentIndex];
+                const muteWaitMs = (slide.duration / playbackRate) * MS_PER_SECOND;
+                slideTransitionTimeout = setTimeout(() => {
+                    onSlideAudioFinished();
+                }, muteWaitMs);
+                return;
+            }
+
+            const slide = slideData[currentIndex];
+            const textToSpeak = prepareSpeechText(slide.narration);
+
+            if (voiceEngineMode === 'online') {
+                speakOnlineTTS(textToSpeak);
+                return;
+            }
+
+            if ('speechSynthesis' in window) {
+                setTimeout(() => {
+                    if (!isPlaying || isMuted || runId !== speechRunId) return;
+
+                    try {
+                        window.speechSynthesis.resume();
+                    } catch(e) {}
+
+                    const voices = window.speechSynthesis.getVoices();
+                    // 落ち着いた優艶な日本語女性音声を優先検索（Nanami, Haruka, Kyoko, Yuka, Sakura, Ayumi, Google 日本語 等）
+                    const femaleJaVoice = voices.find(v => 
+                        v.lang && (v.lang.includes('ja') || v.lang.includes('JP')) &&
+                        /nanami|haruka|kyoko|yuka|sakura|ayumi|mayu|mizuki|female|女性|google/i.test(v.name) &&
+                        !/ichiro|otoya|hattori|keita|daichi|takumi|male|男性/i.test(v.name)
+                    ) || voices.find(v => 
+                        v.lang && (v.lang.includes('ja') || v.lang.includes('JP')) &&
+                        !/ichiro|otoya|hattori|keita|daichi|takumi|male|男性/i.test(v.name)
+                    ) || voices.find(v => v.lang && (v.lang.includes('ja') || v.lang.includes('JP')));
+
+                    const chunks = splitForSpeech(textToSpeak);
+                    let finished = false;
+
+                    const handleEnd = () => {
+                        if (finished || runId !== speechRunId) return;
+                        finished = true;
+                        onSlideAudioFinished();
+                    };
+
+                    const speakChunk = (i) => {
+                        if (finished || runId !== speechRunId || !isPlaying || isMuted) return;
+
+                        const utterance = new SpeechSynthesisUtterance(chunks[i]);
+                        utterance.lang = 'ja-JP';
+                        utterance.rate = Math.min(MAX_SPEECH_RATE, getEffectiveSpeed() * WEB_SPEECH_RATE_FACTOR);
+                        utterance.pitch = WEB_SPEECH_PITCH;
+                        utterance.volume = 1.0;
+                        if (femaleJaVoice) {
+                            utterance.voice = femaleJaVoice;
+                        }
+
+                        utterance.onstart = () => {
+                            updateWaveState(true, "朗読中 (Web Speech)");
+                        };
+
+                        utterance.onend = () => {
+                            if (i + 1 < chunks.length) {
+                                speakChunk(i + 1);
+                            } else {
+                                handleEnd();
+                            }
+                        };
+
+                        utterance.onerror = (e) => {
+                            console.warn("SpeechSynthesis error, falling back to Online TTS:", e);
+                            if (finished || runId !== speechRunId) return;
+                            finished = true; // 分割した数だけ落ちないように 1 回だけ
+                            speakOnlineTTS(textToSpeak);
+                        };
+
+                        window.speechSynthesis.speak(utterance);
+                    };
+
+                    speakChunk(0);
+
+                    // Safety timeout in case SpeechSynthesis hangs without firing onend
+                    const safetyTime = Math.max(SPEECH_SAFETY_MIN_MS,
+                        (textToSpeak.length / SPEECH_CHARS_PER_SECOND / getEffectiveSpeed())
+                        * MS_PER_SECOND + SPEECH_SAFETY_MARGIN_MS);
+                    slideTransitionTimeout = setTimeout(() => {
+                        if (!finished && isPlaying && runId === speechRunId) {
+                            console.warn("Safety timeout triggered for speech end");
+                            handleEnd();
+                        }
+                    }, safetyTime);
+
+                }, SPEECH_START_DELAY_MS);
+            } else {
+                speakOnlineTTS(textToSpeak);
+            }
+        }
+
+        function speakOnlineTTS(text) {
+            if (!text || isMuted || !isPlaying) return;
+            const runId = speechRunId;
+            updateWaveState(true, "朗読中 (Online Voice)");
+
+            const cleanText = text.substring(0, TTS_MAX_CHARS);
+            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ja&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
+
+            if (!fallbackAudioElement) {
+                // No play button press yet (autoplay will likely be blocked)
+                fallbackAudioElement = new Audio();
+            }
+            fallbackAudioElement.pause();
+            fallbackAudioElement.onended = null;
+            fallbackAudioElement.onerror = null;
+            fallbackAudioElement.onloadedmetadata = null;
+            fallbackAudioElement.src = ttsUrl;
+            fallbackAudioElement.load();
+            fallbackAudioElement.playbackRate = Math.min(MAX_SPEECH_RATE, getEffectiveSpeed());
+
+            let finished = false;
+            const handleEnd = () => {
+                if (finished) return;
+                finished = true;
+                onSlideAudioFinished();
+            };
+
+            // 読了後（handleEnd 済み）や、古い呼び出しからは張り直さない。
+            // slideTransitionTimeout は次スライドへの待ちと共用なので、
+            // ここで弾かないとそちらを消してしまう
+            const setEndTimeout = (ms) => {
+                if (finished || runId !== speechRunId) return;
+                if (slideTransitionTimeout) clearTimeout(slideTransitionTimeout);
+                slideTransitionTimeout = setTimeout(() => {
+                    if (finished || !isPlaying) return;
+                    handleEnd();
+                }, ms);
+            };
+
+            fallbackAudioElement.onended = () => {
+                handleEnd();
+            };
+
+            fallbackAudioElement.onerror = (err) => {
+                console.warn("Online Audio TTS error:", err);
+                setEndTimeout((slideData[currentIndex].duration / playbackRate) * MS_PER_SECOND);
+            };
+
+            // onended が来ないとき（通信が途中で止まった等）の受け皿。
+            // まずは原稿の想定秒数で張り、音声の実長が分かったら張り直す
+            setEndTimeout((slideData[currentIndex].duration / playbackRate)
+                * MS_PER_SECOND + TTS_END_MARGIN_MS);
+            fallbackAudioElement.onloadedmetadata = () => {
+                const audioSec = fallbackAudioElement.duration;
+                if (!isFinite(audioSec) || audioSec <= 0) return;
+                setEndTimeout((audioSec / fallbackAudioElement.playbackRate)
+                    * MS_PER_SECOND + TTS_END_MARGIN_MS);
+            };
+
+            fallbackAudioElement.play().catch(e => {
+                console.warn("Audio play blocked by browser interaction policy:", e);
+                setEndTimeout((slideData[currentIndex].duration / playbackRate) * MS_PER_SECOND);
+            });
+        }
+
+        function renderSlide(index, resetOffset = true) {
+            if (index < 0 || index >= slideData.length) return;
+            currentIndex = index;
+            if (resetOffset) {
+                currentSlideElapsedTime = 0;
+            }
+            const slide = slideData[currentIndex];
+
+            // Render main slide HTML
+            slideCanvas.classList.remove('slide-fade-enter');
+            void slideCanvas.offsetWidth; // Reflow trigger
+            slideCanvas.classList.add('slide-fade-enter');
+            slideCanvas.innerHTML = slide.render();
+
+            // Update UI headers & captions
+            slideNum.textContent = String(slide.id).padStart(2, '0');
+            controlTitlePreview.textContent = `${slide.id}. ${slide.title}`;
+            captionText.textContent = slide.narration;
+
+            // Sync seek bar view
+            updateProgressDisplay();
+
+            // Sync sidebar list state
+            updatePlaylistSelection();
+
+            // Speak narration if currently active
+            if (isPlaying) {
+                speakCurrentNarration();
+            }
+        }
+
+        function updateProgressDisplay() {
+            const currentTotalSecs = Math.min(
+                totalDurationSeconds,
+                slideStartTimes[currentIndex] + currentSlideElapsedTime
+            );
+            const progressPct = Math.min(
+                PROGRESS_MAX_PERCENT,
+                (currentTotalSecs / totalDurationSeconds) * PROGRESS_MAX_PERCENT);
+
+            progressBar.style.width = `${progressPct}%`;
+            progressThumb.style.left = `${progressPct}%`;
+            currentTimeDisplay.textContent = formatTime(currentTotalSecs);
+        }
+
+        function updateWaveState(active, statusText) {
+            waveContainer.classList.toggle('paused', !active);
+            if (statusText) audioStatusBadge.textContent = statusText;
+            audioStatusBadge.className = "text-[9px] bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded font-mono "
+                + (active ? "text-lime-400 font-bold" : "text-slate-400");
+        }
+
+        function playbackLoop(timestamp) {
+            if (!isPlaying) return;
+
+            if (!lastFrameTimestamp) {
+                lastFrameTimestamp = timestamp;
+            }
+
+            const deltaTime = (timestamp - lastFrameTimestamp) / MS_PER_SECOND;
+            lastFrameTimestamp = timestamp;
+
+            // 時間軸は実時間。duration には Online TTS の音声を 1.4 倍速で
+            // 再生した実測秒数が入っているので、ここで BASE_SPEED_MULTIPLIER を
+            // 掛けるとバーだけが先走って duration で頭打ちになる（TODO-018）
+            currentSlideElapsedTime += deltaTime * playbackRate;
+
+            // 待ちの分も尺に含めるので、頭打ちは duration ＋ 待ち秒数（TODO-020）
+            const span = slideSpan(currentIndex);
+            if (currentSlideElapsedTime > span) {
+                currentSlideElapsedTime = span;
+            }
+
+            updateProgressDisplay();
+
+            animationFrameId = requestAnimationFrame(playbackLoop);
+        }
+
+        function playPresentation() {
+            isPlaying = true;
+            playIcon.classList.remove('fa-play', 'ml-0.5');
+            playIcon.classList.add('fa-pause');
+            
+            lastFrameTimestamp = null;
+            animationFrameId = requestAnimationFrame(playbackLoop);
+            
+            speakCurrentNarration();
+        }
+
+        function pausePresentation() {
+            isPlaying = false;
+            playIcon.classList.remove('fa-pause');
+            playIcon.classList.add('fa-play', 'ml-0.5');
+            
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            
+            stopSpeech();
+            updateWaveState(false, "一時停止中");
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                pausePresentation();
+            } else {
+                playPresentation();
+            }
+        }
+
+        // チャプター一覧の項目。共通のクラスと、選択中かどうかで変わるクラスを分ける。
+        const PLAYLIST_ITEM_CLASS = 'w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between text-xs';
+        const PLAYLIST_ITEM_ACTIVE_CLASSES = ['bg-sky-950/60', 'border-sky-500/50', 'text-sky-300', 'font-bold'];
+        const PLAYLIST_ITEM_IDLE_CLASSES = ['bg-slate-800/40', 'border-slate-800', 'text-slate-400', 'hover:bg-slate-800', 'hover:text-slate-200'];
+        const playlistItems = [];
+
+        function setPlaylistItemState(item, active) {
+            PLAYLIST_ITEM_ACTIVE_CLASSES.forEach(c => item.classList.toggle(c, active));
+            PLAYLIST_ITEM_IDLE_CLASSES.forEach(c => item.classList.toggle(c, !active));
+            item.querySelector('i').className = `fa-solid ${active ? 'fa-volume-high text-lime-400' : 'fa-chevron-right text-slate-600'} text-[10px]`;
+        }
+
+        function initPlaylist() {
+            totalSlides.textContent = slideData.length;
+            playlistCount.textContent = `${slideData.length} Slides`;
+            totalTimeDisplay.textContent = formatTime(totalDurationSeconds);
+
+            slideData.forEach((slide, idx) => {
+                const btn = document.createElement('button');
+                btn.className = PLAYLIST_ITEM_CLASS;
+                btn.innerHTML = `
+                    <div class="flex items-center gap-2.5 truncate pr-2">
+                        <span class="font-mono text-[10px] ${idx === currentIndex ? 'text-lime-400' : 'text-slate-500'}">${String(slide.id).padStart(2, '0')}</span>
+                        <span class="truncate">${slide.title}</span>
+                    </div>
+                    <i></i>
+                `;
+                setPlaylistItemState(btn, idx === currentIndex);
+                btn.onclick = () => {
+                    renderSlide(idx, true);
+                };
+                playlistItems.push(btn);
+                playlistItemsContainer.appendChild(btn);
+            });
+        }
+
+        // 再生中の項目をチャプター一覧の中だけでスクロールさせる。
+        // scrollIntoView() はスクロールできる祖先を全部動かすので、
+        // 一覧が画面の外にあるスマホ縦画面ではページごとスクロールする（TODO-001）。
+        function scrollPlaylistIntoView(item) {
+            const box = playlistItemsContainer;
+            // 画面上の位置の差で測る。offsetTop で書くと、一覧側に position が
+            // 付いた途端に offsetParent が変わって静かに壊れる。
+            const boxRect = box.getBoundingClientRect();
+            const itemRect = item.getBoundingClientRect();
+            const top = itemRect.top - boxRect.top + box.scrollTop;
+            const bottom = top + itemRect.height;
+            if (top < box.scrollTop) {
+                box.scrollTo({ top: top, behavior: 'smooth' });
+            } else if (bottom > box.scrollTop + box.clientHeight) {
+                box.scrollTo({ top: bottom - box.clientHeight, behavior: 'smooth' });
+            }
+        }
+
+        function updatePlaylistSelection() {
+            playlistItems.forEach((item, idx) => {
+                setPlaylistItemState(item, idx === currentIndex);
+                if (idx === currentIndex) scrollPlaylistIntoView(item);
+            });
+        }
+
+        function setupEventListeners() {
+            playBtn.addEventListener('click', () => {
+                // Direct user gesture unlock for Web Speech API in Chrome/Safari iFrames
+                if ('speechSynthesis' in window) {
+                    try {
+                        window.speechSynthesis.resume();
+                        const dummyUtterance = new SpeechSynthesisUtterance('');
+                        dummyUtterance.volume = 0;
+                        window.speechSynthesis.speak(dummyUtterance);
+                    } catch(e) {}
+                }
+                unlockFallbackAudio();
+                togglePlay();
+            });
+
+            // Toggle Subtitle Banner visibility
+            toggleCaptionBtn.addEventListener('click', () => {
+                showCaptions = !showCaptions;
+                subtitleBanner.classList.toggle('hidden', !showCaptions);
+                toggleCaptionBtn.classList.toggle('text-slate-400', !showCaptions);
+                toggleCaptionBtn.classList.toggle('text-lime-400', showCaptions);
+                toggleCaptionBtn.classList.toggle('border-lime-500/50', showCaptions);
+                captionIcon.classList.toggle('text-slate-400', !showCaptions);
+                captionIcon.classList.toggle('text-lime-400', showCaptions);
+            });
+
+            // Toggle Audio Engine Mode (Web Speech API <-> Online Voice)
+            toggleVoiceEngineBtn.addEventListener('click', () => {
+                voiceEngineMode = voiceEngineMode === 'speech' ? 'online' : 'speech';
+                const online = voiceEngineMode === 'online';
+                speechStatusIndicator.textContent = online ? "Online Voice" : "Web Speech API";
+                speechStatusIndicator.className =
+                    `${online ? 'text-sky-400' : 'text-lime-400'} font-bold font-mono`;
+                if (isPlaying) {
+                    speakCurrentNarration();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    renderSlide(currentIndex - 1, true);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < slideData.length - 1) {
+                    renderSlide(currentIndex + 1, true);
+                }
+            });
+
+            restartBtn.addEventListener('click', () => {
+                renderSlide(0, true);
+                if (isPlaying) playPresentation();
+            });
+
+            // 1.0x が標準（実際は BASE_SPEED_MULTIPLIER を掛けた速さ）
+            speedSelect.addEventListener('change', () => {
+                playbackRate = Number(speedSelect.value);
+                if (isPlaying) {
+                    speakCurrentNarration();
+                }
+            });
+
+            pauseSelect.addEventListener('change', () => {
+                pauseSeconds = Number(pauseSelect.value);
+                recalcTimeline();
+                // 待ちを縮めたとき、経過が新しい尺を超えたままにならないようにする
+                currentSlideElapsedTime = Math.min(currentSlideElapsedTime, slideSpan(currentIndex));
+                totalTimeDisplay.textContent = formatTime(totalDurationSeconds);
+                updateProgressDisplay();
+                if (pauseStartedAt !== null) schedulePauseTransition();
+            });
+
+            muteBtn.addEventListener('click', () => {
+                isMuted = !isMuted;
+                if (isMuted) {
+                    muteIcon.className = 'fa-solid fa-volume-xmark text-rose-400';
+                    stopSpeech();
+                    updateWaveState(false, "消音中");
+                } else {
+                    muteIcon.className = 'fa-solid fa-volume-high';
+                    if (isPlaying) speakCurrentNarration();
+                }
+            });
+
+            // スライドのクリック / タップで再生と一時停止を切り替える（TODO-005）。
+            // フルスクリーン中のスマホは再生ボタンが暗幕の裏に入って押せず、
+            // 物理キーボードも無いので Space も使えない。枠の中に押せるものは
+            // 無いので、どこを押しても切り替えてよい。暗幕のハンドラは
+            // #viewport-stage 自身の click なので、こことは当たらない。
+            // 切り替えそのものは再生ボタンに投げる。枠タップが最初の操作に
+            // なることがあるので、読み上げの解錠（unlockFallbackAudio）まで
+            // 通す必要がある。ユーザー操作の中から同期で呼ぶので、Android
+            // Chrome の自動再生ブロックにも掛からない（TODO-002）。
+            const tapFeedbackIcon = document.getElementById('tap-feedback-icon');
+            const playerViewport = document.getElementById('player-viewport');
+
+            // 横スワイプでスライドを送る（TODO-010）。スマホでは前後ボタンが
+            // 小さくしか出ないため。切り替えは prev-btn / next-btn に投げるので
+            // 中身はボタンを押したときと同じ。縦スクロールを邪魔しないよう
+            // preventDefault はせず、横の移動量が縦より大きいときだけ反応する。
+            // 速さは見ない。時間で切ると、ゆっくり指を滑らせたときに
+            // スワイプ扱いにならず、直後の click が再生／一時停止に化ける。
+            // スワイプの後にも click が飛んでくることがあるので、フラグを立てて
+            // 再生／一時停止（TODO-005）には通さない。フラグは次の touchstart で
+            // 落とすので、click が来なくても次のタップに持ち越さない。
+            const SWIPE_MIN_PX = 50;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchStarted = false;
+            let swiped = false;
+
+            playerViewport.addEventListener('touchstart', (e) => {
+                swiped = false;
+                if (e.touches.length !== 1) {
+                    touchStarted = false;
+                    return;
+                }
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchStarted = true;
+            }, { passive: true });
+
+            playerViewport.addEventListener('touchend', (e) => {
+                const touch = e.changedTouches[0];
+                if (!touch || !touchStarted) return;
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                touchStarted = false;
+                if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) <= Math.abs(dy)) return;
+                swiped = true;
+                (dx < 0 ? nextBtn : prevBtn).click();
+            }, { passive: true });
+
+            playerViewport.addEventListener('click', () => {
+                if (swiped) {
+                    swiped = false;
+                    return;
+                }
+                playBtn.click();
+                tapFeedbackIcon.className = `fa-solid ${isPlaying ? 'fa-play' : 'fa-pause'}`;
+                // 連続でタップされても頭から出し直す
+                void tapFeedbackIcon.offsetWidth;
+                tapFeedbackIcon.classList.add('is-shown');
+            });
+
+            // 擬似フルスクリーンの入り切り。ラッパー側のクラスは CSS の
+            // レターボックスと、狭い画面・タッチ画面の暗幕が使う。
+            const stage = document.getElementById('viewport-stage');
+            const setFullscreen = (on) => {
+                playerViewport.classList.toggle('pseudo-fullscreen', on);
+                stage.classList.toggle('is-fullscreen', on);
+                document.body.classList.toggle('fs-lock', on);
+                fullscreenBtn.querySelector('i').className = on ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+            };
+
+            fullscreenBtn.addEventListener('click', () => {
+                setFullscreen(!playerViewport.classList.contains('pseudo-fullscreen'));
+            });
+
+            // 暗幕（#viewport-stage::before）のタップで抜ける。スマホでは
+            // フルスクリーン中のボタンが暗幕に覆われ、Esc も押せないため。
+            // 疑似要素のヒットはラッパー自身が受けるので、枠や字幕のタップ
+            // （e.target が子要素）とはここで区別できる。
+            stage.addEventListener('click', (e) => {
+                if (e.target === stage && stage.classList.contains('is-fullscreen')) {
+                    setFullscreen(false);
+                }
+            });
+
+            // Listen for keyboard shortcuts (Space, Arrow keys, Fullscreen, Mute, Escape)
+            document.addEventListener('keydown', (e) => {
+                // Do not trigger shortcuts if focus is inside text inputs
+                if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+                if (e.key === ' ' || e.code === 'Space') {
+                    e.preventDefault();
+                    if ('speechSynthesis' in window) {
+                        try {
+                            window.speechSynthesis.resume();
+                        } catch(err) {}
+                    }
+                    togglePlay();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (currentIndex < slideData.length - 1) {
+                        renderSlide(currentIndex + 1, true);
+                    }
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (currentIndex > 0) {
+                        renderSlide(currentIndex - 1, true);
+                    }
+                } else if (e.key === 'f' || e.key === 'F') {
+                    e.preventDefault();
+                    fullscreenBtn.click();
+                } else if (e.key === 'm' || e.key === 'M') {
+                    e.preventDefault();
+                    muteBtn.click();
+                } else if (e.key === 'Escape') {
+                    if (playerViewport.classList.contains('pseudo-fullscreen')) {
+                        setFullscreen(false);
+                    }
+                }
+            });
+
+            // Seekbar click interaction
+            document.getElementById('seekbar-container').addEventListener('click', (e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const ratio = Math.max(0, Math.min(1, clickX / rect.width));
+                const targetSec = ratio * totalDurationSeconds;
+
+                // 対象のスライドは「開始時刻が targetSec より前」の最後のもの。
+                // スライドの境界ちょうどを指したときは手前のスライドの末尾になる
+                // （手書きの累積ループと同じ）。0 秒のときだけ該当が無いので 0 に寄せる。
+                const targetIndex = Math.max(0, slideStartTimes.findLastIndex(t => t < targetSec));
+
+                currentSlideElapsedTime = targetSec - slideStartTimes[targetIndex];
+                renderSlide(targetIndex, false);
+            });
+        }
+
+        // Preload voices for Web Speech API
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
+        // スマホ用: 外枠の幅に合わせて 960px 基準の縮小率を渡す。
+        // --vp-scale を使うのは狭い画面とタッチ画面のメディアクエリの中だけなので、
+        // マウスの PC では値が入っていても効かない。
+        //
+        // 通常表示では枠の高さの上限も入れる。横持ちのスマホは幅いっぱいに
+        // 広げると 16:9 の高さが画面に収まらないので、画面の高さから枠の上端
+        // （ヘッダーと本文の上余白）を引いた分を上限にし、幅の方を絞る
+        // （TODO-011）。上端を実測するのは、ヘッダーの高さが幅で変わり、
+        // 640〜712px の帯では折り返して伸びるため。
+        // max-width はインラインで入るのでメディアクエリの外にも効いてしまう。
+        // 同じ条件を CSS の @media にも書いてあるので、片方を変えたら
+        // 両方直すこと。PC では空にする。
+        // フルスクリーン中は枠自体がレターボックスで既に画面に収まっており、
+        // 上限を重ねると二重に縮むので掛けない。
+        function setupViewportScale() {
+            const frame = document.getElementById('viewport-frame');
+            const stage = document.getElementById('viewport-stage');
+            if (!frame || !('ResizeObserver' in window)) return;
+            const mobile = window.matchMedia(
+                'screen and (max-width: 767.98px), screen and (pointer: coarse)');
+            const update = () => {
+                const capped = mobile.matches
+                    && !(stage && stage.classList.contains('is-fullscreen'));
+                // scrollY を足してページ内の位置に直す。getBoundingClientRect()
+                // だけだとスクロール量の分だけ上限が伸び、枠が動いてしまう。
+                frame.style.maxWidth = capped
+                    ? Math.max(0, window.innerHeight
+                        - (frame.getBoundingClientRect().top + window.scrollY))
+                        * SLIDE_ASPECT_RATIO + 'px'
+                    : '';
+                frame.style.setProperty(
+                    '--vp-scale',
+                    frame.getBoundingClientRect().width / SLIDE_BASE_WIDTH_PX);
+            };
+            update();
+            new ResizeObserver(update).observe(frame);
+            window.addEventListener('resize', update);
+            // フルスクリーンの出入りで上限の有無が変わる
+            new MutationObserver(update).observe(
+                stage, { attributes: true, attributeFilter: ['class'] });
+        }
+
+        function startApp() {
+            document.title = deckConfig.title;
+            document.getElementById('deck-heading').textContent = deckConfig.heading;
+            setupViewportScale();
+            initPlaylist();
+            renderSlide(0, true);
+            setupEventListeners();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startApp);
+        } else {
+            startApp();
+        }
+    </script>
+</body>

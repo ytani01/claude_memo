@@ -11,7 +11,7 @@
 
 `--text` は、差し替える前に案の長さを見るためのもの。
 
-**この下の定数と RULES は claude_memo.html の写し。**
+**この下の定数と RULES は player.html の写し。**
 `prepareSpeechText()` の置換表、`TTS_MAX_CHARS`、`BASE_SPEED_MULTIPLIER` を
 変えたら、**ここも一緒に直す**。片方だけ直すと、測った秒数が実際とずれる。
 
@@ -25,9 +25,9 @@ import subprocess
 import tempfile
 import urllib.parse
 
-SRC = pathlib.Path(__file__).resolve().parent.parent / 'claude_memo.html'
+SRC = pathlib.Path(__file__).resolve().parent.parent / 'slides-claude-memo.js'
 
-# claude_memo.html の写し ---------------------------------------------------
+# player.html の写し ---------------------------------------------------
 TTS_MAX_CHARS = 180
 BASE_SPEED_MULTIPLIER = 1.4
 
@@ -85,7 +85,7 @@ def measure(text):
 
 
 def narrations():
-    """claude_memo.html から narration を並び順に取り出す。"""
+    """slides-claude-memo.js から narration を並び順に取り出す。"""
     return re.findall(r"narration: '(.*?)',\n", SRC.read_text(encoding='utf-8'))
 
 

@@ -4,24 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 構成
 
-`claude_memo.html` 1 ファイルと、`tools/` の補助スクリプトだけ。
-ビルド、依存関係のインストール、テストは無い。
+`player.html`（外枠と再生エンジン）、`slides-claude-memo.js`（スライドの
+データ）、`claude_memo.html`（旧 URL からのリダイレクト）と、`tools/` の
+補助スクリプトだけ。ビルド、依存関係のインストール、テストは無い。
 Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインでは崩れる）。
 
-配置場所が `public_html/` なので、このファイルがそのまま公開される。
-確認はブラウザでファイルを開くだけでよい。
+配置場所が `public_html/` なので、これらのファイルがそのまま公開される。
+確認はブラウザで `player.html?deck=claude-memo` を開くだけでよい。
 
 ## 中身
 
 「Claude Code の使い方」を紹介する日本語スライドを、動画プレイヤー風の UI で
-自動再生するページ。HTML → `slideData` → 再生ロジック の 3 段構成で、すべて
-`claude_memo.html` の中にある。
+自動再生するページ。HTML → `slideData` → 再生ロジック の 3 段構成で、
+データだけが別ファイルに分かれている（TODO-041）。
 
-- **`slideData`**（473 行あたり〜）: スライド 17 枚の配列。1 要素が
+- **`slides-claude-memo.js`**: スライド 17 枚の配列 `slideData`。1 要素が
   `{ id, title, duration, narration, render() }`。`render()` は
   Tailwind クラス付きの HTML 文字列を返す関数で、`slide-canvas` に差し込まれる。
-  スライドの追加・修正はここだけを触る
-- **再生ロジック**（1131 行あたり〜）: `requestAnimationFrame` の
+  スライドの追加・修正はこのファイルだけを触る。先頭の `deckConfig` は
+  ページの `<title>` とヘッダーの見出し
+- **`player.html`**: 外枠の HTML・CSS と再生ロジック。`?deck=<名前>` の
+  `<名前>` から `slides-<名前>.js` を読む（既定は `claude-memo`）。
+  読み込みは `</main>` の直後の `document.write` で、再生ロジックの
+  `<script>` より先に走らせている
+- **再生ロジック**: `requestAnimationFrame` の
   `playbackLoop` が `duration` を進め、尽きたら次のスライドへ。
   **`duration` には、Online TTS の音声を 1.4 倍速で再生した実測秒数が
   入っている**（TODO-018 で 17 枚すべて `ffprobe` で測って入れ替えた。
@@ -92,9 +98,8 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
   タップで抜ける出口が無くなる（対応しないと決めた。TODO-003）暗幕のタップでフルスクリーンを抜ける
   （ハンドラは `#viewport-stage` の click で、`e.target` がラッパー自身の
   ときだけ反応する＝枠の中身や字幕のタップでは閉じない）
-- **スライド枚数は 2 か所にある。** `slideData` を増減したら、420 行の
-  `playlist-count`（`17 Slides`）も直す。`total-slides` の方は
-  `initPlaylist()` が `slideData.length` で上書きするので触らなくてよい
+- **スライド枚数は書かない。** `total-slides` も `playlist-count` も
+  `initPlaylist()` が `slideData.length` で埋める（TODO-041）
 - `total-time-display` の初期値は `--:--`。`initPlaylist()` が
   `duration` の合計で上書きするので、値を直書きしない（TODO-018）
 - `narration` は `prepareSpeechText()` を通してから読み上げられる。
