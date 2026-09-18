@@ -1087,34 +1087,38 @@
             {
                 id: 17,
                 title: 'まとめ',
-                duration: 22,
-                narration: 'まとめです。Raspberry Pi 5 と tmux による常時稼働、こまめなスラッシュクリア、TODO.md への一元管理、そして役割に応じたモデル分散が私の現在の運用スタイルです。自己流で手探りの部分も多いため、ぜひ皆さんのご意見やアドバイス、ダメ出しなどをコメントで教えていただけると嬉しいです。',
+                duration: 23,
+                narration: 'まとめです。Raspberry Pi 5 と tmux による常時稼働、こまめなスラッシュクリア、TODO.md への一元管理、役割に応じたモデル分散。このほか、スマホ連携や複数アカウント運用といった便利な使い方もご紹介しました。自己流で手探りですので、ぜひ皆さんのご意見やダメ出しをコメントで教えていただけると嬉しいです。',
                 render: function() {
                     return `
                         <div class="flex flex-col h-full justify-center px-[3cqw]">
                             <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
                                 <i class="fa-solid fa-flag-checkered text-lime-400"></i> まとめ
                             </h2>
-                            <div class="space-y-[1.1cqw] text-slate-200 mb-[1.4cqw] font-medium">
-                                <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                            <div class="space-y-[0.8cqw] text-slate-200 mb-[1.1cqw] font-medium">
+                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
                                     <i class="fa-solid fa-server text-lime-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
                                     <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>Raspberry Pi 5 + ssh + tmux:</strong> 常時起動環境でいつでも復帰可能</span>
                                 </div>
-                                <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
                                     <i class="fa-solid fa-broom text-sky-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
                                     <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>話題が変わったら /clear:</strong> 一番手軽で最も効果的なトークン節約術</span>
                                 </div>
-                                <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
                                     <i class="fa-solid fa-handshake text-amber-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
                                     <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>AI を縛らず、頼って任せる:</strong> 指示の矛盾をなくしルール設定を重視</span>
                                 </div>
-                                <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
                                     <i class="fa-solid fa-list-check text-purple-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
                                     <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>TODO.md にすべて集める:</strong> セッションが切れてもスマホから継続</span>
                                 </div>
+                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-toolbox text-teal-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
+                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>その他の便利な使い方:</strong> スマホ連携・複数アカウント・小技も紹介</span>
+                                </div>
                             </div>
-                            <div class="bg-sky-950/60 border border-sky-500/60 rounded-xl p-[1cqw] text-center text-sky-300 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">
-                                ※ ここで説明したやり方は私の自己流です。ぜひ皆さんのご意見・ダメ出し・コメントをお願いいたします！
+                            <div class="bg-sky-950/60 border border-sky-500/60 rounded-xl p-[0.8cqw] text-center text-sky-300 font-bold" style="font-size: clamp(0.8rem, 1.8cqw, 1.35rem);">
+                                ※ 自己流です。ぜひご意見・ダメ出しをコメントでお願いします！
                             </div>
                         </div>
                     `;
