@@ -1756,7 +1756,50 @@
             // 通す必要がある。ユーザー操作の中から同期で呼ぶので、Android
             // Chrome の自動再生ブロックにも掛からない（TODO-002）。
             const tapFeedbackIcon = document.getElementById('tap-feedback-icon');
-            document.getElementById('player-viewport').addEventListener('click', () => {
+            const playerViewport = document.getElementById('player-viewport');
+
+            // 横スワイプでスライドを送る（TODO-010）。スマホでは前後ボタンが
+            // 小さくしか出ないため。切り替えは prev-btn / next-btn に投げるので
+            // 中身はボタンを押したときと同じ。縦スクロールを邪魔しないよう
+            // preventDefault はせず、横の移動量が縦より大きいときだけ反応する。
+            // 速さは見ない。時間で切ると、ゆっくり指を滑らせたときに
+            // スワイプ扱いにならず、直後の click が再生／一時停止に化ける。
+            // スワイプの後にも click が飛んでくることがあるので、フラグを立てて
+            // 再生／一時停止（TODO-005）には通さない。フラグは次の touchstart で
+            // 落とすので、click が来なくても次のタップに持ち越さない。
+            const SWIPE_MIN_PX = 50;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchStarted = false;
+            let swiped = false;
+
+            playerViewport.addEventListener('touchstart', (e) => {
+                swiped = false;
+                if (e.touches.length !== 1) {
+                    touchStarted = false;
+                    return;
+                }
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchStarted = true;
+            }, { passive: true });
+
+            playerViewport.addEventListener('touchend', (e) => {
+                const touch = e.changedTouches[0];
+                if (!touch || !touchStarted) return;
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                touchStarted = false;
+                if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) <= Math.abs(dy)) return;
+                swiped = true;
+                (dx < 0 ? nextBtn : prevBtn).click();
+            }, { passive: true });
+
+            playerViewport.addEventListener('click', () => {
+                if (swiped) {
+                    swiped = false;
+                    return;
+                }
                 playBtn.click();
                 if (!tapFeedbackIcon) return;
                 tapFeedbackIcon.className = `fa-solid ${isPlaying ? 'fa-play' : 'fa-pause'}`;
