@@ -512,33 +512,36 @@
             // Slide 2
             {
                 id: 2,
-                category: 'COMMAND OVERVIEW',
-                title: '主なコマンド一覧',
+                category: 'OVERVIEW',
+                title: '全体の概要',
                 duration: 19,
-                narration: 'このあとの説明で登場する主なコマンドです。話題が変わったら文脈を捨てるスラッシュクリア、TODO項目を完了まで自動で走らせるスラッシュゴール、環境チェック用のスラッシュドクター、スマホ連携用のスラッシュリモートコントロール、そしてアカウント切替用のスラッシュログインなどが基本になります。',
+                narration: 'このあとの流れです。まず常時稼働させている利用環境、次に日常の対話のしかたと設定の考え方、そして最も重要な TODO.md によるタスク管理、さらにマルチエージェントでの役割分担、最後に現状の課題とまとめ、という順にご紹介します。',
                 render: function() {
                     return `
                         <div class="flex flex-col h-full justify-center px-[3cqw]">
                             <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                                <i class="fa-solid fa-terminal text-lime-400"></i> 主なコマンド一覧
+                                <i class="fa-solid fa-list-ol text-lime-400"></i> 全体の概要
                             </h2>
-                            <div class="grid grid-cols-2 gap-[1.8cqw]">
-                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.8cqw]">
-                                    <div class="text-lime-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.6cqw, 2.0rem);">/clear</div>
-                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.1cqw, 1.55rem);">話題が変わったら文脈を捨てる</div>
+                            <div class="grid grid-cols-2 gap-[1.5cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.6cqw]">
+                                    <div class="text-lime-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">1. 利用環境</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">Raspberry Pi 5 + tmux で常時稼働</div>
                                 </div>
-                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.8cqw]">
-                                    <div class="text-sky-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.6cqw, 2.0rem);">/goal TODO-NNN</div>
-                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.1cqw, 1.55rem);">TODO 項目を完了まで走らせる</div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.6cqw]">
+                                    <div class="text-sky-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">2. 対話のしかた</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">自然な日本語で伝え、設定も AI に書かせる</div>
                                 </div>
-                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.8cqw]">
-                                    <div class="text-lime-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.6cqw, 2.0rem);">/doctor</div>
-                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.1cqw, 1.55rem);">設定の点検 (Anthropic 推奨)</div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.6cqw]">
+                                    <div class="text-lime-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">3. TODO.md 運用</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">タスクを一元管理し、いつでも再開できる</div>
                                 </div>
-                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.8cqw]">
-                                    <div class="text-sky-400 font-mono font-bold mb-[0.5cqw]" style="font-size: clamp(1.15rem, 2.6cqw, 2.0rem);">/rc (/login)</div>
-                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.1cqw, 1.55rem);">スマホアプリから操作・アカウント切り替え</div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.6cqw]">
+                                    <div class="text-sky-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">4. 役割分担</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">マルチエージェントでモデルを使い分ける</div>
                                 </div>
+                            </div>
+                            <div class="mt-[1.5cqw] text-center text-slate-300 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">
+                                5. 現状の課題とまとめ
                             </div>
                         </div>
                     `;
@@ -816,7 +819,7 @@
                 id: 10,
                 category: 'MULTI-AGENT WORKFLOW',
                 title: 'マルチエージェントで役割分担',
-                duration: 20,
+                duration: 19,
                 narration: 'マルチエージェントで役割分担を行っています。全体指揮とレビューには知能の高い Opus を、実装や検証には高速な Sonnet を、日本語校正には Haiku を割り当てています。直接ファイルを編集できるのは main と implementer だけに制限し、コストと精度の最適化を図っています。',
                 render: function() {
                     return `
@@ -1252,7 +1255,10 @@
                 .replace(/ponytail/gi, 'ポニーテール')
                 .replace(/codegraph/gi, 'コードグラフ')
                 .replace(/git worktree/gi, 'ギット ワークツリー')
-                .replace(/auto-mode/gi, 'オートモード');
+                .replace(/auto-mode/gi, 'オートモード')
+                .replace(/考え方/g, 'かんがえかた')
+                .replace(/\bmain\b/gi, 'メイン')
+                .replace(/\bimplementer\b/gi, 'インプリメンター');
         }
 
         // Android/desktop Chrome cut long utterances off after ~15s, so the

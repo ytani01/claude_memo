@@ -24,8 +24,10 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
   `playbackLoop` が `duration` を進め、尽きたら次のスライドへ。
   **`duration` には、Online TTS の音声を 1.4 倍速で再生した実測秒数が
   入っている**（TODO-018 で 17 枚すべて `ffprobe` で測って入れ替えた。
-  合計 317 秒）。進行バーと時間表示は実時間（`deltaTime * playbackRate`）で
-  進め、**読み上げの速度だけが `playbackRate * baseSpeedMultiplier`（1.4）**。
+  合計 316 秒）。**`prepareSpeechText()` の置換表を変えると読み上げの長さも
+  変わるので、当たるスライドの `duration` を測り直す**（TODO-023）。
+  進行バーと時間表示は実時間（`deltaTime * playbackRate`）で進め、
+  **読み上げの速度だけが `playbackRate * baseSpeedMultiplier`（1.4）**。
   時間軸に 1.4 を掛けるとバーだけが先走り、`duration` で頭打ちになって
   読み終わりまで止まる。**スライドの送りは読み上げの終了イベントで起きる**ので、
   音声が `duration` より長ければバーは 100% で待つ。`duration` を待ち時間に
