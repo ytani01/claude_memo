@@ -587,8 +587,8 @@
             {
                 id: 4,
                 title: '【最重要】TODO.md によるタスク管理',
-                duration: 19,
-                narration: '運用の中で最も重要なのが TODO.md によるタスク管理です。作業に着手する前に必ず項目を立てることで、万が一セッションが切れても TODO.md から確実に再開できます。利用者の要望から AI が TODO を起草し、承認後にスラッシュゴールで完走させます。',
+                duration: 23,
+                narration: '運用の中で最も重要なのが TODO.md によるタスク管理です。作業に着手する前に必ず項目を立てることで、万が一セッションが切れても TODO.md から確実に再開できます。利用者の要望から AI が TODO を起草し、承認までの間に壁打ちしながら内容を精査します。承認後はスラッシュゴールで完走させます。',
                 render: function() {
                     return `
                         <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -596,16 +596,16 @@
                                 <i class="fa-solid fa-list-check text-lime-400"></i> 【最重要】TODO.md によるタスク管理
                             </h2>
                             <p class="text-slate-200 mb-[2cqw] font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">着手前に必ず項目を立てるので、セッションが切れても TODO.md から再開できる。</p>
-                            <div class="grid grid-cols-4 gap-[1.5cqw] items-center text-center">
+                            <div class="grid grid-cols-4 gap-[1.5cqw] items-stretch text-center">
                                 <div class="bg-slate-800/80 border border-sky-500/50 p-[1.5cqw] rounded-xl">
                                     <div class="text-sky-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">1. 要望</div>
                                     <div class="text-slate-100 font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">「○○したい」</div>
                                     <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">利用者の一言</div>
                                 </div>
                                 <div class="bg-slate-800/80 border border-lime-500 p-[1.5cqw] rounded-xl shadow-lg shadow-lime-500/10">
-                                    <div class="text-lime-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">2. 起草・承認</div>
+                                    <div class="text-lime-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">2. 起草・壁打ち・承認</div>
                                     <div class="text-lime-400 font-mono font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">TODO.md</div>
-                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">AI起草 / 利用者承認</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">AI起草 &rarr; 壁打ちで精査 &rarr; 承認</div>
                                 </div>
                                 <div class="bg-slate-800/80 border border-sky-500/50 p-[1.5cqw] rounded-xl">
                                     <div class="text-sky-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">3. 完走</div>
@@ -1084,36 +1084,40 @@
             {
                 id: 17,
                 title: 'まとめ',
-                duration: 23,
-                narration: 'まとめです。Raspberry Pi 5 と tmux による常時稼働、こまめなスラッシュクリア、TODO.md への一元管理、役割に応じたモデル分散。このほか、スマホ連携や複数アカウント運用といった便利な使い方もご紹介しました。自己流で手探りですので、ぜひ皆さんのご意見やダメ出しをコメントで教えていただけると嬉しいです。',
+                duration: 24,
+                narration: 'まとめです。Raspberry Pi 5 と tmux による常時稼働、TODO.md への一元管理、役割に応じたモデルの使い分け、AI を縛らずルール作りを重視すること、こまめなスラッシュクリア。このほか、スマホ連携や複数アカウント運用もご紹介しました。自己流ですので、ぜひご意見やダメ出しをコメントで教えてください。',
                 render: function() {
                     return `
                         <div class="flex flex-col h-full justify-center px-[3cqw]">
                             <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
                                 <i class="fa-solid fa-flag-checkered text-lime-400"></i> まとめ
                             </h2>
-                            <div class="space-y-[0.8cqw] text-slate-200 mb-[1.1cqw] font-medium">
-                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-server text-lime-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
-                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>Raspberry Pi 5 + ssh + tmux:</strong> 常時起動環境でいつでも復帰可能</span>
+                            <div class="space-y-[0.6cqw] text-slate-200 mb-[1.1cqw] font-medium">
+                                <div class="bg-slate-800/60 p-[0.8cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-server text-lime-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.4cqw, 1.7rem);"></i>
+                                    <span style="font-size: clamp(0.95rem, 2.0cqw, 1.5rem);"><strong>Raspberry Pi 5 + ssh + tmux:</strong> 常時起動環境でいつでも復帰可能</span>
                                 </div>
-                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-broom text-sky-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
-                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>話題が変わったら /clear:</strong> 一番手軽で最も効果的なトークン節約術</span>
+                                <div class="bg-slate-800/60 p-[0.8cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-list-check text-purple-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.4cqw, 1.7rem);"></i>
+                                    <span style="font-size: clamp(0.95rem, 2.0cqw, 1.5rem);"><strong>TODO.md でタスク管理を集約:</strong> セッションが切れても継続可能</span>
                                 </div>
-                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-handshake text-amber-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
-                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>AI を縛らず、頼って任せる:</strong> 指示の矛盾をなくしルール設定を重視</span>
+                                <div class="bg-slate-800/60 p-[0.8cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-users-gear text-sky-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.4cqw, 1.7rem);"></i>
+                                    <span style="font-size: clamp(0.95rem, 2.0cqw, 1.5rem);"><strong>役割でモデルを使い分ける:</strong> Opus / Sonnet / Haiku を担当ごとに</span>
                                 </div>
-                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-list-check text-purple-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
-                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>TODO.md にすべて集める:</strong> セッションが切れてもスマホから継続</span>
+                                <div class="bg-slate-800/60 p-[0.8cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-handshake text-amber-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.4cqw, 1.7rem);"></i>
+                                    <span style="font-size: clamp(0.95rem, 2.0cqw, 1.5rem);"><strong>AI を縛らず、頼って任せる:</strong> 指示の矛盾をなくしルール設定を重視</span>
                                 </div>
-                                <div class="bg-slate-800/60 p-[0.95cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-toolbox text-teal-400 flex-shrink-0" style="font-size: clamp(1.3rem, 2.6cqw, 1.8rem);"></i>
-                                    <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>その他の便利な使い方:</strong> スマホ連携・複数アカウント・小技も紹介</span>
+                                <div class="bg-slate-800/60 p-[0.8cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-broom text-rose-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.4cqw, 1.7rem);"></i>
+                                    <span style="font-size: clamp(0.95rem, 2.0cqw, 1.5rem);"><strong>話題が変わったら /clear:</strong> 一番手軽で最も効果的なトークン節約術</span>
                                 </div>
-                            </div>
+                                <div class="bg-slate-800/60 p-[0.8cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-toolbox text-teal-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.4cqw, 1.7rem);"></i>
+                                    <span style="font-size: clamp(0.95rem, 2.0cqw, 1.5rem);"><strong>その他の便利な使い方:</strong> スマホ連携・複数アカウント・小技も紹介</span>
+                                </div>
+                                </div>
                             <div class="bg-sky-950/60 border border-sky-500/60 rounded-xl p-[0.8cqw] text-center text-sky-300 font-bold" style="font-size: clamp(0.8rem, 1.8cqw, 1.35rem);">
                                 ※ 自己流です。ぜひご意見・ダメ出しをコメントでお願いします！
                             </div>
