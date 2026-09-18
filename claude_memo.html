@@ -163,10 +163,15 @@
             position: relative;
         }
 
-        /* 字幕は #player-viewport の外に出したので、基準の箱がボーダーの分
-           1px 広がる。その分を margin で戻し、枠内の位置を変更前と揃える。 */
-        #subtitle-banner {
-            margin: 1px;
+        /* 字幕は枠に重ねず、画面幅によらず枠の下へ流す（TODO-035）。
+           通常表示ではクラスの mt-3 だけで足りるので、ここには擬似
+           フルスクリーン中の位置だけを書く。ラッパーがレターボックス
+           そのものなので、top: 100% がそのまま枠の下端になる（暗幕の上）。 */
+        #viewport-stage.is-fullscreen > #subtitle-banner {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
         }
 
         /* 16:9 の外枠（#viewport-frame）は、マウスの PC では素通し。
@@ -200,24 +205,6 @@
                    overflow を触らない（.video-viewport の影が枠で
                    切られてしまうため）。 */
                 overflow: hidden;
-            }
-            /* 字幕は枠の外なので縮小されない。重ねると縮んだ中身を隠すため、
-               枠の下へ流す。 */
-            #subtitle-banner {
-                position: static;
-                margin: 0.75rem 0 0;
-            }
-            /* 擬似フルスクリーン中も同じく枠の下。ラッパーがレターボックス
-               そのものなので、top: 100% がそのまま枠の下端になる（暗幕の上）。
-               #player-viewport のボーダーを打ち消す 1px はここでは要らない。 */
-            #viewport-stage.is-fullscreen > #subtitle-banner {
-                position: absolute;
-                top: 100%;
-                /* Tailwind の bottom-3 が残ると top と挟まれて高さが潰れる */
-                bottom: auto;
-                left: 0;
-                right: 0;
-                margin: 0.75rem 0 0;
             }
             /* Tailwind の relative / p-4 に勝つよう id セレクタで書く */
             #player-viewport {
@@ -342,8 +329,8 @@
                     <!-- Bottom Subtitle / Narration Banner。
                          縮小の対象は #viewport-frame の中だけなので、字幕はその外に
                          置いて等倍のまま読めるようにしている（TODO-001）。
-                         PC では枠に重なり、768px 未満では枠の下へ流れる。 -->
-                    <div id="subtitle-banner" class="z-30 bg-slate-950/95 backdrop-blur border border-sky-500/40 rounded-xl p-3 shadow-2xl flex items-center gap-3 absolute bottom-3 left-4 right-4 hidden">
+                         画面幅によらず枠の下へ流す（TODO-035）。 -->
+                    <div id="subtitle-banner" class="z-30 bg-slate-950/95 backdrop-blur border border-sky-500/40 rounded-xl p-3 shadow-2xl flex items-center gap-3 mt-3 hidden">
                         <div class="flex items-center gap-1 h-6 md:h-7 px-2 bg-slate-900 rounded border border-slate-800 flex-shrink-0 paused" id="wave-container">
                             <div class="wave-bar"></div>
                             <div class="wave-bar"></div>
@@ -356,7 +343,7 @@
                                 <span class="flex items-center gap-1"><i class="fa-solid fa-comment-dots"></i> ナレーション字幕</span>
                                 <span id="audio-status-badge" class="text-xs bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded font-mono">停止中</span>
                             </div>
-                            <p id="caption-text" class="text-sm md:text-base text-slate-100 font-medium leading-relaxed transition-all line-clamp-2 overflow-hidden">
+                            <p id="caption-text" class="text-sm md:text-base text-slate-100 font-medium leading-relaxed transition-all">
                                 ここにナレーションテキストが表示されます...
                             </p>
                         </div>
