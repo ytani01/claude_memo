@@ -11,7 +11,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Urbanist:wght@600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -19,19 +19,8 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        brand: {
-                            dark: '#020617',
-                            card: '#0f172a',
-                            border: '#1e293b',
-                            accent: '#38bdf8',
-                            lime: '#bef264',
-                            sub: '#94a3b8'
-                        }
-                    },
                     fontFamily: {
                         sans: ['Noto Sans JP', 'sans-serif'],
-                        heading: ['Urbanist', 'Noto Sans JP', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace']
                     }
                 }
@@ -60,8 +49,6 @@
             justify-content: space-between;
             container-type: inline-size;
             container-name: viewport;
-            width: 100%;
-            max-width: 100%;
         }
 
         /* タップ/クリックで再生と一時停止を切り替えたときの反応（TODO-005）。
@@ -176,19 +163,15 @@
             position: relative;
         }
 
-        /* 16:9 の外枠。マウスの PC では素通しで、狭い画面とタッチ画面で
-           縮小の土台になる。
-           PC で overflow を触らないのは、.video-viewport の影が枠で
-           切られてしまうため。 */
-        #viewport-frame {
-            width: 100%;
-        }
-
         /* 字幕は #player-viewport の外に出したので、基準の箱がボーダーの分
            1px 広がる。その分を margin で戻し、枠内の位置を変更前と揃える。 */
         #subtitle-banner {
             margin: 1px;
         }
+
+        /* 16:9 の外枠（#viewport-frame）は、マウスの PC では素通し。
+           ブロック要素のまま幅いっぱいに広がるので、ここでの指定は要らない。
+           狭い画面とタッチ画面でだけ、下の @media が縮小の土台にする。 */
 
         /* Mobile: 中身は PC と同じ 960x540 のまま描き、全体を transform で
            縮小する。cqw と clamp() は常に 960px 基準で解決されるので、
@@ -213,7 +196,9 @@
                    margin-inline だけここに置く。 */
                 margin-inline: auto;
                 /* --vp-scale を入れる JS が動かなかったときでも、960px の
-                   中身を枠内に閉じ込めるための保険 */
+                   中身を枠内に閉じ込めるための保険。マウスの PC では
+                   overflow を触らない（.video-viewport の影が枠で
+                   切られてしまうため）。 */
                 overflow: hidden;
             }
             /* 字幕は枠の外なので縮小されない。重ねると縮んだ中身を隠すため、
@@ -257,17 +242,14 @@
                 height: 540px !important;
                 z-index: 1 !important;
             }
-        }
 
-        /* 暗幕と裏のスクロール止めは、幅が狭いときに加えてタッチ画面でも効かせる。
-           横持ちのスマホ（844x390 など）は幅が 768 以上で PC 扱いになるが、
-           フルスクリーン中のボタンは箱の裏で押せず、物理キーボードも無いので、
-           暗幕が出ないと再読み込みしか出口が無くなる（TODO-003）。
-           マウスの PC には掛けない。PC で裏をスクロール禁止にするとスクロール
-           バーが消え、裏のページとレターボックスが横に動く（TODO-003）。
-           なお暗幕の帯は画面の比率で決まり、16:9 ちょうどの画面では 0px に
-           なる。そこでは抜けられないままだが、対応しないと決めた（TODO-003）。 */
-        @media screen and (max-width: 767.98px), screen and (pointer: coarse) {
+            /* 暗幕と裏のスクロール止めも同じ条件。
+               フルスクリーン中のボタンは箱の裏で押せず、物理キーボードも
+               無いので、暗幕が出ないと再読み込みしか出口が無くなる（TODO-003）。
+               マウスの PC には掛けない。PC で裏をスクロール禁止にするとスクロール
+               バーが消え、裏のページとレターボックスが横に動く（TODO-003）。
+               なお暗幕の帯は画面の比率で決まり、16:9 ちょうどの画面では 0px に
+               なる。そこでは抜けられないままだが、対応しないと決めた（TODO-003）。 */
             /* 擬似フルスクリーン中は裏のページをスクロールさせない。 */
             body.fs-lock {
                 overflow: hidden;
@@ -1154,7 +1136,6 @@
         let currentSlideElapsedTime = 0;
         let animationFrameId = null;
         let lastFrameTimestamp = null;
-        let speechActive = false;
         let showCaptions = false; // Subtitles hidden by default
 
         // Base speed multiplier (1.0x in UI corresponds to 1.4x actual speed)
@@ -1191,11 +1172,11 @@
         const totalDurationSeconds = slideData.reduce((acc, curr) => acc + curr.duration, 0);
 
         // Calculate offset start time for each slide
-        const slideStartTimes = [];
         let accumTime = 0;
-        slideData.forEach(slide => {
-            slideStartTimes.push(accumTime);
+        const slideStartTimes = slideData.map(slide => {
+            const start = accumTime;
             accumTime += slide.duration;
+            return start;
         });
 
         // DOM Element Cache
@@ -1298,12 +1279,10 @@
                 fallbackAudioElement.onended = null;
                 fallbackAudioElement.onerror = null;
             }
-            speechActive = false;
         }
 
         function onSlideAudioFinished() {
             if (!isPlaying) return;
-            speechActive = false;
             updateWaveState(true, "朗読完了");
 
             if (slideTransitionTimeout) {
@@ -1390,7 +1369,6 @@
                         }
 
                         utterance.onstart = () => {
-                            speechActive = true;
                             updateWaveState(true, "朗読中 (Web Speech)");
                         };
 
@@ -1404,7 +1382,6 @@
 
                         utterance.onerror = (e) => {
                             console.warn("SpeechSynthesis error, falling back to Online TTS:", e);
-                            speechActive = false;
                             if (finished || runId !== speechRunId) return;
                             finished = true; // 分割した数だけ落ちないように 1 回だけ
                             speakOnlineTTS(textToSpeak);
@@ -1593,15 +1570,12 @@
         }
 
         function initPlaylist() {
-            playlistItemsContainer.innerHTML = '';
-            playlistItems.length = 0;
             totalSlides.textContent = slideData.length;
             totalTimeDisplay.textContent = formatTime(totalDurationSeconds);
 
             slideData.forEach((slide, idx) => {
                 const btn = document.createElement('button');
                 btn.className = PLAYLIST_ITEM_CLASS;
-                btn.id = `playlist-item-${idx}`;
                 btn.innerHTML = `
                     <div class="flex items-center gap-2.5 truncate pr-2">
                         <span class="font-mono text-[10px] ${idx === currentIndex ? 'text-lime-400' : 'text-slate-500'}">${String(slide.id).padStart(2, '0')}</span>
@@ -1661,32 +1635,21 @@
             // Toggle Subtitle Banner visibility
             toggleCaptionBtn.addEventListener('click', () => {
                 showCaptions = !showCaptions;
-                if (showCaptions) {
-                    subtitleBanner.classList.remove('hidden');
-                    toggleCaptionBtn.classList.remove('text-slate-400');
-                    toggleCaptionBtn.classList.add('text-lime-400', 'border-lime-500/50');
-                    captionIcon.classList.remove('text-slate-400');
-                    captionIcon.classList.add('text-lime-400');
-                } else {
-                    subtitleBanner.classList.add('hidden');
-                    toggleCaptionBtn.classList.add('text-slate-400');
-                    toggleCaptionBtn.classList.remove('text-lime-400', 'border-lime-500/50');
-                    captionIcon.classList.add('text-slate-400');
-                    captionIcon.classList.remove('text-lime-400');
-                }
+                subtitleBanner.classList.toggle('hidden', !showCaptions);
+                toggleCaptionBtn.classList.toggle('text-slate-400', !showCaptions);
+                toggleCaptionBtn.classList.toggle('text-lime-400', showCaptions);
+                toggleCaptionBtn.classList.toggle('border-lime-500/50', showCaptions);
+                captionIcon.classList.toggle('text-slate-400', !showCaptions);
+                captionIcon.classList.toggle('text-lime-400', showCaptions);
             });
 
             // Toggle Audio Engine Mode (Web Speech API <-> Online Voice)
             toggleVoiceEngineBtn.addEventListener('click', () => {
-                if (voiceEngineMode === 'speech') {
-                    voiceEngineMode = 'online';
-                    speechStatusIndicator.textContent = "Online Voice";
-                    speechStatusIndicator.className = "text-sky-400 font-bold font-mono";
-                } else {
-                    voiceEngineMode = 'speech';
-                    speechStatusIndicator.textContent = "Web Speech API";
-                    speechStatusIndicator.className = "text-lime-400 font-bold font-mono";
-                }
+                voiceEngineMode = voiceEngineMode === 'speech' ? 'online' : 'speech';
+                const online = voiceEngineMode === 'online';
+                speechStatusIndicator.textContent = online ? "Online Voice" : "Web Speech API";
+                speechStatusIndicator.className =
+                    `${online ? 'text-sky-400' : 'text-lime-400'} font-bold font-mono`;
                 if (isPlaying) {
                     speakCurrentNarration();
                 }
@@ -1712,10 +1675,8 @@
             // Speed multiplier options with 1.0x set as the new baseline (fast standard speed)
             const speedOptions = [0.75, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0];
             speedBtn.addEventListener('click', () => {
-                let nextIdx = speedOptions.indexOf(playbackRate) + 1;
-                if (nextIdx >= speedOptions.length || nextIdx < 0) {
-                    nextIdx = 0;
-                }
+                // indexOf が -1（一覧に無い値）でも先頭に戻る
+                const nextIdx = (speedOptions.indexOf(playbackRate) + 1) % speedOptions.length;
                 playbackRate = speedOptions[nextIdx];
 
                 const label = Number.isInteger(playbackRate) ? `${playbackRate}.0x` : `${playbackRate}x`;
@@ -1892,8 +1853,8 @@
         // （TODO-011）。上端を実測するのは、ヘッダーの高さが幅で変わり、
         // 640〜712px の帯では折り返して伸びるため。
         // max-width はインラインで入るのでメディアクエリの外にも効いてしまう。
-        // 同じ条件を CSS の @media 2 か所にも書いてあるので、片方を変えたら
-        // 全部直すこと。PC では空にする。
+        // 同じ条件を CSS の @media にも書いてあるので、片方を変えたら
+        // 両方直すこと。PC では空にする。
         // フルスクリーン中は枠自体がレターボックスで既に画面に収まっており、
         // 上限を重ねると二重に縮むので掛けない。
         function setupViewportScale() {
