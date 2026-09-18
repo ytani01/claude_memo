@@ -423,17 +423,21 @@
                                 <span class="hidden sm:inline">字幕</span>
                             </button>
 
+                            <!-- Speed Selector -->
+                            <select id="speed-select" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-sky-400 font-mono font-bold px-3 py-2 rounded-lg transition cursor-pointer" title="再生速度">
+                                <option value="0.75">速度 0.75x</option>
+                                <option value="1" selected>速度 1.0x</option>
+                                <option value="1.25">速度 1.25x</option>
+                                <option value="1.5">速度 1.5x</option>
+                                <option value="2">速度 2.0x</option>
+                            </select>
+
                             <!-- Pause After Narration -->
                             <select id="pause-select" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-sky-400 font-mono font-bold px-3 py-2 rounded-lg transition cursor-pointer" title="ナレーション終了後の待ち時間">
                                 <option value="1">待ち 1秒</option>
                                 <option value="2" selected>待ち 2秒</option>
                                 <option value="3">待ち 3秒</option>
                             </select>
-
-                            <!-- Speed Selector -->
-                            <button id="speed-btn" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-sky-400 font-mono font-bold px-3 py-2 rounded-lg transition">
-                                1.0x
-                            </button>
 
                             <!-- Mute Button -->
                             <button id="mute-btn" class="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm border border-slate-700">
@@ -1209,7 +1213,7 @@
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const restartBtn = document.getElementById('restart-btn');
-        const speedBtn = document.getElementById('speed-btn');
+        const speedSelect = document.getElementById('speed-select');
         const pauseSelect = document.getElementById('pause-select');
         const muteBtn = document.getElementById('mute-btn');
         const muteIcon = document.getElementById('mute-icon');
@@ -1725,15 +1729,9 @@
                 if (isPlaying) playPresentation();
             });
 
-            // Speed multiplier options with 1.0x set as the new baseline (fast standard speed)
-            const speedOptions = [0.75, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0];
-            speedBtn.addEventListener('click', () => {
-                // indexOf が -1（一覧に無い値）でも先頭に戻る
-                const nextIdx = (speedOptions.indexOf(playbackRate) + 1) % speedOptions.length;
-                playbackRate = speedOptions[nextIdx];
-
-                const label = Number.isInteger(playbackRate) ? `${playbackRate}.0x` : `${playbackRate}x`;
-                speedBtn.textContent = label;
+            // 1.0x が標準（実際は baseSpeedMultiplier を掛けた速さ）
+            speedSelect.addEventListener('change', () => {
+                playbackRate = Number(speedSelect.value);
                 if (isPlaying) {
                     speakCurrentNarration();
                 }
