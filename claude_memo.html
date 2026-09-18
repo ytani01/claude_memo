@@ -1155,8 +1155,34 @@
         let showCaptions = false; // Subtitles hidden by default
 
         // Base speed multiplier (1.0x in UI corresponds to 1.4x actual speed)
-        const baseSpeedMultiplier = 1.4;
-        const getEffectiveSpeed = () => playbackRate * baseSpeedMultiplier;
+        const BASE_SPEED_MULTIPLIER = 1.4;
+        const getEffectiveSpeed = () => playbackRate * BASE_SPEED_MULTIPLIER;
+
+        const MS_PER_SECOND = 1000;
+        const SECONDS_PER_MINUTE = 60;
+        // 進行バーの幅（%）の上限
+        const PROGRESS_MAX_PERCENT = 100;
+        // スライドの原寸（CSS の 16:9 の幅）。縮小率の基準
+        const SLIDE_BASE_WIDTH_PX = 960;
+        const SLIDE_ASPECT_RATIO = 16 / 9;
+
+        // SpeechSynthesis も Audio も rate はこの辺りが上限（超えると無視される）
+        const MAX_SPEECH_RATE = 2.0;
+        // Web Speech はほんの少しゆったりしたテンポにする
+        const WEB_SPEECH_RATE_FACTOR = 0.95;
+        // 低めのトーンにするためのピッチ
+        const WEB_SPEECH_PITCH = 0.85;
+        // getVoices() が揃うのを待つための、発話開始前の遅延
+        const SPEECH_START_DELAY_MS = 50;
+        // SpeechSynthesis が onend を返さないときの安全タイマー（TODO-019）。
+        // 読み上げの所要は「文字数 ÷ 毎秒の文字数 ÷ 速度」で見積もる
+        const SPEECH_SAFETY_MIN_MS = 6000;
+        const SPEECH_CHARS_PER_SECOND = 4.5;
+        const SPEECH_SAFETY_MARGIN_MS = 3000;
+        // Online TTS の onended が来ないときの受け皿に足す余裕
+        const TTS_END_MARGIN_MS = 3000;
+        // Google の translate_tts が 1 回で読める長さの上限
+        const TTS_MAX_CHARS = 180;
 
         let voiceEngineMode = 'online'; // 'online' or 'speech'
         let fallbackAudioElement = null;
@@ -1287,8 +1313,8 @@
 
         // Format seconds to M:SS
         function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
+            const mins = Math.floor(seconds / SECONDS_PER_MINUTE);
+            const secs = Math.floor(seconds % SECONDS_PER_MINUTE);
             return `${mins}:${String(secs).padStart(2, '0')}`;
         }
 
@@ -1328,7 +1354,7 @@
                 slideTransitionTimeout = null;
             }
 
-            const remainMs = Math.max(0, pauseSeconds * 1000 - (performance.now() - pauseStartedAt));
+            const remainMs = Math.max(0, pauseSeconds * MS_PER_SECOND - (performance.now() - pauseStartedAt));
             slideTransitionTimeout = setTimeout(() => {
                 slideTransitionTimeout = null;
                 pauseStartedAt = null;
@@ -1353,7 +1379,7 @@
             if (isMuted) {
                 updateWaveState(false, "消音中");
                 const slide = slideData[currentIndex];
-                const muteWaitMs = (slide.duration / playbackRate) * 1000;
+                const muteWaitMs = (slide.duration / playbackRate) * MS_PER_SECOND;
                 slideTransitionTimeout = setTimeout(() => {
                     onSlideAudioFinished();
                 }, muteWaitMs);
@@ -1401,8 +1427,8 @@
 
                         const utterance = new SpeechSynthesisUtterance(chunks[i]);
                         utterance.lang = 'ja-JP';
-                        utterance.rate = Math.min(2.0, getEffectiveSpeed() * 0.95); // ほんの少しゆったりとしたテンポ感
-                        utterance.pitch = 0.85; // ピッチを0.85に下げ、しっとりとした落ち着きと色気のある低めのトーンに調整
+                        utterance.rate = Math.min(MAX_SPEECH_RATE, getEffectiveSpeed() * WEB_SPEECH_RATE_FACTOR);
+                        utterance.pitch = WEB_SPEECH_PITCH;
                         utterance.volume = 1.0;
                         if (femaleJaVoice) {
                             utterance.voice = femaleJaVoice;
@@ -1433,7 +1459,9 @@
                     speakChunk(0);
 
                     // Safety timeout in case SpeechSynthesis hangs without firing onend
-                    const safetyTime = Math.max(6000, (textToSpeak.length / 4.5 / getEffectiveSpeed()) * 1000 + 3000);
+                    const safetyTime = Math.max(SPEECH_SAFETY_MIN_MS,
+                        (textToSpeak.length / SPEECH_CHARS_PER_SECOND / getEffectiveSpeed())
+                        * MS_PER_SECOND + SPEECH_SAFETY_MARGIN_MS);
                     slideTransitionTimeout = setTimeout(() => {
                         if (!finished && isPlaying && runId === speechRunId) {
                             console.warn("Safety timeout triggered for speech end");
@@ -1441,7 +1469,7 @@
                         }
                     }, safetyTime);
 
-                }, 50);
+                }, SPEECH_START_DELAY_MS);
             } else {
                 speakOnlineTTS(textToSpeak);
             }
@@ -1452,7 +1480,7 @@
             const runId = speechRunId;
             updateWaveState(true, "朗読中 (Online Voice)");
 
-            const cleanText = text.substring(0, 180);
+            const cleanText = text.substring(0, TTS_MAX_CHARS);
             const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ja&client=tw-ob&q=${encodeURIComponent(cleanText)}`;
 
             if (!fallbackAudioElement) {
@@ -1465,7 +1493,7 @@
             fallbackAudioElement.onloadedmetadata = null;
             fallbackAudioElement.src = ttsUrl;
             fallbackAudioElement.load();
-            fallbackAudioElement.playbackRate = Math.min(2.0, getEffectiveSpeed());
+            fallbackAudioElement.playbackRate = Math.min(MAX_SPEECH_RATE, getEffectiveSpeed());
 
             let finished = false;
             const handleEnd = () => {
@@ -1492,21 +1520,23 @@
 
             fallbackAudioElement.onerror = (err) => {
                 console.warn("Online Audio TTS error:", err);
-                setEndTimeout((slideData[currentIndex].duration / playbackRate) * 1000);
+                setEndTimeout((slideData[currentIndex].duration / playbackRate) * MS_PER_SECOND);
             };
 
             // onended が来ないとき（通信が途中で止まった等）の受け皿。
             // まずは原稿の想定秒数で張り、音声の実長が分かったら張り直す
-            setEndTimeout((slideData[currentIndex].duration / playbackRate) * 1000 + 3000);
+            setEndTimeout((slideData[currentIndex].duration / playbackRate)
+                * MS_PER_SECOND + TTS_END_MARGIN_MS);
             fallbackAudioElement.onloadedmetadata = () => {
                 const audioSec = fallbackAudioElement.duration;
                 if (!isFinite(audioSec) || audioSec <= 0) return;
-                setEndTimeout((audioSec / fallbackAudioElement.playbackRate) * 1000 + 3000);
+                setEndTimeout((audioSec / fallbackAudioElement.playbackRate)
+                    * MS_PER_SECOND + TTS_END_MARGIN_MS);
             };
 
             fallbackAudioElement.play().catch(e => {
                 console.warn("Audio play blocked by browser interaction policy:", e);
-                setEndTimeout((slideData[currentIndex].duration / playbackRate) * 1000);
+                setEndTimeout((slideData[currentIndex].duration / playbackRate) * MS_PER_SECOND);
             });
         }
 
@@ -1547,7 +1577,9 @@
                 totalDurationSeconds,
                 slideStartTimes[currentIndex] + currentSlideElapsedTime
             );
-            const progressPct = Math.min(100, (currentTotalSecs / totalDurationSeconds) * 100);
+            const progressPct = Math.min(
+                PROGRESS_MAX_PERCENT,
+                (currentTotalSecs / totalDurationSeconds) * PROGRESS_MAX_PERCENT);
 
             progressBar.style.width = `${progressPct}%`;
             progressThumb.style.left = `${progressPct}%`;
@@ -1568,11 +1600,11 @@
                 lastFrameTimestamp = timestamp;
             }
 
-            const deltaTime = (timestamp - lastFrameTimestamp) / 1000;
+            const deltaTime = (timestamp - lastFrameTimestamp) / MS_PER_SECOND;
             lastFrameTimestamp = timestamp;
 
             // 時間軸は実時間。duration には Online TTS の音声を 1.4 倍速で
-            // 再生した実測秒数が入っているので、ここで baseSpeedMultiplier を
+            // 再生した実測秒数が入っているので、ここで BASE_SPEED_MULTIPLIER を
             // 掛けるとバーだけが先走って duration で頭打ちになる（TODO-018）
             currentSlideElapsedTime += deltaTime * playbackRate;
 
@@ -1735,7 +1767,7 @@
                 if (isPlaying) playPresentation();
             });
 
-            // 1.0x が標準（実際は baseSpeedMultiplier を掛けた速さ）
+            // 1.0x が標準（実際は BASE_SPEED_MULTIPLIER を掛けた速さ）
             speedSelect.addEventListener('change', () => {
                 playbackRate = Number(speedSelect.value);
                 if (isPlaying) {
@@ -1938,10 +1970,11 @@
                 frame.style.maxWidth = capped
                     ? Math.max(0, window.innerHeight
                         - (frame.getBoundingClientRect().top + window.scrollY))
-                        * (16 / 9) + 'px'
+                        * SLIDE_ASPECT_RATIO + 'px'
                     : '';
                 frame.style.setProperty(
-                    '--vp-scale', frame.getBoundingClientRect().width / 960);
+                    '--vp-scale',
+                    frame.getBoundingClientRect().width / SLIDE_BASE_WIDTH_PX);
             };
             update();
             new ResizeObserver(update).observe(frame);
