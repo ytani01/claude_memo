@@ -16,19 +16,30 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
 自動再生するページ。HTML → `slideData` → 再生ロジック の 3 段構成で、すべて
 `claude_memo.html` の中にある。
 
-- **`slideData`**（439 行あたり〜）: スライド 17 枚の配列。1 要素が
+- **`slideData`**（473 行あたり〜）: スライド 17 枚の配列。1 要素が
   `{ id, category, title, duration, narration, render() }`。`render()` は
   Tailwind クラス付きの HTML 文字列を返す関数で、`slide-canvas` に差し込まれる。
   スライドの追加・修正はここだけを触る
-- **再生ロジック**（1098 行あたり〜）: `requestAnimationFrame` の
-  `playbackLoop` が `duration` を進め、尽きたら次のスライドへ。実速度は
-  `playbackRate * baseSpeedMultiplier`（1.4）
+- **再生ロジック**（1131 行あたり〜）: `requestAnimationFrame` の
+  `playbackLoop` が `duration` を進め、尽きたら次のスライドへ。
+  **`duration` には、Online TTS の音声を 1.4 倍速で再生した実測秒数が
+  入っている**（TODO-018 で 17 枚すべて `ffprobe` で測って入れ替えた。
+  合計 317 秒）。進行バーと時間表示は実時間（`deltaTime * playbackRate`）で
+  進め、**読み上げの速度だけが `playbackRate * baseSpeedMultiplier`（1.4）**。
+  時間軸に 1.4 を掛けるとバーだけが先走り、`duration` で頭打ちになって
+  読み終わりまで止まる。**スライドの送りは読み上げの終了イベントで起きる**ので、
+  音声が `duration` より長ければバーは 100% で待つ。`duration` を待ち時間に
+  使うのは消音中と、音声が鳴らせなかったとき（`onerror`・`play()` の拒否）だけ。
+  **Web Speech に切り替えると音声の長さが変わるので、バーとはずれる**
 - **読み上げ**: 2 系統を `toggle-voice-engine-btn` で切り替える。
   `speech` = Web Speech API（`SpeechSynthesisUtterance`）、
   `online` = Google Translate TTS の URL を `Audio` で再生（180 文字で切る）。
   既定は `online`。
-  どちらも読み終わりのイベントが来ないことがあるので、`duration` から
-  計算した安全タイマーで次へ進める作りになっている
+  Web Speech は読み終わりのイベントが来ないことがあるので、**文字数**から
+  計算した安全タイマー（`textToSpeak.length / 4.5 / getEffectiveSpeed()`）で
+  次へ進める。**Online TTS 側には安全タイマーが無い**（`onended`・`onerror`・
+  `play()` の拒否だけ）。通信が途中で止まると読み終わりのイベントが来ず、
+  そこで止まったままになる（TODO-019）
 
 ## 触るときの注意
 
@@ -77,7 +88,8 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
 - **スライド枚数は 2 か所にある。** `slideData` を増減したら、420 行の
   `playlist-count`（`17 Slides`）も直す。`total-slides` の方は
   `initPlaylist()` が `slideData.length` で上書きするので触らなくてよい
-- `total-time-display` の初期値 `3:15` も同様の直書き（再生開始後に上書きされる）
+- `total-time-display` の初期値は `--:--`。`initPlaylist()` が
+  `duration` の合計で上書きするので、値を直書きしない（TODO-018）
 - `narration` は `prepareSpeechText()` を通してから読み上げられる。
   記号や英単語の読みがおかしいときはここを見る
 - **Online TTS の `Audio` 要素（`fallbackAudioElement`）は 1 個を使い回す。**
