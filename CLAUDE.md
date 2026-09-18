@@ -4,7 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 構成
 
-`claude_memo.html` 1 ファイルだけ。ビルド、依存関係のインストール、テストは無い。
+`claude_memo.html` 1 ファイルと、`tools/` の補助スクリプトだけ。
+ビルド、依存関係のインストール、テストは無い。
 Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインでは崩れる）。
 
 配置場所が `public_html/` なので、このファイルがそのまま公開される。
@@ -17,7 +18,7 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
 `claude_memo.html` の中にある。
 
 - **`slideData`**（473 行あたり〜）: スライド 17 枚の配列。1 要素が
-  `{ id, category, title, duration, narration, render() }`。`render()` は
+  `{ id, title, duration, narration, render() }`。`render()` は
   Tailwind クラス付きの HTML 文字列を返す関数で、`slide-canvas` に差し込まれる。
   スライドの追加・修正はここだけを触る
 - **再生ロジック**（1131 行あたり〜）: `requestAnimationFrame` の
@@ -26,6 +27,10 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
   入っている**（TODO-018 で 17 枚すべて `ffprobe` で測って入れ替えた。
   合計 316 秒）。**`prepareSpeechText()` の置換表を変えると読み上げの長さも
   変わるので、当たるスライドの `duration` を測り直す**（TODO-023）。
+  **測るには `tools/measure-duration.py` を使う**（`tools/measure-duration.py 2 17`、
+  案の下見は `--text`）。**このスクリプトは `prepareSpeechText()` の置換表と
+  `TTS_MAX_CHARS`・`BASE_SPEED_MULTIPLIER` を写しているので、
+  そちらを直したら一緒に直す**（TODO-030）。
   進行バーと時間表示は実時間（`deltaTime * playbackRate`）で進め、
   **読み上げの速度だけが `playbackRate * baseSpeedMultiplier`（1.4）**。
   時間軸に 1.4 を掛けるとバーだけが先走り、`duration` で頭打ちになって
