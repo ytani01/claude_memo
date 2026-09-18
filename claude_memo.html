@@ -477,8 +477,8 @@
             {
                 id: 1,
                 title: '私の Claude Code の使い方',
-                duration: 16,
-                narration: 'みなさんこんにちは。常時起動しているラズベリーパイに、出先のスマホから一言投げるだけで、タスクが最後まで進んでいきます。今回は、私が実践している Claude Code の使い方と工夫を、自己流の一例としてご紹介します。',
+                duration: 19,
+                narration: 'みなさんこんにちは。ネット上の情報をもとにした自己流の一例ですが、私が Claude Code をどう使っているかをご紹介します。中心になるのは、TODO.md でタスクを管理するやり方です。そのほか、環境の作り方や役割分担、細かい工夫までまとめました。',
                 render: function() {
                     return `
                         <div class="flex flex-col items-start justify-center h-full px-[4cqw] py-[1.5cqw] space-y-[1.5cqw]">
@@ -489,12 +489,9 @@
                                 私の <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-lime-400">Claude Code</span> の使い方
                             </h1>
                             <p class="text-slate-200 font-medium leading-relaxed" style="font-size: clamp(1.15rem, 2.8cqw, 2.1rem);">
-                                常時起動の Raspberry Pi に、出先のスマホから一言。<br>それだけでタスクが最後まで進みます。
+                                ネット情報をもとに、自分なりに試行錯誤している方法について
                             </p>
-                            <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl px-[2cqw] py-[1.2cqw] flex items-center gap-[1.2cqw] mt-[0.8cqw]">
-                                <i class="fa-solid fa-circle-info text-sky-400" style="font-size: clamp(1.1rem, 2.4cqw, 1.8rem);"></i>
-                                <span class="text-slate-200 font-medium" style="font-size: clamp(0.95rem, 2cqw, 1.45rem);">ネット上の情報をもとにした自己流の一例です | 2026-09</span>
-                            </div>
+                            <div class="text-slate-400 font-medium mt-[0.8cqw]" style="font-size: clamp(0.8rem, 1.6cqw, 1.15rem);">2026-09</div>
                         </div>
                     `;
                 }
@@ -503,8 +500,8 @@
             {
                 id: 2,
                 title: '全体の概要',
-                duration: 19,
-                narration: 'このあとの流れです。常時稼働させている利用環境、日常の対話のしかたと設定の考え方、最も重要な TODO.md によるタスク管理、マルチエージェントでの役割分担、その他の便利な使い方、そして現状の課題とまとめ、の順にご紹介します。',
+                duration: 21,
+                narration: 'このあとの流れです。まず、常時稼働させている利用環境。続いて、最も重要な TODO.md によるタスク管理と、マルチエージェントでの役割分担。そのあとに、日々の基本的な使い方と、その他の工夫。最後に、現状の課題とまとめ、の順にご紹介します。',
                 render: function() {
                     return `
                         <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -517,24 +514,24 @@
                                     <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">Raspberry Pi 5 + tmux で常時稼働</div>
                                 </div>
                                 <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.3cqw]">
-                                    <div class="text-sky-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">2. 対話のしかた</div>
-                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">自然な日本語で伝え、設定も AI に書かせる</div>
-                                </div>
-                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.3cqw]">
-                                    <div class="text-lime-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">3. TODO.md 運用</div>
+                                    <div class="text-sky-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">2. TODO.md 運用【最重要】</div>
                                     <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">タスクを一元管理し、いつでも再開できる</div>
                                 </div>
                                 <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.3cqw]">
-                                    <div class="text-sky-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">4. 役割分担</div>
+                                    <div class="text-lime-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">3. 役割分担</div>
                                     <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">マルチエージェントでモデルを使い分ける</div>
                                 </div>
                                 <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.3cqw]">
-                                    <div class="text-lime-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">5. その他の便利な使い方</div>
-                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">スマホ連携、複数アカウント、小技</div>
+                                    <div class="text-sky-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">4. 基本的な使い方</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">自然な日本語、設定も AI に、/clear、plugin と MCP、スマホ連携</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.3cqw]">
+                                    <div class="text-lime-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">5. その他の工夫</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">複数アカウント運用、Codex との共存</div>
                                 </div>
                                 <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.3cqw]">
                                     <div class="text-sky-400 font-bold mb-[0.4cqw]" style="font-size: clamp(1.05rem, 2.4cqw, 1.8rem);">6. 現状の課題とまとめ</div>
-                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">残っている悩みと、運用スタイルの総括</div>
+                                    <div class="text-slate-100 font-medium" style="font-size: clamp(0.9rem, 2.0cqw, 1.45rem);">現状の課題と、運用スタイルの総括</div>
                                 </div>
                             </div>
                         </div>
@@ -589,6 +586,159 @@
             // Slide 4
             {
                 id: 4,
+                title: '【最重要】TODO.md によるタスク管理',
+                duration: 19,
+                narration: '運用の中で最も重要なのが TODO.md によるタスク管理です。作業に着手する前に必ず項目を立てることで、万が一セッションが切れても TODO.md から確実に再開できます。利用者の要望から AI が TODO を起草し、承認後にスラッシュゴールで完走させます。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.2cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-list-check text-lime-400"></i> 【最重要】TODO.md によるタスク管理
+                            </h2>
+                            <p class="text-slate-200 mb-[2cqw] font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">着手前に必ず項目を立てるので、セッションが切れても TODO.md から再開できる。</p>
+                            <div class="grid grid-cols-4 gap-[1.5cqw] items-center text-center">
+                                <div class="bg-slate-800/80 border border-sky-500/50 p-[1.5cqw] rounded-xl">
+                                    <div class="text-sky-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">1. 要望</div>
+                                    <div class="text-slate-100 font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">「○○したい」</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">利用者の一言</div>
+                                </div>
+                                <div class="bg-slate-800/80 border border-lime-500 p-[1.5cqw] rounded-xl shadow-lg shadow-lime-500/10">
+                                    <div class="text-lime-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">2. 起草・承認</div>
+                                    <div class="text-lime-400 font-mono font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">TODO.md</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">AI起草 / 利用者承認</div>
+                                </div>
+                                <div class="bg-slate-800/80 border border-sky-500/50 p-[1.5cqw] rounded-xl">
+                                    <div class="text-sky-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">3. 完走</div>
+                                    <div class="text-slate-100 font-mono font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">/goal</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">完了まで自動走破</div>
+                                </div>
+                                <div class="bg-slate-800/80 border border-slate-700 p-[1.5cqw] rounded-xl">
+                                    <div class="text-slate-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">4. 保存</div>
+                                    <div class="text-slate-300 font-mono my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">archives/</div>
+                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">決着・目次保存</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 5
+            {
+                id: 5,
+                title: 'TODO.md 運用の具体ルール',
+                duration: 18,
+                narration: 'TODO.md 運用のルールとしては、大きな作業も小さな作業も例外なくすべて項目化します。そしてスラッシュゴールで一気に完走させます。ファイルを無駄に分割せず TODO.md 一本に集約し、運用のルール自体も AI と相談しながらブラッシュアップしていきます。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-clipboard-list text-lime-400"></i> TODO.md 運用の具体ルール
+                            </h2>
+                            <div class="space-y-[1.2cqw] text-slate-200 font-medium">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-check-double text-lime-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>すべての作業を例外なく項目化:</strong> 大小問わず必ず TODO に起草</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-person-running text-sky-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong class="font-mono text-sky-400">/goal TODO-NNN</strong> で完了まで止まらず走らせる</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-file text-amber-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>ファイル分割をしない:</strong> plan.md や task.md に分けず TODO.md 1本に集約</div>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
+                                    <i class="fa-solid fa-seedling text-purple-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
+                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>ルール自体も AI と直す:</strong> <span class="font-mono bg-slate-900 px-[0.5cqw] py-[0.1cqw] rounded text-slate-200" style="font-size: clamp(0.85rem, 1.7cqw, 1.25rem);">~/.claude/CLAUDE.md</span> へ自動反映</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 6
+            {
+                id: 6,
+                title: 'マルチエージェントで役割分担',
+                duration: 19,
+                narration: 'マルチエージェントで役割分担を行っています。全体指揮とレビューには知能の高い Opus を、実装や検証には高速な Sonnet を、日本語校正には Haiku を割り当てています。直接ファイルを編集できるのは main と implementer だけに制限し、コストと精度の最適化を図っています。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-network-wired text-lime-400"></i> マルチエージェントで役割分担
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[1.8cqw] items-center">
+                                <div class="bg-sky-950/60 border border-sky-500/60 p-[2cqw] rounded-xl text-center">
+                                    <div class="text-sky-400 font-bold mb-[0.6cqw]" style="font-size: clamp(1.25rem, 2.6cqw, 1.9rem);">main (Opus / リーダー役)</div>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.0cqw, 1.45rem);">割り振り / 進行管理 / 最終報告<br><span class="text-lime-400 font-bold mt-[0.4cqw] inline-block">※ リポジトリ編集権限あり</span></p>
+                                </div>
+                                <div class="space-y-[1cqw]">
+                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
+                                        <span><strong class="text-lime-400">implementer</strong> (Sonnet)</span>
+                                        <span class="text-slate-200">実装・修正 (編集権限あり)</span>
+                                    </div>
+                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
+                                        <span><strong class="text-sky-400">reviewer</strong> (Opus)</span>
+                                        <span class="text-slate-200">コードをレビュー</span>
+                                    </div>
+                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
+                                        <span><strong class="text-lime-400">verifier</strong> (Sonnet)</span>
+                                        <span class="text-slate-200">動かして動作検証</span>
+                                    </div>
+                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
+                                        <span><strong class="text-rose-400">wording</strong> (Haiku)</span>
+                                        <span class="text-slate-200">日本語に校正</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 7
+            {
+                id: 7,
+                title: 'TODO.md の実際の記述例',
+                duration: 25,
+                narration: 'こちらが TODO.md の実際の記述例です。タスク管理と役割分担を組み合わせた実例になっています。ヘッダー部分に残数の管理状況や次回発行IDを記録し、タスクごとに担当エージェント、実施する具体的なステップ、ツールによる検証結果まで明記します。決着したタスクはアーカイブファイルへ集約し、コンテキスト量を最小限に保ちます。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.3rem, 2.8cqw, 2.1rem);">
+                                <i class="fa-solid fa-file-lines text-lime-400"></i> TODO.md の実際の記述例
+                            </h2>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-[1.4cqw] font-mono text-slate-200 leading-normal space-y-[0.7cqw] overflow-hidden shadow-inner" style="font-size: clamp(0.82rem, 1.75cqw, 1.3cqw);">
+                                <div class="text-sky-400 font-bold border-b border-slate-800 pb-[0.4cqw] flex justify-between items-center">
+                                    <span># TODO.md - Claude Code Task Board</span>
+                                    <span class="text-slate-400 font-normal" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">v2.4</span>
+                                </div>
+                                <div class="text-slate-300" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">ステータス: 進行中 (残1件 / 累計 55 件完了) · 次回 ID: TODO-057</div>
+                                
+                                <div class="text-lime-400 font-bold pt-[0.2cqw]">## [進行中] TODO-056 モジュール構成とクラス構成の刷新</div>
+                                <div class="text-sky-300 bg-slate-900/80 px-[0.7cqw] py-[0.15cqw] rounded border border-slate-800 inline-block" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">
+                                    担当: main (Opus/設計) &rarr; implementer (Sonnet/実装) &rarr; verifier (Sonnet/検証)
+                                </div>
+                                
+                                <div class="text-slate-200 pl-[0.8cqw] space-y-[0.4cqw]">
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-lime-400 font-bold">[x]</span> <span>責務・依存関係の抽出と設計書作成 (<code class="text-amber-300">docs/design-4.md</code>)</span></div>
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-lime-400 font-bold">[x]</span> <span>インターフェース定義とリファクタリング実施 (<code class="text-sky-300">pyright-lsp</code> にて型検証)</span></div>
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-amber-400 font-bold">[/]</span> <span>単体テスト実行と結果検証 (<code class="text-lime-300 font-bold">pytest tests/ --cov</code>)</span></div>
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-slate-400">[ ]</span> <span>旧 API 呼び出し箇所の追随修正 (<code class="text-amber-300">src/</code> 配下 12 箇所)</span></div>
+                                </div>
+
+                                <div class="text-slate-300 font-bold pt-[0.2cqw] border-t border-slate-800/80">## 完了済みアーカイブ</div>
+                                <div class="text-slate-400 pl-[0.8cqw]" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">
+                                    <div>- TODO-001 ~ TODO-055: <span class="underline text-slate-300">archives/todo/2026-09-history.md</span> へ移動・集約済み</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 8
+            {
+                id: 8,
                 title: '自然な日本語で対話する',
                 duration: 19,
                 narration: '対話は「○○したい」とシンプルに伝えるだけで十分です。プロンプトをガチガチに作り込む必要はなく、基本は auto-mode で AI に任せます。足りない情報は AI から質問してくれます。プロンプトエンジニアリングよりも、共通のルール作りが重要だと感じています。',
@@ -619,9 +769,42 @@
                     `;
                 }
             },
-            // Slide 5
+            // Slide 9
             {
-                id: 5,
+                id: 9,
+                title: 'AI の設定も AI にやってもらう',
+                duration: 19,
+                narration: 'CLAUDE.md などの設定ファイルは、人間が手で編集しないようにしています。人間が書いた曖昧さや矛盾がそのままハルシネーションの原因になるため、修正も AI に指示して書かせます。プラグインや MCP の設定も任せつつ、入れ過ぎに注意してスラッシュドクターで点検しています。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-sliders text-lime-400"></i> AI の設定も AI にやってもらう
+                            </h2>
+                            <div class="grid grid-cols-3 gap-[2cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
+                                    <div class="text-sky-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-file-code"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">CLAUDE.md 自作禁止</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">人間が書いた矛盾がハルシネーションの元。修正も AI に書かせる。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
+                                    <div class="text-lime-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-plug"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">plugin / MCP 管理</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">プラグインの設定も AI に任せる。ただし入れ過ぎには十分注意。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
+                                    <div class="text-amber-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-user-doctor"></i></div>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">/doctor で点検</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">設定の矛盾や環境の健康状態を Anthropic 推奨コマンドで定期チェック。</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 10
+            {
+                id: 10,
                 title: 'トークン節約に効くコマンド：/clear',
                 duration: 21,
                 narration: 'トークン節約に最も手軽で効くのがスラッシュクリアです。話題が変わったりコミットが終わったタイミングで、文脈をリセットします。AI自身にクリアの適切なタイミングを判定させて、スラッシュクリアできますと言わせるルールも組み込んでいます。なお、要約の脱落を防ぐためスラッシュコンパクトはほとんど使いません。',
@@ -659,42 +842,9 @@
                     `;
                 }
             },
-            // Slide 6
+            // Slide 11
             {
-                id: 6,
-                title: 'AI の設定も AI にやってもらう',
-                duration: 19,
-                narration: 'CLAUDE.md などの設定ファイルは、人間が手で編集しないようにしています。人間が書いた曖昧さや矛盾がそのままハルシネーションの原因になるため、修正も AI に指示して書かせます。プラグインや MCP の設定も任せつつ、入れ過ぎに注意してスラッシュドクターで点検しています。',
-                render: function() {
-                    return `
-                        <div class="flex flex-col h-full justify-center px-[3cqw]">
-                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                                <i class="fa-solid fa-sliders text-lime-400"></i> AI の設定も AI にやってもらう
-                            </h2>
-                            <div class="grid grid-cols-3 gap-[2cqw]">
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
-                                    <div class="text-sky-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-file-code"></i></div>
-                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">CLAUDE.md 自作禁止</h3>
-                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">人間が書いた矛盾がハルシネーションの元。修正も AI に書かせる。</p>
-                                </div>
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
-                                    <div class="text-lime-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-plug"></i></div>
-                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">plugin / MCP 管理</h3>
-                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">プラグインの設定も AI に任せる。ただし入れ過ぎには十分注意。</p>
-                                </div>
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2cqw]">
-                                    <div class="text-amber-400 mb-[1cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"><i class="fa-solid fa-user-doctor"></i></div>
-                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.15rem, 2.5cqw, 1.85rem);">/doctor で点検</h3>
-                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">設定の矛盾や環境の健康状態を Anthropic 推奨コマンドで定期チェック。</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            },
-            // Slide 7
-            {
-                id: 7,
+                id: 11,
                 title: '実際に使っている plugin と MCP',
                 duration: 19,
                 narration: '実際に導入しているプラグインと MCP です。Python の型チェックを行う pyright-lsp や、過剰な実装を止める ponytail、コード構造を効率よく検索する codegraph などが活躍しています。数を増やせばいいわけではないため、使っていないものは見直しています。',
@@ -724,159 +874,6 @@
                                 </table>
                             </div>
                             <p class="text-slate-400 mt-[1cqw] text-right font-medium" style="font-size: clamp(0.8rem, 1.6cqw, 1.15rem);">※ 呼び出し回数は ~/.claude.json pluginUsage より抽出</p>
-                        </div>
-                    `;
-                }
-            },
-            // Slide 8
-            {
-                id: 8,
-                title: '【最重要】TODO.md によるタスク管理',
-                duration: 19,
-                narration: '運用の中で最も重要なのが TODO.md によるタスク管理です。作業に着手する前に必ず項目を立てることで、万が一セッションが切れても TODO.md から確実に再開できます。利用者の要望から AI が TODO を起草し、承認後にスラッシュゴールで完走させます。',
-                render: function() {
-                    return `
-                        <div class="flex flex-col h-full justify-center px-[3cqw]">
-                            <h2 class="font-bold text-sky-400 mb-[1.2cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                                <i class="fa-solid fa-list-check text-lime-400"></i> 【最重要】TODO.md によるタスク管理
-                            </h2>
-                            <p class="text-slate-200 mb-[2cqw] font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">着手前に必ず項目を立てるので、セッションが切れても TODO.md から再開できる。</p>
-                            <div class="grid grid-cols-4 gap-[1.5cqw] items-center text-center">
-                                <div class="bg-slate-800/80 border border-sky-500/50 p-[1.5cqw] rounded-xl">
-                                    <div class="text-sky-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">1. 要望</div>
-                                    <div class="text-slate-100 font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">「○○したい」</div>
-                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">利用者の一言</div>
-                                </div>
-                                <div class="bg-slate-800/80 border border-lime-500 p-[1.5cqw] rounded-xl shadow-lg shadow-lime-500/10">
-                                    <div class="text-lime-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">2. 起草・承認</div>
-                                    <div class="text-lime-400 font-mono font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">TODO.md</div>
-                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">AI起草 / 利用者承認</div>
-                                </div>
-                                <div class="bg-slate-800/80 border border-sky-500/50 p-[1.5cqw] rounded-xl">
-                                    <div class="text-sky-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">3. 完走</div>
-                                    <div class="text-slate-100 font-mono font-bold my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">/goal</div>
-                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">完了まで自動走破</div>
-                                </div>
-                                <div class="bg-slate-800/80 border border-slate-700 p-[1.5cqw] rounded-xl">
-                                    <div class="text-slate-400 font-bold" style="font-size: clamp(0.9rem, 1.8cqw, 1.35rem);">4. 保存</div>
-                                    <div class="text-slate-300 font-mono my-[0.3cqw]" style="font-size: clamp(1.1rem, 2.4cqw, 1.75rem);">archives/</div>
-                                    <div class="text-slate-300 font-medium" style="font-size: clamp(0.82rem, 1.6cqw, 1.25rem);">決着・目次保存</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            },
-            // Slide 9
-            {
-                id: 9,
-                title: 'TODO.md 運用の具体ルール',
-                duration: 18,
-                narration: 'TODO.md 運用のルールとしては、大きな作業も小さな作業も例外なくすべて項目化します。そしてスラッシュゴールで一気に完走させます。ファイルを無駄に分割せず TODO.md 一本に集約し、運用のルール自体も AI と相談しながらブラッシュアップしていきます。',
-                render: function() {
-                    return `
-                        <div class="flex flex-col h-full justify-center px-[3cqw]">
-                            <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                                <i class="fa-solid fa-clipboard-list text-lime-400"></i> TODO.md 運用の具体ルール
-                            </h2>
-                            <div class="space-y-[1.2cqw] text-slate-200 font-medium">
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-check-double text-lime-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
-                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>すべての作業を例外なく項目化:</strong> 大小問わず必ず TODO に起草</div>
-                                </div>
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-person-running text-sky-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
-                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong class="font-mono text-sky-400">/goal TODO-NNN</strong> で完了まで止まらず走らせる</div>
-                                </div>
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-file text-amber-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
-                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>ファイル分割をしない:</strong> plan.md や task.md に分けず TODO.md 1本に集約</div>
-                                </div>
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.4cqw] flex items-center gap-[1.2cqw]">
-                                    <i class="fa-solid fa-seedling text-purple-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.6cqw, 1.8rem);"></i>
-                                    <div style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);"><strong>ルール自体も AI と直す:</strong> <span class="font-mono bg-slate-900 px-[0.5cqw] py-[0.1cqw] rounded text-slate-200" style="font-size: clamp(0.85rem, 1.7cqw, 1.25rem);">~/.claude/CLAUDE.md</span> へ自動反映</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            },
-            // Slide 10
-            {
-                id: 10,
-                title: 'TODO.md の実際の記述例',
-                duration: 21,
-                narration: 'こちらが TODO.md の実際の記述例です。ヘッダー部分に残数の管理状況や次回発行IDを記録し、タスクごとに担当エージェント、実施する具体的なステップ、ツールによる検証結果まで明記します。決着したタスクはアーカイブファイルへ集約し、コンテキスト量を最小限に保ちます。',
-                render: function() {
-                    return `
-                        <div class="flex flex-col h-full justify-center px-[3cqw]">
-                            <h2 class="font-bold text-sky-400 mb-[1cqw] flex items-center gap-[0.8cqw]" style="font-size: clamp(1.3rem, 2.8cqw, 2.1rem);">
-                                <i class="fa-solid fa-file-lines text-lime-400"></i> TODO.md の実際の記述例
-                            </h2>
-                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-[1.4cqw] font-mono text-slate-200 leading-normal space-y-[0.7cqw] overflow-hidden shadow-inner" style="font-size: clamp(0.82rem, 1.75cqw, 1.3cqw);">
-                                <div class="text-sky-400 font-bold border-b border-slate-800 pb-[0.4cqw] flex justify-between items-center">
-                                    <span># TODO.md - Claude Code Task Board</span>
-                                    <span class="text-slate-400 font-normal" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">v2.4</span>
-                                </div>
-                                <div class="text-slate-300" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">ステータス: 進行中 (残1件 / 累計 55 件完了) · 次回 ID: TODO-057</div>
-                                
-                                <div class="text-lime-400 font-bold pt-[0.2cqw]">## [進行中] TODO-056 モジュール構成とクラス構成の刷新</div>
-                                <div class="text-sky-300 bg-slate-900/80 px-[0.7cqw] py-[0.15cqw] rounded border border-slate-800 inline-block" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">
-                                    担当: main (Opus/設計) &rarr; implementer (Sonnet/実装) &rarr; verifier (Sonnet/検証)
-                                </div>
-                                
-                                <div class="text-slate-200 pl-[0.8cqw] space-y-[0.4cqw]">
-                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-lime-400 font-bold">[x]</span> <span>責務・依存関係の抽出と設計書作成 (<code class="text-amber-300">docs/design-4.md</code>)</span></div>
-                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-lime-400 font-bold">[x]</span> <span>インターフェース定義とリファクタリング実施 (<code class="text-sky-300">pyright-lsp</code> にて型検証)</span></div>
-                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-amber-400 font-bold">[/]</span> <span>単体テスト実行と結果検証 (<code class="text-lime-300 font-bold">pytest tests/ --cov</code>)</span></div>
-                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-slate-400">[ ]</span> <span>旧 API 呼び出し箇所の追随修正 (<code class="text-amber-300">src/</code> 配下 12 箇所)</span></div>
-                                </div>
-
-                                <div class="text-slate-300 font-bold pt-[0.2cqw] border-t border-slate-800/80">## 完了済みアーカイブ</div>
-                                <div class="text-slate-400 pl-[0.8cqw]" style="font-size: clamp(0.75rem, 1.5cqw, 1.1rem);">
-                                    <div>- TODO-001 ~ TODO-055: <span class="underline text-slate-300">archives/todo/2026-09-history.md</span> へ移動・集約済み</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            },
-            // Slide 11
-            {
-                id: 11,
-                title: 'マルチエージェントで役割分担',
-                duration: 19,
-                narration: 'マルチエージェントで役割分担を行っています。全体指揮とレビューには知能の高い Opus を、実装や検証には高速な Sonnet を、日本語校正には Haiku を割り当てています。直接ファイルを編集できるのは main と implementer だけに制限し、コストと精度の最適化を図っています。',
-                render: function() {
-                    return `
-                        <div class="flex flex-col h-full justify-center px-[3cqw]">
-                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                                <i class="fa-solid fa-network-wired text-lime-400"></i> マルチエージェントで役割分担
-                            </h2>
-                            <div class="grid grid-cols-2 gap-[1.8cqw] items-center">
-                                <div class="bg-sky-950/60 border border-sky-500/60 p-[2cqw] rounded-xl text-center">
-                                    <div class="text-sky-400 font-bold mb-[0.6cqw]" style="font-size: clamp(1.25rem, 2.6cqw, 1.9rem);">main (Opus / リーダー役)</div>
-                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.0cqw, 1.45rem);">割り振り / 進行管理 / 最終報告<br><span class="text-lime-400 font-bold mt-[0.4cqw] inline-block">※ リポジトリ編集権限あり</span></p>
-                                </div>
-                                <div class="space-y-[1cqw]">
-                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
-                                        <span><strong class="text-lime-400">implementer</strong> (Sonnet)</span>
-                                        <span class="text-slate-200">実装・修正 (編集権限あり)</span>
-                                    </div>
-                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
-                                        <span><strong class="text-sky-400">reviewer</strong> (Opus)</span>
-                                        <span class="text-slate-200">コードをレビュー</span>
-                                    </div>
-                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
-                                        <span><strong class="text-lime-400">verifier</strong> (Sonnet)</span>
-                                        <span class="text-slate-200">動かして動作検証</span>
-                                    </div>
-                                    <div class="bg-slate-800/80 p-[1cqw] rounded-lg border border-slate-700 flex justify-between items-center font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">
-                                        <span><strong class="text-rose-400">wording</strong> (Haiku)</span>
-                                        <span class="text-slate-200">日本語に校正</span>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     `;
                 }
@@ -916,34 +913,6 @@
             // Slide 13
             {
                 id: 13,
-                title: 'トークン上限対策：複数アカウント運用',
-                duration: 17,
-                narration: 'トークン制限に達した場合は、月単位で複数アカウントを利用します。解約忘れを防ぐために契約直後に解約手続きを行い、限界に達したらスラッシュログインで別アカウントに切り替えます。作業セッションはそのままでスムーズに継続可能です。',
-                render: function() {
-                    return `
-                        <div class="flex flex-col h-full justify-center px-[3cqw]">
-                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                                <i class="fa-solid fa-users text-lime-400"></i> トークン不足のときは月単位で複数アカウント
-                            </h2>
-                            <div class="grid grid-cols-2 gap-[2.2cqw]">
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw]">
-                                    <i class="fa-solid fa-calendar-xmark text-rose-400 mb-[1.2cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"></i>
-                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">契約直後に即解約</h3>
-                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">解約し忘れによる無駄な自動更新を確実に防ぐテクニック。</p>
-                                </div>
-                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw]">
-                                    <i class="fa-solid fa-right-left text-sky-400 mb-[1.2cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"></i>
-                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">/login でスムーズ切替</h3>
-                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">限界に達してもアカウントを切り替えて作業セッションはそのまま継続可能。</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            },
-            // Slide 14
-            {
-                id: 14,
                 title: '知っておくと便利な小技',
                 duration: 17,
                 narration: '便利なおすすめ小技です。プロンプト入力中に Ctrl-G を押すと愛用の外部エディタが起動し、長い指示を落ち着いて書くことができます。また ccstatusline を使うと、ステータスラインに残トークンやモデル情報が常時表示されて非常に重宝しています。',
@@ -1021,6 +990,34 @@
                                         <span class="text-amber-400 font-bold">▸▸ auto mode on</span>
                                         <span class="text-slate-400">(shift+tab to cycle) · ← for agents</span>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+            // Slide 14
+            {
+                id: 14,
+                title: 'トークン上限対策：複数アカウント運用',
+                duration: 17,
+                narration: 'トークン制限に達した場合は、月単位で複数アカウントを利用します。解約忘れを防ぐために契約直後に解約手続きを行い、限界に達したらスラッシュログインで別アカウントに切り替えます。作業セッションはそのままでスムーズに継続可能です。',
+                render: function() {
+                    return `
+                        <div class="flex flex-col h-full justify-center px-[3cqw]">
+                            <h2 class="font-bold text-sky-400 mb-[1.8cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
+                                <i class="fa-solid fa-users text-lime-400"></i> トークン不足のときは月単位で複数アカウント
+                            </h2>
+                            <div class="grid grid-cols-2 gap-[2.2cqw]">
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw]">
+                                    <i class="fa-solid fa-calendar-xmark text-rose-400 mb-[1.2cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"></i>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">契約直後に即解約</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">解約し忘れによる無駄な自動更新を確実に防ぐテクニック。</p>
+                                </div>
+                                <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[2.2cqw]">
+                                    <i class="fa-solid fa-right-left text-sky-400 mb-[1.2cqw]" style="font-size: clamp(1.8rem, 4cqw, 3rem);"></i>
+                                    <h3 class="font-bold text-slate-100 mb-[0.8cqw]" style="font-size: clamp(1.25rem, 2.7cqw, 2.0rem);">/login でスムーズ切替</h3>
+                                    <p class="text-slate-200 leading-relaxed font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">限界に達してもアカウントを切り替えて作業セッションはそのまま継続可能。</p>
                                 </div>
                             </div>
                         </div>
