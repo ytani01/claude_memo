@@ -1278,6 +1278,7 @@
                 fallbackAudioElement.pause();
                 fallbackAudioElement.onended = null;
                 fallbackAudioElement.onerror = null;
+                fallbackAudioElement.onloadedmetadata = null;
             }
         }
 
@@ -1409,6 +1410,7 @@
 
         function speakOnlineTTS(text) {
             if (!text || isMuted || !isPlaying) return;
+            const runId = speechRunId;
             updateWaveState(true, "朗読中 (Online Voice)");
 
             const cleanText = text.substring(0, 180);
@@ -1421,6 +1423,7 @@
             fallbackAudioElement.pause();
             fallbackAudioElement.onended = null;
             fallbackAudioElement.onerror = null;
+            fallbackAudioElement.onloadedmetadata = null;
             fallbackAudioElement.src = ttsUrl;
             fallbackAudioElement.load();
             fallbackAudioElement.playbackRate = Math.min(2.0, getEffectiveSpeed());
@@ -1432,20 +1435,39 @@
                 onSlideAudioFinished();
             };
 
+            // 読了後（handleEnd 済み）や、古い呼び出しからは張り直さない。
+            // slideTransitionTimeout は次スライドへの待ちと共用なので、
+            // ここで弾かないとそちらを消してしまう
+            const setEndTimeout = (ms) => {
+                if (finished || runId !== speechRunId) return;
+                if (slideTransitionTimeout) clearTimeout(slideTransitionTimeout);
+                slideTransitionTimeout = setTimeout(() => {
+                    if (finished || !isPlaying) return;
+                    handleEnd();
+                }, ms);
+            };
+
             fallbackAudioElement.onended = () => {
                 handleEnd();
             };
 
             fallbackAudioElement.onerror = (err) => {
                 console.warn("Online Audio TTS error:", err);
-                const muteWaitMs = (slideData[currentIndex].duration / playbackRate) * 1000;
-                slideTransitionTimeout = setTimeout(handleEnd, muteWaitMs);
+                setEndTimeout((slideData[currentIndex].duration / playbackRate) * 1000);
+            };
+
+            // onended が来ないとき（通信が途中で止まった等）の受け皿。
+            // まずは原稿の想定秒数で張り、音声の実長が分かったら張り直す
+            setEndTimeout((slideData[currentIndex].duration / playbackRate) * 1000 + 3000);
+            fallbackAudioElement.onloadedmetadata = () => {
+                const audioSec = fallbackAudioElement.duration;
+                if (!isFinite(audioSec) || audioSec <= 0) return;
+                setEndTimeout((audioSec / fallbackAudioElement.playbackRate) * 1000 + 3000);
             };
 
             fallbackAudioElement.play().catch(e => {
                 console.warn("Audio play blocked by browser interaction policy:", e);
-                const muteWaitMs = (slideData[currentIndex].duration / playbackRate) * 1000;
-                slideTransitionTimeout = setTimeout(handleEnd, muteWaitMs);
+                setEndTimeout((slideData[currentIndex].duration / playbackRate) * 1000);
             });
         }
 

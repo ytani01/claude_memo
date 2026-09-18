@@ -37,9 +37,9 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
   既定は `online`。
   Web Speech は読み終わりのイベントが来ないことがあるので、**文字数**から
   計算した安全タイマー（`textToSpeak.length / 4.5 / getEffectiveSpeed()`）で
-  次へ進める。**Online TTS 側には安全タイマーが無い**（`onended`・`onerror`・
-  `play()` の拒否だけ）。通信が途中で止まると読み終わりのイベントが来ず、
-  そこで止まったままになる（TODO-019）
+  次へ進める。Online TTS 側にも安全タイマーがあり、**音声の実長**
+  （`loadedmetadata` で取れなければスライドの `duration`）に 3 秒足した
+  時点で次へ進める（TODO-019）
 
 ## 触るときの注意
 
