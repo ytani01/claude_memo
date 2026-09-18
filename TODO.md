@@ -5,20 +5,35 @@
 
 ---
 
-## TODO-018. 合計時間の直書き `3:15` を実際の値に直す
+## TODO-018. 進行バーと時間表示を実時間に合わせる
 
 |      | main | 担当 |
 |------|------|------|
-| 見込み | Sonnet 5 / effort medium | verifier |
+| 見込み | Opus 5 / effort high | verifier + reviewer |
 
-- [ ] `total-time-display` の初期値 `3:15` を、`duration` の合計 214 秒を
-      再生速度 1.4 倍で割った 2:33 に直す
-- [ ] 直書きをやめて `slideData` から計算させるかどうかを決める
+- [ ] `playbackLoop` の経過時間から `baseSpeedMultiplier`（1.4）を外し、
+      `deltaTime * playbackRate` で進める
+- [ ] `duration` を待ち時間に使っている箇所（消音中・音声エラー・再生拒否の
+      フォールバック）も `duration / playbackRate` に揃える
+- [ ] 読み上げ速度（`utterance.rate`、`fallbackAudioElement.playbackRate`）と
+      Web Speech の安全タイマーは `getEffectiveSpeed()` のまま変えない
+- [ ] `total-time-display` の直書き `3:15` を、値らしくない初期値に変える
+      （読み込み直後だけ見え、`initPlaylist()` が上書きする）
 
-TODO-017 の確認中に verifier が見つけた。並べ替えの前からある不一致で、
-再生を始めると正しい値に上書きされるため、目に入るのは読み込み直後だけ。
-`playlist-count` の `17 Slides` も同じ直書きなので、計算に寄せるなら
-一緒に見る。
+もともとは合計時間の直書き `3:15` がおかしいという話だったが、調べると
+前提が違っていた。`duration` は**ナレーションを 1.4 倍速で読み切る実時間**として
+振られている（合計 214 秒に対し、文字数から見積もった 1.4 倍速での読了は
+約 216 秒。17 枚すべてでほぼ一致する）。つまり `initPlaylist()` が出す
+`3:34` は実時間の合計として正しく、直すべきはそちらではない。
+
+おかしいのは経過の進め方。`currentSlideElapsedTime += deltaTime *
+getEffectiveSpeed()` で 1.4 倍して進めているため、バーと現在時刻が実時間の
+1.4 倍で走り、`duration` で頭打ちになってから読み終わりまで 1 枚 3〜4 秒
+止まって待つ。ここから 1.4 を外せば、バーが実時間どおりに進んで
+読み終わりの直前に `duration` へ届く。
+
+`playbackRate`（UI の 1.0x / 1.5x など）は経過にも待ち時間にも掛け続ける。
+速度を上げれば読み上げも時間軸も同じだけ縮む。
 
 ---
 
