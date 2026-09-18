@@ -251,18 +251,11 @@
                ものを据え置く。クラスは JS が付ける（:has() を使うと非対応
                ブラウザでルールごと落ちて無反応になる。TODO-001）。 */
             .video-viewport.pseudo-fullscreen {
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
                 right: auto !important;
                 bottom: auto !important;
                 width: 960px !important;
                 height: 540px !important;
-                max-width: none !important;
-                max-height: none !important;
-                margin: 0 !important;
                 z-index: 1 !important;
-                padding: 1.5rem !important;
             }
         }
 
@@ -1182,18 +1175,12 @@
             try {
                 fallbackAudioElement = new Audio(SILENT_WAV);
                 fallbackAudioElement.volume = 0;
-                const p = fallbackAudioElement.play();
-                if (p && p.then) {
-                    p.then(() => {
-                        fallbackAudioElement.pause();
-                        fallbackAudioElement.volume = 1;
-                    }).catch(() => {
-                        fallbackAudioElement.volume = 1;
-                    });
-                } else {
+                fallbackAudioElement.play().then(() => {
                     fallbackAudioElement.pause();
                     fallbackAudioElement.volume = 1;
-                }
+                }).catch(() => {
+                    fallbackAudioElement.volume = 1;
+                });
             } catch(e) {
                 console.warn("Audio unlock failed:", e);
             }
@@ -1291,7 +1278,7 @@
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            return `${mins}:${String(secs).padStart(2, '0')}`;
         }
 
         function stopSpeech() {
@@ -1530,15 +1517,10 @@
         }
 
         function updateWaveState(active, statusText) {
-            if (active) {
-                waveContainer.classList.remove('paused');
-                if (statusText) audioStatusBadge.textContent = statusText;
-                audioStatusBadge.className = "text-[9px] bg-slate-800 text-lime-400 border border-slate-700 px-1.5 py-0.5 rounded font-mono font-bold";
-            } else {
-                waveContainer.classList.add('paused');
-                if (statusText) audioStatusBadge.textContent = statusText;
-                audioStatusBadge.className = "text-[9px] bg-slate-800 text-slate-400 border border-slate-700 px-1.5 py-0.5 rounded font-mono";
-            }
+            waveContainer.classList.toggle('paused', !active);
+            if (statusText) audioStatusBadge.textContent = statusText;
+            audioStatusBadge.className = "text-[9px] bg-slate-800 border border-slate-700 px-1.5 py-0.5 rounded font-mono "
+                + (active ? "text-lime-400 font-bold" : "text-slate-400");
         }
 
         function playbackLoop(timestamp) {
@@ -1598,29 +1580,40 @@
             }
         }
 
+        // チャプター一覧の項目。共通のクラスと、選択中かどうかで変わるクラスを分ける。
+        const PLAYLIST_ITEM_CLASS = 'w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between text-xs';
+        const PLAYLIST_ITEM_ACTIVE_CLASSES = ['bg-sky-950/60', 'border-sky-500/50', 'text-sky-300', 'font-bold'];
+        const PLAYLIST_ITEM_IDLE_CLASSES = ['bg-slate-800/40', 'border-slate-800', 'text-slate-400', 'hover:bg-slate-800', 'hover:text-slate-200'];
+        const playlistItems = [];
+
+        function setPlaylistItemState(item, active) {
+            PLAYLIST_ITEM_ACTIVE_CLASSES.forEach(c => item.classList.toggle(c, active));
+            PLAYLIST_ITEM_IDLE_CLASSES.forEach(c => item.classList.toggle(c, !active));
+            item.querySelector('i').className = `fa-solid ${active ? 'fa-volume-high text-lime-400' : 'fa-chevron-right text-slate-600'} text-[10px]`;
+        }
+
         function initPlaylist() {
             playlistItemsContainer.innerHTML = '';
+            playlistItems.length = 0;
             totalSlides.textContent = slideData.length;
             totalTimeDisplay.textContent = formatTime(totalDurationSeconds);
 
             slideData.forEach((slide, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between text-xs ${
-                    idx === currentIndex
-                        ? 'bg-sky-950/60 border-sky-500/50 text-sky-300 font-bold'
-                        : 'bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                }`;
+                btn.className = PLAYLIST_ITEM_CLASS;
                 btn.id = `playlist-item-${idx}`;
                 btn.innerHTML = `
                     <div class="flex items-center gap-2.5 truncate pr-2">
                         <span class="font-mono text-[10px] ${idx === currentIndex ? 'text-lime-400' : 'text-slate-500'}">${String(slide.id).padStart(2, '0')}</span>
                         <span class="truncate">${slide.title}</span>
                     </div>
-                    <i class="fa-solid ${idx === currentIndex ? 'fa-volume-high text-lime-400' : 'fa-chevron-right text-slate-600'} text-[10px]"></i>
+                    <i></i>
                 `;
+                setPlaylistItemState(btn, idx === currentIndex);
                 btn.onclick = () => {
                     renderSlide(idx, true);
                 };
+                playlistItems.push(btn);
                 playlistItemsContainer.appendChild(btn);
             });
         }
@@ -1644,17 +1637,9 @@
         }
 
         function updatePlaylistSelection() {
-            slideData.forEach((_, idx) => {
-                const item = document.getElementById(`playlist-item-${idx}`);
-                if (!item) return;
-                if (idx === currentIndex) {
-                    item.className = 'w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between text-xs bg-sky-950/60 border-sky-500/50 text-sky-300 font-bold';
-                    item.querySelector('i').className = 'fa-solid fa-volume-high text-lime-400 text-[10px]';
-                    scrollPlaylistIntoView(item);
-                } else {
-                    item.className = 'w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between text-xs bg-slate-800/40 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200';
-                    item.querySelector('i').className = 'fa-solid fa-chevron-right text-slate-600 text-[10px]';
-                }
+            playlistItems.forEach((item, idx) => {
+                setPlaylistItemState(item, idx === currentIndex);
+                if (idx === currentIndex) scrollPlaylistIntoView(item);
             });
         }
 
@@ -1692,22 +1677,20 @@
             });
 
             // Toggle Audio Engine Mode (Web Speech API <-> Online Voice)
-            if (toggleVoiceEngineBtn) {
-                toggleVoiceEngineBtn.addEventListener('click', () => {
-                    if (voiceEngineMode === 'speech') {
-                        voiceEngineMode = 'online';
-                        speechStatusIndicator.textContent = "Online Voice";
-                        speechStatusIndicator.className = "text-sky-400 font-bold font-mono";
-                    } else {
-                        voiceEngineMode = 'speech';
-                        speechStatusIndicator.textContent = "Web Speech API";
-                        speechStatusIndicator.className = "text-lime-400 font-bold font-mono";
-                    }
-                    if (isPlaying) {
-                        speakCurrentNarration();
-                    }
-                });
-            }
+            toggleVoiceEngineBtn.addEventListener('click', () => {
+                if (voiceEngineMode === 'speech') {
+                    voiceEngineMode = 'online';
+                    speechStatusIndicator.textContent = "Online Voice";
+                    speechStatusIndicator.className = "text-sky-400 font-bold font-mono";
+                } else {
+                    voiceEngineMode = 'speech';
+                    speechStatusIndicator.textContent = "Web Speech API";
+                    speechStatusIndicator.className = "text-lime-400 font-bold font-mono";
+                }
+                if (isPlaying) {
+                    speakCurrentNarration();
+                }
+            });
 
             prevBtn.addEventListener('click', () => {
                 if (currentIndex > 0) {
@@ -1809,7 +1792,6 @@
                     return;
                 }
                 playBtn.click();
-                if (!tapFeedbackIcon) return;
                 tapFeedbackIcon.className = `fa-solid ${isPlaying ? 'fa-play' : 'fa-pause'}`;
                 // 連続でタップされても頭から出し直す
                 void tapFeedbackIcon.offsetWidth;
@@ -1820,30 +1802,25 @@
             // レターボックスと、狭い画面・タッチ画面の暗幕が使う。
             const stage = document.getElementById('viewport-stage');
             const setFullscreen = (on) => {
-                const viewport = document.getElementById('player-viewport');
-                viewport.classList.toggle('pseudo-fullscreen', on);
-                if (stage) stage.classList.toggle('is-fullscreen', on);
+                playerViewport.classList.toggle('pseudo-fullscreen', on);
+                stage.classList.toggle('is-fullscreen', on);
                 document.body.classList.toggle('fs-lock', on);
-                const fsIcon = fullscreenBtn.querySelector('i');
-                if (fsIcon) fsIcon.className = on ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+                fullscreenBtn.querySelector('i').className = on ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
             };
 
             fullscreenBtn.addEventListener('click', () => {
-                const viewport = document.getElementById('player-viewport');
-                setFullscreen(!viewport.classList.contains('pseudo-fullscreen'));
+                setFullscreen(!playerViewport.classList.contains('pseudo-fullscreen'));
             });
 
             // 暗幕（#viewport-stage::before）のタップで抜ける。スマホでは
             // フルスクリーン中のボタンが暗幕に覆われ、Esc も押せないため。
             // 疑似要素のヒットはラッパー自身が受けるので、枠や字幕のタップ
             // （e.target が子要素）とはここで区別できる。
-            if (stage) {
-                stage.addEventListener('click', (e) => {
-                    if (e.target === stage && stage.classList.contains('is-fullscreen')) {
-                        setFullscreen(false);
-                    }
-                });
-            }
+            stage.addEventListener('click', (e) => {
+                if (e.target === stage && stage.classList.contains('is-fullscreen')) {
+                    setFullscreen(false);
+                }
+            });
 
             // Listen for keyboard shortcuts (Space, Arrow keys, Fullscreen, Mute, Escape)
             document.addEventListener('keydown', (e) => {
@@ -1875,8 +1852,7 @@
                     e.preventDefault();
                     muteBtn.click();
                 } else if (e.key === 'Escape') {
-                    const viewport = document.getElementById('player-viewport');
-                    if (viewport && viewport.classList.contains('pseudo-fullscreen')) {
+                    if (playerViewport.classList.contains('pseudo-fullscreen')) {
                         setFullscreen(false);
                     }
                 }
@@ -1889,21 +1865,12 @@
                 const ratio = Math.max(0, Math.min(1, clickX / rect.width));
                 const targetSec = ratio * totalDurationSeconds;
 
-                // Determine target slide index and relative offset
-                let accumulated = 0;
-                let targetIndex = 0;
-                let slideOffset = 0;
+                // 対象のスライドは「開始時刻が targetSec より前」の最後のもの。
+                // スライドの境界ちょうどを指したときは手前のスライドの末尾になる
+                // （手書きの累積ループと同じ）。0 秒のときだけ該当が無いので 0 に寄せる。
+                const targetIndex = Math.max(0, slideStartTimes.findLastIndex(t => t < targetSec));
 
-                for (let i = 0; i < slideData.length; i++) {
-                    if (accumulated + slideData[i].duration >= targetSec) {
-                        targetIndex = i;
-                        slideOffset = targetSec - accumulated;
-                        break;
-                    }
-                    accumulated += slideData[i].duration;
-                }
-
-                currentSlideElapsedTime = slideOffset;
+                currentSlideElapsedTime = targetSec - slideStartTimes[targetIndex];
                 renderSlide(targetIndex, false);
             });
         }
