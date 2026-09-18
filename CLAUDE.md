@@ -50,7 +50,9 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
   `margin: 1px` は `#player-viewport` の 1px ボーダーを打ち消す値で、
   通常時とフルスクリーン中の両方に効く。ボーダーの太さを変えたら一緒に直す
 - **擬似フルスクリーンのレターボックスは `#viewport-stage.is-fullscreen` だけが
-  持つ。** 中身（`.video-viewport.pseudo-fullscreen`、768px 未満では
+  持つ。高さの基準は `100dvh`**（`vh` の行は dvh 非対応ブラウザ用に残してある）。
+  スマホの `100vh` は URL バーを含んだ高さなので、`vh` のままだと横持ちで
+  箱が画面の下へはみ出す（TODO-004）。 中身（`.video-viewport.pseudo-fullscreen`、768px 未満では
   `#viewport-frame`）も字幕も、このラッパーを基準に置いているので、
   比率やサイズを変えるのはここ 1 か所でよい（TODO-001）。
   字幕はフルスクリーン中、PC では枠に重なり、768px 未満では `top: 100%` で
