@@ -1,0 +1,28 @@
+const { chromium } = require('playwright');
+const FILE_URL = 'file:///net/fs/vol0/home.localhost.1-ytani/ytani/public_html/claude_memo/claude_memo.html';
+const conds = [
+  ['landscape normal', {width:844,height:390}, true, false],
+  ['landscape fullscreen', {width:844,height:390}, true, true],
+  ['portrait normal', {width:390,height:844}, true, false],
+  ['portrait fullscreen', {width:390,height:844}, true, true],
+  ['PC', {width:1280,height:800}, false, false],
+];
+(async () => {
+  const b = await chromium.launch();
+  for (const [label, viewport, touch, fs] of conds) {
+    const ctx = await b.newContext({ viewport, hasTouch: touch, isMobile: touch });
+    const p = await ctx.newPage();
+    await p.goto(FILE_URL);
+    await p.waitForSelector('#slide-canvas');
+    if (fs) { await p.click('#fullscreen-btn'); await p.waitForTimeout(300); }
+    const r = await p.evaluate(() => {
+      const g = s => { const e=document.querySelector(s); const b=e.getBoundingClientRect(); return [Math.round(b.left),Math.round(b.top),Math.round(b.width),Math.round(b.height)]; };
+      return { frame: g('#viewport-frame'), vp: g('#player-viewport'),
+        scale: getComputedStyle(document.getElementById('viewport-frame')).getPropertyValue('--vp-scale'),
+        ih: innerHeight, iw: innerWidth };
+    });
+    console.log(label, JSON.stringify(r));
+    await ctx.close();
+  }
+  await b.close();
+})();

@@ -204,6 +204,14 @@
             #viewport-frame {
                 position: relative;
                 aspect-ratio: 16 / 9;
+                /* 横持ちのスマホ（844x390 など）では、幅いっぱいに広げると
+                   16:9 の高さが画面に収まらない。高さの上限は JS
+                   （setupViewportScale）が枠の上端の実測から max-width として
+                   入れる。ヘッダーの高さは幅で変わり、640〜712px の帯では
+                   折り返して伸びるので、CSS に定数で書くとその帯でずれる
+                   （TODO-011）。max-width が入ったときに枠を中央へ置くため、
+                   margin-inline だけここに置く。 */
+                margin-inline: auto;
                 /* --vp-scale を入れる JS が動かなかったときでも、960px の
                    中身を枠内に閉じ込めるための保険 */
                 overflow: hidden;
@@ -1910,13 +1918,42 @@
         // スマホ用: 外枠の幅に合わせて 960px 基準の縮小率を渡す。
         // --vp-scale を使うのは狭い画面とタッチ画面のメディアクエリの中だけなので、
         // マウスの PC では値が入っていても効かない。
+        //
+        // 通常表示では枠の高さの上限も入れる。横持ちのスマホは幅いっぱいに
+        // 広げると 16:9 の高さが画面に収まらないので、画面の高さから枠の上端
+        // （ヘッダーと本文の上余白）を引いた分を上限にし、幅の方を絞る
+        // （TODO-011）。上端を実測するのは、ヘッダーの高さが幅で変わり、
+        // 640〜712px の帯では折り返して伸びるため。
+        // max-width はインラインで入るのでメディアクエリの外にも効いてしまう。
+        // 同じ条件を CSS の @media 2 か所にも書いてあるので、片方を変えたら
+        // 全部直すこと。PC では空にする。
+        // フルスクリーン中は枠自体がレターボックスで既に画面に収まっており、
+        // 上限を重ねると二重に縮むので掛けない。
         function setupViewportScale() {
             const frame = document.getElementById('viewport-frame');
+            const stage = document.getElementById('viewport-stage');
             if (!frame || !('ResizeObserver' in window)) return;
-            const update = () => frame.style.setProperty(
-                '--vp-scale', frame.getBoundingClientRect().width / 960);
+            const mobile = window.matchMedia(
+                'screen and (max-width: 767.98px), screen and (pointer: coarse)');
+            const update = () => {
+                const capped = mobile.matches
+                    && !(stage && stage.classList.contains('is-fullscreen'));
+                // scrollY を足してページ内の位置に直す。getBoundingClientRect()
+                // だけだとスクロール量の分だけ上限が伸び、枠が動いてしまう。
+                frame.style.maxWidth = capped
+                    ? Math.max(0, window.innerHeight
+                        - (frame.getBoundingClientRect().top + window.scrollY))
+                        * (16 / 9) + 'px'
+                    : '';
+                frame.style.setProperty(
+                    '--vp-scale', frame.getBoundingClientRect().width / 960);
+            };
             update();
             new ResizeObserver(update).observe(frame);
+            window.addEventListener('resize', update);
+            // フルスクリーンの出入りで上限の有無が変わる
+            new MutationObserver(update).observe(
+                stage, { attributes: true, attributeFilter: ['class'] });
         }
 
         function startApp() {
