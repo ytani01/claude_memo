@@ -1179,16 +1179,24 @@
         // 読み終わり後の待ちを始めた時刻。待ち中でなければ null（TODO-021）
         let pauseStartedAt = null;
 
-        // Total calculated presentation duration
-        const totalDurationSeconds = slideData.reduce((acc, curr) => acc + curr.duration, 0);
+        // 各スライドの尺は、ナレーションの長さ＋読み終わり後の待ち（TODO-020）
+        const slideSpan = index => slideData[index].duration + pauseSeconds;
 
-        // Calculate offset start time for each slide
-        let accumTime = 0;
-        const slideStartTimes = slideData.map(slide => {
-            const start = accumTime;
-            accumTime += slide.duration;
-            return start;
-        });
+        let totalDurationSeconds = 0;
+        let slideStartTimes = [];
+
+        // 待ち秒数を変えると全体の尺も各スライドの開始時刻も変わるので、
+        // プルダウンの change から呼び直す（TODO-020）
+        function recalcTimeline() {
+            let accumTime = 0;
+            slideStartTimes = slideData.map((slide, idx) => {
+                const start = accumTime;
+                accumTime += slideSpan(idx);
+                return start;
+            });
+            totalDurationSeconds = accumTime;
+        }
+        recalcTimeline();
 
         // DOM Element Cache
         const slideCanvas = document.getElementById('slide-canvas');
@@ -1558,10 +1566,10 @@
             // 掛けるとバーだけが先走って duration で頭打ちになる（TODO-018）
             currentSlideElapsedTime += deltaTime * playbackRate;
 
-            // Cap elapsed time visually to slide duration until audio event triggers transition
-            const currentSlide = slideData[currentIndex];
-            if (currentSlideElapsedTime > currentSlide.duration) {
-                currentSlideElapsedTime = currentSlide.duration;
+            // 待ちの分も尺に含めるので、頭打ちは duration ＋ 待ち秒数（TODO-020）
+            const span = slideSpan(currentIndex);
+            if (currentSlideElapsedTime > span) {
+                currentSlideElapsedTime = span;
             }
 
             updateProgressDisplay();
@@ -1733,6 +1741,11 @@
 
             pauseSelect.addEventListener('change', () => {
                 pauseSeconds = Number(pauseSelect.value);
+                recalcTimeline();
+                // 待ちを縮めたとき、経過が新しい尺を超えたままにならないようにする
+                currentSlideElapsedTime = Math.min(currentSlideElapsedTime, slideSpan(currentIndex));
+                totalTimeDisplay.textContent = formatTime(totalDurationSeconds);
+                updateProgressDisplay();
                 if (pauseStartedAt !== null) schedulePauseTransition();
             });
 
