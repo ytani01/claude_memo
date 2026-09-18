@@ -25,7 +25,7 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
   `playbackLoop` が `duration` を進め、尽きたら次のスライドへ。
   **`duration` には、Online TTS の音声を 1.4 倍速で再生した実測秒数が
   入っている**（TODO-018 で 17 枚すべて `ffprobe` で測って入れ替えた。
-  合計 316 秒）。**`prepareSpeechText()` の置換表を変えると読み上げの長さも
+  合計 315 秒）。**`prepareSpeechText()` の置換表を変えると読み上げの長さも
   変わるので、当たるスライドの `duration` を測り直す**（TODO-023）。
   **測るには `tools/measure-duration.py` を使う**（`tools/measure-duration.py 2 17`、
   案の下見は `--text`）。**このスクリプトは `prepareSpeechText()` の置換表と
