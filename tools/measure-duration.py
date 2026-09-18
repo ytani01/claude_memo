@@ -50,6 +50,7 @@ RULES = [
     (r'git worktree', 'ギット ワークツリー', re.I),
     (r'auto-mode', 'オートモード', re.I),
     (r'考え方', 'かんがえかた', 0),
+    (r'使い方', 'つかいかた', 0),
     (r'\bmain\b', 'メイン', re.I),
     (r'\bimplementer\b', 'インプリメンター', re.I),
 ]
