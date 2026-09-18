@@ -660,8 +660,8 @@
             {
                 id: 6,
                 title: 'マルチエージェントで役割分担',
-                duration: 19,
-                narration: 'マルチエージェントで役割分担を行っています。全体指揮とレビューには知能の高い Opus を、実装や検証には高速な Sonnet を、日本語校正には Haiku を割り当てています。直接ファイルを編集できるのは main と implementer だけに制限し、コストと精度の最適化を図っています。',
+                duration: 23,
+                narration: 'マルチエージェントで役割分担を行っています。全体指揮とレビューには知能の高い Opus を、実装や検証には高速な Sonnet を、日本語校正には Haiku を割り当てています。直接ファイルを編集できるのは main と implementer だけに制限しています。ただし、担当とモデルは固定ではなく、タスクの内容に応じて main が判断します。',
                 render: function() {
                     return `
                         <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -692,6 +692,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <p class="mt-[1.4cqw] px-[1.4cqw] py-[0.8cqw] rounded-lg bg-lime-950/50 border border-lime-500/60 text-lime-300 font-bold text-center" style="font-size: clamp(1.0rem, 2.0cqw, 1.4rem);">※ 担当とモデルは固定ではなく、タスクの内容に応じて main が判断する</p>
                         </div>
                     `;
                 }
