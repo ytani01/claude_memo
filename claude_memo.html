@@ -319,11 +319,7 @@
                             <div class="absolute -bottom-24 -left-24 w-80 h-80 bg-lime-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
                             <!-- Top Slide Header Info -->
-                            <div class="flex items-center justify-between text-sm md:text-base font-mono text-slate-400 z-10 mb-1 flex-shrink-0">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-lime-400 animate-pulse"></span>
-                                    <span id="slide-category" class="text-sky-400 font-bold uppercase tracking-widest text-xs md:text-sm">CLAUDE CODE WORKFLOW</span>
-                                </div>
+                            <div class="flex items-center justify-end text-sm md:text-base font-mono text-slate-400 z-10 mb-1 flex-shrink-0">
                                 <div class="bg-slate-800/80 px-3 py-1 rounded text-slate-300 border border-slate-700/50">
                                     SLIDE <span id="slide-num" class="text-lime-400 font-bold">01</span> / <span id="total-slides">17</span>
                                 </div>
@@ -475,17 +471,11 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-800 bg-slate-950 py-3 text-center text-xs text-slate-500">
-        Claude Code Interactive Presentation Video &copy; 2026 | Audio-Synced Presentation Engine
-    </footer>
-
     <script>
         const slideData = [
             // Slide 1
             {
                 id: 1,
-                category: 'CLAUDE CODE WORKFLOW',
                 title: '私の Claude Code の使い方',
                 duration: 18,
                 narration: 'みなさんこんにちは。今回は、私が日常的に実践している Claude Code の具体的な使い方や工夫についてご紹介します。ネット上の知見を参考にしながら自分なりにアレンジして試行錯誤を重ねている段階ですので、使い方の一例としてご覧いただければ幸いです。',
@@ -512,7 +502,6 @@
             // Slide 2
             {
                 id: 2,
-                category: 'OVERVIEW',
                 title: '全体の概要',
                 duration: 19,
                 narration: 'このあとの流れです。まず常時稼働させている利用環境、次に日常の対話のしかたと設定の考え方、そして最も重要な TODO.md によるタスク管理、さらにマルチエージェントでの役割分担、最後に現状の課題とまとめ、という順にご紹介します。',
@@ -550,7 +539,6 @@
             // Slide 3
             {
                 id: 3,
-                category: 'ENVIRONMENT SETUP',
                 title: '利用環境とセットアップ',
                 duration: 19,
                 narration: '私の利用環境のポイントは、Claude Code のセッションを常に起動しっぱなしにできる点です。常時稼働の Raspberry Pi 5 上で tmux を起動し、その中で Claude Code を動かしています。PC から SSH でログインすれば、いつでも以前のセッションを再開できます。',
@@ -596,7 +584,6 @@
             // Slide 4
             {
                 id: 4,
-                category: 'NATURAL DIALOGUE',
                 title: '自然な日本語で対話する',
                 duration: 19,
                 narration: '対話は「○○したい」とシンプルに伝えるだけで十分です。プロンプトをガチガチに作り込む必要はなく、基本は auto-mode で AI に任せます。足りない情報は AI から質問してくれます。プロンプトエンジニアリングよりも、共通のルール作りが重要だと感じています。',
@@ -630,7 +617,6 @@
             // Slide 5
             {
                 id: 5,
-                category: 'TOKEN SAVING',
                 title: 'トークン節約に効くコマンド：/clear',
                 duration: 21,
                 narration: 'トークン節約に最も手軽で効くのがスラッシュクリアです。話題が変わったりコミットが終わったタイミングで、文脈をリセットします。AI自身にクリアの適切なタイミングを判定させて、スラッシュクリアできますと言わせるルールも組み込んでいます。なお、要約の脱落を防ぐためスラッシュコンパクトはほとんど使いません。',
@@ -671,7 +657,6 @@
             // Slide 6
             {
                 id: 6,
-                category: 'AI CONFIGURATION',
                 title: 'AI の設定も AI にやってもらう',
                 duration: 19,
                 narration: 'CLAUDE.md などの設定ファイルは、人間が手で編集しないようにしています。人間が書いた曖昧さや矛盾がそのままハルシネーションの原因になるため、修正も AI に指示して書かせます。プラグインや MCP の設定も任せつつ、入れ過ぎに注意してスラッシュドクターで点検しています。',
@@ -705,7 +690,6 @@
             // Slide 7
             {
                 id: 7,
-                category: 'PLUGINS & MCP',
                 title: '実際に使っている plugin と MCP',
                 duration: 19,
                 narration: '実際に導入しているプラグインと MCP です。Python の型チェックを行う pyright-lsp や、過剰な実装を止める ponytail、コード構造を効率よく検索する codegraph などが活躍しています。数を増やせばいいわけではないため、使っていないものは見直しています。',
@@ -742,7 +726,6 @@
             // Slide 8
             {
                 id: 8,
-                category: 'TASK MANAGEMENT',
                 title: '【最重要】TODO.md によるタスク管理',
                 duration: 19,
                 narration: '運用の中で最も重要なのが TODO.md によるタスク管理です。作業に着手する前に必ず項目を立てることで、万が一セッションが切れても TODO.md から確実に再開できます。利用者の要望から AI が TODO を起草し、承認後にスラッシュゴールで完走させます。',
@@ -782,7 +765,6 @@
             // Slide 9
             {
                 id: 9,
-                category: 'TASK MANAGEMENT RULES',
                 title: 'TODO.md 運用の具体ルール',
                 duration: 18,
                 narration: 'TODO.md 運用のルールとしては、大きな作業も小さな作業も例外なくすべて項目化します。そしてスラッシュゴールで一気に完走させます。ファイルを無駄に分割せず TODO.md 一本に集約し、運用のルール自体も AI と相談しながらブラッシュアップしていきます。',
@@ -817,7 +799,6 @@
             // Slide 10
             {
                 id: 10,
-                category: 'MULTI-AGENT WORKFLOW',
                 title: 'マルチエージェントで役割分担',
                 duration: 19,
                 narration: 'マルチエージェントで役割分担を行っています。全体指揮とレビューには知能の高い Opus を、実装や検証には高速な Sonnet を、日本語校正には Haiku を割り当てています。直接ファイルを編集できるのは main と implementer だけに制限し、コストと精度の最適化を図っています。',
@@ -858,7 +839,6 @@
             // Slide 11
             {
                 id: 11,
-                category: 'TASK MANAGEMENT',
                 title: 'TODO.md の実際の記述例',
                 duration: 21,
                 narration: 'こちらが TODO.md の実際の記述例です。ヘッダー部分に残数の管理状況や次回発行IDを記録し、タスクごとに担当エージェント、実施する具体的なステップ、ツールによる検証結果まで明記します。決着したタスクはアーカイブファイルへ集約し、コンテキスト量を最小限に保ちます。',
@@ -899,7 +879,6 @@
             // Slide 12
             {
                 id: 12,
-                category: 'MOBILE INTEGRATION',
                 title: 'スマホ連携：/rc',
                 duration: 15,
                 narration: 'スラッシュリモートコントロールを使うことで、スマホの Claude アプリからラズパイのセッションに接続できます。TODO.md による運用ルールが固まっているため、出先からの短い指示でも AI が自律的に作業を進めてくれます。',
@@ -932,7 +911,6 @@
             // Slide 13
             {
                 id: 13,
-                category: 'TOKEN LIMIT SOLUTION',
                 title: 'トークン上限対策：複数アカウント運用',
                 duration: 17,
                 narration: 'トークン制限に達した場合は、月単位で複数アカウントを利用します。解約忘れを防ぐために契約直後に解約手続きを行い、限界に達したらスラッシュログインで別アカウントに切り替えます。作業セッションはそのままでスムーズに継続可能です。',
@@ -961,7 +939,6 @@
             // Slide 14
             {
                 id: 14,
-                category: 'TIPS & TRICKS',
                 title: '知っておくと便利な小技',
                 duration: 17,
                 narration: '便利なおすすめ小技です。プロンプト入力中に Ctrl-G を押すと愛用の外部エディタが起動し、長い指示を落ち着いて書くことができます。また ccstatusline を使うと、ステータスラインに残トークンやモデル情報が常時表示されて非常に重宝しています。',
@@ -1048,7 +1025,6 @@
             // Slide 15
             {
                 id: 15,
-                category: 'OTHER AI TOOLS',
                 title: 'OpenAI Codex との共存について',
                 duration: 17,
                 narration: 'OpenAI Codex との併用についても試行中です。git worktree を利用してブランチと作業ディレクトリを完全に分けることで、混乱や干渉を防いでいます。また Codex の環境設定も Codex 自身に行わせる運用にしています。',
@@ -1077,7 +1053,6 @@
             // Slide 16
             {
                 id: 16,
-                category: 'CURRENT CHALLENGES',
                 title: '現状の課題',
                 duration: 17,
                 narration: '現在感じている課題は大きく2点あります。1つ目は、長時間の開発に伴うトークン消費をもっと効果的に削減したいこと。2つ目は、日々のメモに愛用している Obsidian と Claude Code のスムーズな連携方法を模索中であることです。',
@@ -1106,7 +1081,6 @@
             // Slide 17
             {
                 id: 17,
-                category: 'SUMMARY & CONCLUSION',
                 title: 'まとめ',
                 duration: 22,
                 narration: 'まとめです。Raspberry Pi 5 と tmux による常時稼働、こまめなスラッシュクリア、TODO.md への一元管理、そして役割に応じたモデル分散が私の現在の運用スタイルです。自己流で手探りの部分も多いため、ぜひ皆さんのご意見やアドバイス、ダメ出しなどをコメントで教えていただけると嬉しいです。',
@@ -1233,7 +1207,6 @@
 
         // DOM Element Cache
         const slideCanvas = document.getElementById('slide-canvas');
-        const slideCategory = document.getElementById('slide-category');
         const slideNum = document.getElementById('slide-num');
         const totalSlides = document.getElementById('total-slides');
         const captionText = document.getElementById('caption-text');
@@ -1555,7 +1528,6 @@
             slideCanvas.innerHTML = slide.render();
 
             // Update UI headers & captions
-            slideCategory.textContent = slide.category;
             slideNum.textContent = String(slide.id).padStart(2, '0');
             controlTitlePreview.textContent = `${slide.id}. ${slide.title}`;
             captionText.textContent = slide.narration;
