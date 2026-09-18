@@ -1,42 +1,7 @@
 # TODO
 
-**残っている項目: TODO-016。** これまでに 15 件を決着させた。
+**残っている項目: 無し。** これまでに 16 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-017` から。**
-
----
-
-## TODO-016. 未使用の定義と冗長な記述を削る
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | implementer + verifier + reviewer |
-
-- [ ] tailwind.config の `colors.brand`（6 色）と `fontFamily.heading` を消し、
-      Google Fonts の読み込みから `Urbanist` を外す（いずれも参照 0）
-- [ ] `.video-viewport` の `width: 100%` / `max-width: 100%` と
-      `#viewport-frame { width: 100% }` を消す（flex 列の子は既定で幅いっぱい）
-- [ ] 同一条件の `@media` 2 ブロックを 1 つに統合する
-- [ ] `speechActive` を消す（代入 4 回・参照 0 回）
-- [ ] `initPlaylist()` の `btn.id = playlist-item-N` を消す
-      （TODO-014 で配列参照に変えた名残で、参照が無い）
-- [ ] `initPlaylist()` 冒頭の再初期化 2 行を消す（呼び出しは `startApp()` からの 1 回だけ）
-- [ ] `slideStartTimes` の累積ループを短くする
-- [ ] 字幕トグル・音声エンジン切替・速度の巡回の 3 ハンドラを、
-      `classList.toggle` と剰余で短くする
-- [ ] `#viewport-stage` の `getElementById` 2 か所を、上の DOM キャッシュに寄せる
-
-`/ponytail-review` で `claude_memo.html` 全体を見て出た指摘のうち、
-**描画結果と動作が変わらないものだけ**を拾った。TODO-014 と同じ趣旨の続き。
-行番号は立てた時点（1939 行）のもの。見込み −55 行ほど。
-
-**この項目に入れないもの**（表示か動作が変わるので別扱い）:
-
-- `playlist-count` の `17 Slides` 直書き（JS から更新していない）
-- `updateWaveState()` が組み立てるクラスと HTML の初期値の食い違い
-  （`text-[9px]` / `text-xs`）
-- Web Speech の音声選択の正規表現（名前の当て推量で 3 段になっている）
-- Web Speech 経路そのものの削除
-- `speakOnlineTTS()` の `finished` フラグ削除（等価とは言い切れない）
 
 ---
 
@@ -45,6 +10,7 @@
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-016.** 未使用の定義と冗長な記述を削る](archives/todo/TODO-016.%20未使用の定義と冗長な記述を削る.md)
 - [**TODO-015.** オンライン音声に無料で使える他の選択肢がないか検討する（対応しない）](archives/todo/TODO-015.%20オンライン音声に無料で使える他の選択肢がないか検討する.md)
 - [**TODO-014.** 見た目と動作を変えない範囲でコードの重複を整理する](archives/todo/TODO-014.%20見た目と動作を変えない範囲でコードの重複を整理する.md)
 - [**TODO-013.** スライド 4 のナレーションから「スマホから SSH」を外す](archives/todo/TODO-013.%20スライド%204%20のナレーションから「スマホから%20SSH」を外す.md)
