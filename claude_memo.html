@@ -888,7 +888,7 @@
                 category: 'TASK MANAGEMENT',
                 title: 'TODO.md の実際の記述例',
                 duration: 14,
-                narration: 'こちらが TODO.md の実際の記述例です。ヘッダー部分に残数の管理状況や次回発行IDを記録し、タスクごとに担当エージェント、実施する具体的なステップ、ツールによる検証結果やコミット後のクリア手順まで明記します。決着したタスクはアーカイブファイルへ集約し、コンテキスト量を最小限に保ちます。',
+                narration: 'こちらが TODO.md の実際の記述例です。ヘッダー部分に残数の管理状況や次回発行IDを記録し、タスクごとに担当エージェント、実施する具体的なステップ、ツールによる検証結果や決着時のコミットまで明記します。決着したタスクはアーカイブファイルへ集約し、コンテキスト量を最小限に保ちます。',
                 render: function() {
                     return `
                         <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -911,7 +911,7 @@
                                     <div class="flex items-center gap-[0.5cqw]"><span class="text-lime-400 font-bold">[x]</span> <span>責務・依存関係の抽出と設計書作成 (<code class="text-amber-300">docs/design-4.md</code>)</span></div>
                                     <div class="flex items-center gap-[0.5cqw]"><span class="text-lime-400 font-bold">[x]</span> <span>インターフェース定義とリファクタリング実施 (<code class="text-sky-300">pyright-lsp</code> にて型検証)</span></div>
                                     <div class="flex items-center gap-[0.5cqw]"><span class="text-amber-400 font-bold">[/]</span> <span>単体テスト実行と結果検証 (<code class="text-lime-300 font-bold">pytest tests/ --cov</code>)</span></div>
-                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-slate-400">[ ]</span> <span>Git コミット作成後に <code class="text-sky-400 font-bold">/clear</code> を実行してセッションリセット</span></div>
+                                    <div class="flex items-center gap-[0.5cqw]"><span class="text-slate-400">[ ]</span> <span>決着してコミット (<code class="text-sky-400 font-bold">feat(core): クラス構成の刷新（TODO-056）</code>)</span></div>
                                 </div>
 
                                 <div class="text-slate-300 font-bold pt-[0.2cqw] border-t border-slate-800/80">## 完了済みアーカイブ</div>
