@@ -112,8 +112,11 @@
 
         /* Pseudo Fullscreen Overlay Fallback - Fixed 16:9 Ratio Centered */
         /* 画面中央の 16:9 レターボックスはこのラッパーが担う。中身も字幕も
-           この箱を基準に置けるので、100vh からレターボックスの位置を
-           計算する必要が無い（TODO-001）。 */
+           この箱を基準に置けるので、100dvh からレターボックスの位置を
+           計算する必要が無い（TODO-001）。
+           高さは dvh で取る。スマホの 100vh は URL バーを含んだ高さなので、
+           横持ち（幅 768 以上で PC 側の経路に入る）で 16:9 の箱が画面の下へ
+           はみ出す（TODO-004）。dvh 非対応のブラウザ用に vh の行を先に置く。 */
         #viewport-stage.is-fullscreen {
             position: fixed;
             top: 0;
@@ -122,7 +125,9 @@
             bottom: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             max-width: calc(100vh * (16 / 9));
+            max-width: calc(100dvh * (16 / 9));
             max-height: calc(100vw * (9 / 16));
             margin: auto;
             z-index: 9999;
