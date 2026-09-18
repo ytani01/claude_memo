@@ -74,12 +74,15 @@
             opacity: 0;
         }
         #tap-feedback-icon.is-shown {
-            animation: tapFeedback 0.5s ease-out forwards;
+            animation: tapFeedback 2s ease-out forwards;
         }
 
+        /* 出したあと 1.5 秒はそのままで、最後の 0.5 秒で消す（TODO-006）。 */
         @keyframes tapFeedback {
-            from { opacity: 0.9; transform: scale(0.8); }
-            to { opacity: 0; transform: scale(1.3); }
+            0% { opacity: 0.9; transform: scale(0.8); }
+            10% { opacity: 0.9; transform: scale(1); }
+            75% { opacity: 0.9; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.3); }
         }
 
         /* Custom Scrollbar for sidebar */
