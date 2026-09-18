@@ -35,27 +35,33 @@ Tailwind・Google Fonts・FontAwesome は CDN から読む（オフラインで�
 - **スライドの拡大縮小は container query に頼っている。** `.video-viewport` が
   `container-type: inline-size` で、`render()` の中は `cqw` と
   `clamp()` で書く。`px` や `rem` 直書きは 16:9 を縮めたときに崩れる
-- **768px 未満は container query とは別系統で縮小している。**
+- **幅 768px 未満とタッチ画面は、container query とは別系統で縮小している。**
+  条件は `@media screen and (max-width: 767.98px), screen and (pointer: coarse)`。
+  タッチ画面を加えたのは、横持ちのスマホ（844x390 など）が幅 768 以上で PC 扱いに
+  なり、レターボックスの中では `clamp()` の下限 px が効いて本文が縮まず、
+  枠内上段に重なるため（TODO-009）。**フルスクリーン中に限らず、タッチ画面なら
+  通常表示でも縮小経路に入る**（タブレットやタッチ対応 PC も同じ）。
   `#viewport-frame` が 16:9 の外枠になり、`setupViewportScale()` が
   `--vp-scale` を入れて `#player-viewport`（中身は 960x540 のまま）を
   `transform: scale()` で縮める（TODO-001）。**縮むのは枠の中身すべてで、
   `cqw` や `clamp()` で書いていない固定 px のものも例外ではない。**
-  768px 未満では `md:` は効かない（`md:` は `min-width: 768px`）ので、
+  幅 768px 未満では `md:` は効かない（`md:` は `min-width: 768px`）ので、
   枠の中のクロームは `text-xs` などの小さい方が選ばれ、それがさらに
   `--vp-scale`（0.34〜0.77）倍される。実際、枠の上の
   `#slide-category` と `SLIDE nn / 17` は 390px 幅で 4.5〜5.2px になる
   （補助的な情報なので、読めなくてよいものとして残している。TODO-001）
 - **字幕バナー（`#subtitle-banner`）だけは枠の外**（`#viewport-stage` 直下）に
-  あり、縮小されない。PC では絶対配置で枠に重ね、768px 未満では枠の下に流す。
+  あり、縮小されない。マウスの PC では絶対配置で枠に重ね、縮小経路（幅 768px 未満
+  またはタッチ画面）では枠の下に流す。
   `margin: 1px` は `#player-viewport` の 1px ボーダーを打ち消す値で、
   通常時とフルスクリーン中の両方に効く。ボーダーの太さを変えたら一緒に直す
 - **擬似フルスクリーンのレターボックスは `#viewport-stage.is-fullscreen` だけが
   持つ。高さの基準は `100dvh`**（`vh` の行は dvh 非対応ブラウザ用に残してある）。
   スマホの `100vh` は URL バーを含んだ高さなので、`vh` のままだと横持ちで
-  箱が画面の下へはみ出す（TODO-004）。 中身（`.video-viewport.pseudo-fullscreen`、768px 未満では
+  箱が画面の下へはみ出す（TODO-004）。 中身（`.video-viewport.pseudo-fullscreen`、縮小経路では
   `#viewport-frame`）も字幕も、このラッパーを基準に置いているので、
   比率やサイズを変えるのはここ 1 か所でよい（TODO-001）。
-  字幕はフルスクリーン中、PC では枠に重なり、768px 未満では `top: 100%` で
+  字幕はフルスクリーン中、マウスの PC では枠に重なり、縮小経路では `top: 100%` で
   枠のすぐ下（暗幕の上）に出る
 - **`body.fs-lock`（裏のスクロール止め）と暗幕（`::before`）は、幅 768px 未満
   または `(pointer: coarse)` のときだけ。** マウスの PC で裏をスクロール禁止に

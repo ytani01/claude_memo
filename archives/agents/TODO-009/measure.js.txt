@@ -1,0 +1,127 @@
+const { chromium } = require('playwright');
+const path = require('path');
+
+const FILE_URL = 'file://' + path.resolve(
+  '/net/fs/vol0/home.localhost.1-ytani/ytani/public_html/claude_memo/claude_memo.html'
+);
+
+async function measureAllSlides(page) {
+  const results = [];
+  const total = await page.evaluate(() => window.slideDataLength || null);
+  // discover slide count via #total-slides
+  const totalSlides = parseInt(await page.locator('#total-slides').textContent(), 10);
+  for (let i = 0; i < totalSlides; i++) {
+    const data = await page.evaluate(() => {
+      const header = document.querySelector('.flex.items-center.justify-between.text-sm')
+        || document.getElementById('slide-category').closest('div').parentElement;
+      const canvas = document.getElementById('slide-canvas');
+      const viewport = document.getElementById('player-viewport');
+      const headerRow = document.getElementById('slide-category').closest('div').parentElement;
+      const headerRect = headerRow.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      const cs = getComputedStyle(viewport);
+      const vpRect = viewport.getBoundingClientRect();
+      const padTop = parseFloat(cs.paddingTop);
+      const padBottom = parseFloat(cs.paddingBottom);
+      const borderTop = parseFloat(cs.borderTopWidth);
+      const borderBottom = parseFloat(cs.borderBottomWidth);
+      const contentBoxBottom = vpRect.bottom - borderBottom - padBottom;
+      const contentBoxTop = vpRect.top + borderTop + padTop;
+      return {
+        headerBottom: headerRect.bottom,
+        canvasTop: canvasRect.top,
+        canvasBottom: canvasRect.bottom,
+        contentBoxTop,
+        contentBoxBottom,
+        borderBoxBottom: vpRect.bottom,
+        borderBoxTop: vpRect.top,
+      };
+    });
+    results.push({ slide: i + 1, ...data });
+    // advance
+    if (i < totalSlides - 1) {
+      await page.evaluate(() => document.getElementById('next-btn').click());
+      await page.waitForTimeout(120);
+    }
+  }
+  return results;
+}
+
+async function pauseAutoplay(page) {
+  await page.evaluate(() => {
+    try {
+      const icon = document.querySelector('#play-btn i');
+      if (icon && icon.classList.contains('fa-pause')) {
+        document.getElementById('play-btn').click();
+      }
+    } catch (e) {}
+  });
+}
+
+async function runCondition(browser, { label, viewport, hasTouch, isMobile, fullscreen }) {
+  const context = await browser.newContext({ viewport, hasTouch, isMobile });
+  const page = await context.newPage();
+  await page.goto(FILE_URL);
+  await page.waitForSelector('#slide-canvas');
+  await pauseAutoplay(page);
+  if (fullscreen) {
+    await page.click('#fullscreen-btn');
+    await page.waitForTimeout(200);
+  }
+  const mqCoarse = await page.evaluate(() => matchMedia('(pointer: coarse)').matches);
+  const mqNarrow = await page.evaluate(() => matchMedia('(max-width: 767.98px)').matches);
+  const vpScale = await page.evaluate(() => getComputedStyle(document.getElementById('viewport-frame')).getPropertyValue('--vp-scale') || getComputedStyle(document.getElementById('player-viewport')).transform);
+  const results = await measureAllSlides(page);
+  await context.close();
+  return { label, mqCoarse, mqNarrow, vpScale, results };
+}
+
+async function testTapExitFullscreen(browser) {
+  const context = await browser.newContext({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+  const page = await context.newPage();
+  await page.goto(FILE_URL);
+  await page.waitForSelector('#slide-canvas');
+  await page.click('#fullscreen-btn');
+  await page.waitForTimeout(200);
+  const isFsBefore = await page.evaluate(() => document.getElementById('player-viewport').classList.contains('pseudo-fullscreen'));
+  // tap far corner (should hit the dark letterbox / #viewport-stage itself)
+  await page.mouse.click(5, 5);
+  await page.waitForTimeout(200);
+  const isFsAfter = await page.evaluate(() => document.getElementById('player-viewport').classList.contains('pseudo-fullscreen'));
+  await context.close();
+  return { isFsBefore, isFsAfter };
+}
+
+(async () => {
+  const browser = await chromium.launch();
+  const out = {};
+
+  out.mobileLandscapeFullscreen = await runCondition(browser, {
+    label: '844x390 touch fullscreen',
+    viewport: { width: 844, height: 390 },
+    hasTouch: true,
+    isMobile: true,
+    fullscreen: true,
+  });
+
+  out.mobileLandscapeNormal = await runCondition(browser, {
+    label: '844x390 touch normal',
+    viewport: { width: 844, height: 390 },
+    hasTouch: true,
+    isMobile: true,
+    fullscreen: false,
+  });
+
+  out.pcNoTouch = await runCondition(browser, {
+    label: '1280x800 no-touch (PC)',
+    viewport: { width: 1280, height: 800 },
+    hasTouch: false,
+    isMobile: false,
+    fullscreen: false,
+  });
+
+  out.tapExit = await testTapExitFullscreen(browser);
+
+  await browser.close();
+  console.log(JSON.stringify(out, null, 2));
+})();

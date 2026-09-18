@@ -1,0 +1,540 @@
+{
+  "mobileLandscapeFullscreen": {
+    "label": "844x390 touch fullscreen",
+    "mqCoarse": true,
+    "mqNarrow": false,
+    "vpScale": "0.722216796875",
+    "results": [
+      {
+        "slide": 1,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 45.499656677246094,
+        "canvasBottom": 371.94164276123047,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 2,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 47.80193328857422,
+        "canvasBottom": 369.6393356323242,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 3,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.764068603515625,
+        "canvasBottom": 368.67724609375,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 4,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.26357650756836,
+        "canvasBottom": 369.17773056030273,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 5,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.764068603515625,
+        "canvasBottom": 368.67724609375,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 6,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.764068603515625,
+        "canvasBottom": 368.67724609375,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 7,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 47.58292770385742,
+        "canvasBottom": 369.8584098815918,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 8,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.027801513671875,
+        "canvasBottom": 369.4134826660156,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 9,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 47.80134963989258,
+        "canvasBottom": 369.63994216918945,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 10,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.26410675048828,
+        "canvasBottom": 369.1771926879883,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 11,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 47.58241271972656,
+        "canvasBottom": 369.85890197753906,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 12,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 47.371761322021484,
+        "canvasBottom": 370.0695457458496,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 13,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.027549743652344,
+        "canvasBottom": 369.4137496948242,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 14,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.764068603515625,
+        "canvasBottom": 368.67724609375,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 15,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.02763748168945,
+        "canvasBottom": 369.4136543273926,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 16,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 48.02799987792969,
+        "canvasBottom": 369.41331481933594,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      },
+      {
+        "slide": 17,
+        "headerBottom": 42.61079025268555,
+        "canvasTop": 47.80200958251953,
+        "canvasBottom": 369.63928985595703,
+        "contentBoxTop": 25,
+        "contentBoxBottom": 364.9970703125,
+        "borderBoxBottom": 389.9970703125,
+        "borderBoxTop": 0
+      }
+    ]
+  },
+  "mobileLandscapeNormal": {
+    "label": "844x390 touch normal",
+    "mqCoarse": true,
+    "mqNarrow": false,
+    "vpScale": "0.8291666666666667",
+    "results": [
+      {
+        "slide": 1,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.38674926757812,
+        "canvasBottom": 513.87158203125,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 2,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.8795623779297,
+        "canvasBottom": 513.3787689208984,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 3,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.6284942626953,
+        "canvasBottom": 513.6298370361328,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 4,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.386474609375,
+        "canvasBottom": 513.871826171875,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 5,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.386474609375,
+        "canvasBottom": 513.871826171875,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 6,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.386474609375,
+        "canvasBottom": 513.871826171875,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 7,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.38671875,
+        "canvasBottom": 513.87158203125,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 8,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.38671875,
+        "canvasBottom": 513.87158203125,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 9,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.38671875,
+        "canvasBottom": 513.87158203125,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 10,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.38645935058594,
+        "canvasBottom": 513.8718719482422,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 11,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.62826538085938,
+        "canvasBottom": 513.6300048828125,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 12,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.15512084960938,
+        "canvasBottom": 514.1031494140625,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 13,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.3865966796875,
+        "canvasBottom": 513.8717041015625,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 14,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.3870391845703,
+        "canvasBottom": 513.8712921142578,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 15,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.1553192138672,
+        "canvasBottom": 514.1030120849609,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 16,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.1552276611328,
+        "canvasBottom": 514.1031036376953,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 17,
+        "headerBottom": 137.92083740234375,
+        "canvasTop": 143.38671875,
+        "canvasBottom": 513.87158203125,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 511.75,
+        "borderBoxBottom": 536.75,
+        "borderBoxTop": 89
+      }
+    ]
+  },
+  "pcNoTouch": {
+    "label": "1280x800 no-touch (PC)",
+    "mqCoarse": false,
+    "mqNarrow": false,
+    "vpScale": "0.95625",
+    "results": [
+      {
+        "slide": 1,
+        "headerBottom": 148,
+        "canvasTop": 153.9375762939453,
+        "canvasBottom": 578.4374542236328,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 2,
+        "headerBottom": 148,
+        "canvasTop": 154.45697021484375,
+        "canvasBottom": 577.9180297851562,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 3,
+        "headerBottom": 148,
+        "canvasTop": 154.45631408691406,
+        "canvasBottom": 577.9187164306641,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 4,
+        "headerBottom": 148,
+        "canvasTop": 154.45631408691406,
+        "canvasBottom": 577.9187164306641,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 5,
+        "headerBottom": 148,
+        "canvasTop": 154.7327117919922,
+        "canvasBottom": 577.6422576904297,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 6,
+        "headerBottom": 148,
+        "canvasTop": 154.7327117919922,
+        "canvasBottom": 577.6422576904297,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 7,
+        "headerBottom": 148,
+        "canvasTop": 154.7327423095703,
+        "canvasBottom": 577.6422882080078,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 8,
+        "headerBottom": 148,
+        "canvasTop": 154.4562530517578,
+        "canvasBottom": 577.9187774658203,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 9,
+        "headerBottom": 148,
+        "canvasTop": 154.4562530517578,
+        "canvasBottom": 577.9187774658203,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 10,
+        "headerBottom": 148,
+        "canvasTop": 154.45704650878906,
+        "canvasBottom": 577.9179840087891,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 11,
+        "headerBottom": 148,
+        "canvasTop": 154.73336791992188,
+        "canvasBottom": 577.6416015625,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 12,
+        "headerBottom": 148,
+        "canvasTop": 154.4568328857422,
+        "canvasBottom": 577.9181365966797,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 13,
+        "headerBottom": 148,
+        "canvasTop": 154.4567413330078,
+        "canvasBottom": 577.9182891845703,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 14,
+        "headerBottom": 148,
+        "canvasTop": 154.73304748535156,
+        "canvasBottom": 577.6419830322266,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 15,
+        "headerBottom": 148,
+        "canvasTop": 154.45704650878906,
+        "canvasBottom": 577.9179840087891,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 16,
+        "headerBottom": 148,
+        "canvasTop": 154.45692443847656,
+        "canvasBottom": 577.9181060791016,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      },
+      {
+        "slide": 17,
+        "headerBottom": 148,
+        "canvasTop": 154.4568328857422,
+        "canvasBottom": 577.9181365966797,
+        "contentBoxTop": 114,
+        "contentBoxBottom": 580.375,
+        "borderBoxBottom": 605.375,
+        "borderBoxTop": 89
+      }
+    ]
+  },
+  "tapExit": {
+    "isFsBefore": true,
+    "isFsAfter": false
+  }
+}
