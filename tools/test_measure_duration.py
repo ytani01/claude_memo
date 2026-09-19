@@ -80,20 +80,20 @@ QUOTE_SAMPLE = r"""const SPEECH_RULES = [
 rules = md.load_rules(QUOTE_SAMPLE)
 assert rules == [("it's", "イッツ']", md.re.I)], rules
 
-# rules: を持たないデッキのテキストを渡すと空になる（レビュー指摘 5）。
-NO_RULES_SAMPLE = """const deckConfig = {
+# rules: を持たないスライド一式のテキストを渡すと空になる（レビュー指摘 5）。
+NO_RULES_SAMPLE = """const slidesConfig = {
     title: 'タイトル',
     heading: '見出し',
 };
 """
-assert md.deck_rules_from_text(NO_RULES_SAMPLE) == []
+assert md.slides_rules_from_text(NO_RULES_SAMPLE) == []
 
-# 4 デッキすべてが実際に読めること（デッキだけの語があるものは 1 つ以上）。
-for deck in ('readme', 'user', 'developer', 'claude-memo'):
-    deck_rules = md.load_deck_rules(deck)
-    assert deck_rules, f'{deck}: deckConfig.rules が読めていない'
+# 4 つのスライド一式すべてが実際に読めること（スライド一式だけの語があるものは 1 つ以上）。
+for slides in ('readme', 'user', 'developer', 'claude-memo'):
+    slides_rules = md.load_slides_rules(slides)
+    assert slides_rules, f'{slides}: slidesConfig.rules が読めていない'
 
 common_rules = md.load_common_rules()
-assert len(common_rules) == 24, common_rules
+assert len(common_rules) == 23, common_rules
 
 print('OK')

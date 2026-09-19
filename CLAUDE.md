@@ -5,15 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 構成
 
 `player.html`（外枠と再生エンジン）、`slides/*.js`（スライドのデータ。
-`readme`・`user`・`developer`・`claude-memo` の 4 デッキ）と、
+`readme`・`user`・`developer`・`claude-memo` の 4 つのスライド一式）と、
 `tools/` の補助スクリプトだけ。ビルドも依存関係のインストールも不要。
 テストは `tools/test_measure_duration.py` の 1 本だけ。
 配置場所が `public_html/` なので、ファイルがそのまま公開される。
 確認はブラウザで `player.html` を開くだけ。
 
 日本語のスライドをナレーション付きで自動再生するプレイヤーページ。
-`player.html` は `?deck=<名前>` で `slides/<名前>.js` を読む（既定は `readme`）。
-`claude-memo` は「Claude Code の使い方」を紹介するデッキ。
+`player.html` は `?slides=<名前>` で `slides/<名前>.js` を読む（既定は `readme`）。
+`claude-memo` は「Claude Code の使い方」を紹介するスライド一式。
 
 ## 触る前に読むもの
 

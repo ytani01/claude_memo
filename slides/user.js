@@ -1,11 +1,11 @@
-// スライドのデータ。player.html?deck=user から読まれる（TODO-051、TODO-053）。
+// スライドのデータ。player.html?slides=user から読まれる（TODO-051、TODO-053）。
 // docs/User.md（スライドを作る人向けの手順）の要点をスライドにしたもの。
 // 共通の再生エンジンは player.html の中にある。
 
-const deckConfig = {
+const slidesConfig = {
     title: 'player.html で別のスライドを作る - 使い方',
     heading: '新しいスライドを作る手順',
-    // このデッキだけの読みの置換表（TODO-054）。共通は slides/_rules.js
+    // このスライド一式だけの読みの置換表（TODO-054）。共通は slides/_rules.js
     rules: [
         [/\.js\b/gi, ' ドット ジェイエス'],
         [/\bwrite\b/gi, 'ライト'],
@@ -87,7 +87,7 @@ const slideData = [
     {
         title: '手順2と3 書いて開く',
         duration: 10,
-        narration: 'ファイルの中に deckConfig と slideData を書きます。書けたら、ブラウザで player.html に deck パラメータを付けて開けば再生されます。',
+        narration: 'ファイルの中に slidesConfig と slideData を書きます。書けたら、ブラウザで player.html に slides パラメータを付けて開けば再生されます。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -97,16 +97,16 @@ const slideData = [
                     <div class="grid grid-cols-2 gap-[1.8cqw]">
                         <div class="bg-slate-800/80 border border-sky-500/50 p-[1.6cqw] rounded-xl">
                             <div class="text-sky-400 font-bold mb-[0.5cqw]" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">2. 中身を書く</div>
-                            <div class="text-slate-100 font-mono font-bold" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">deckConfig</div>
+                            <div class="text-slate-100 font-mono font-bold" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">slidesConfig</div>
                             <div class="text-slate-100 font-mono font-bold" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">slideData</div>
                         </div>
                         <div class="bg-slate-800/80 border border-lime-500 p-[1.6cqw] rounded-xl shadow-lg shadow-lime-500/10">
                             <div class="text-lime-400 font-bold mb-[0.5cqw]" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">3. ブラウザで開く</div>
-                            <div class="text-slate-100 font-mono font-bold break-all" style="font-size: clamp(0.85rem, 1.8cqw, 1.3rem);">player.html?deck=&lt;名前&gt;</div>
+                            <div class="text-slate-100 font-mono font-bold break-all" style="font-size: clamp(0.85rem, 1.8cqw, 1.3rem);">player.html?slides=&lt;名前&gt;</div>
                         </div>
                     </div>
                     <div class="mt-[1.5cqw] text-slate-400 font-medium" style="font-size: clamp(0.85rem, 1.7cqw, 1.25rem);">
-                        <code class="bg-slate-900 px-[0.6cqw] py-[0.2cqw] rounded text-slate-300 font-mono">?deck=</code> を省くと <code class="bg-slate-900 px-[0.6cqw] py-[0.2cqw] rounded text-slate-300 font-mono">slides/readme.js</code> が読まれる
+                        <code class="bg-slate-900 px-[0.6cqw] py-[0.2cqw] rounded text-slate-300 font-mono">?slides=</code> を省くと <code class="bg-slate-900 px-[0.6cqw] py-[0.2cqw] rounded text-slate-300 font-mono">slides/readme.js</code> が読まれる
                     </div>
                 </div>
             `;
@@ -263,7 +263,7 @@ const slideData = [
                         <i class="fa-solid fa-rotate text-lime-400"></i> まとめて書き換える
                     </h2>
                     <div class="bg-slate-900 border border-slate-800 rounded-xl p-[1.4cqw] font-mono text-slate-200 mb-[1.4cqw] break-all" style="font-size: clamp(0.85rem, 1.8cqw, 1.3rem);">
-                        tools/measure-duration.py --deck &lt;名前&gt; --all --write
+                        tools/measure-duration.py --slides &lt;名前&gt; --all --write
                     </div>
                     <div class="bg-rose-950/40 border border-rose-500/40 rounded-xl p-[1.1cqw] text-rose-300 flex items-center gap-[1cqw] font-medium" style="font-size: clamp(0.85rem, 1.8cqw, 1.3rem);">
                         <i class="fa-solid fa-triangle-exclamation text-rose-400 flex-shrink-0" style="font-size: clamp(1.1rem, 2.2cqw, 1.6rem);"></i>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Google Translate TTS returns 404 when a Referer is sent (TODO-002) -->
     <meta name="referrer" content="no-referrer">
-    <!-- deckConfig.title で上書きされる（TODO-041） -->
+    <!-- slidesConfig.title で上書きされる（TODO-041） -->
     <title>プレゼン動画プレイヤー</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -270,7 +270,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-sm sm:text-base text-slate-100 flex items-center gap-2">
-                    <span id="deck-heading"></span>
+                    <span id="slides-heading"></span>
                     <span class="hidden sm:inline text-xs font-normal bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full">AI Presentation Video</span>
                 </h1>
                 <p class="hidden sm:block text-xs text-slate-400">インタラクティブ・プレゼンテーション動画プレイヤー</p>
@@ -459,28 +459,30 @@
 
     </main>
 
-    <!-- 読みの置換表。デッキ共通（TODO-054）。デッキ側より先に読む必要があるので
+    <!-- 読みの置換表。全スライド共通（TODO-054）。スライド一式のファイルより先に読む必要があるので
          ここで読む（fetch だと file:// で開けなくなる）。 -->
     <script src="slides/_rules.js"></script>
 
-    <!-- ?deck=<名前> で読み込むスライドのデータを選ぶ（TODO-041）。
-         下の再生エンジンより先に読む必要があるので document.write を使う。 -->
+    <!-- ?slides=<名前> で読み込むスライドのデータを選ぶ（TODO-041）。
+         下の再生エンジンより先に読む必要があるので document.write を使う。
+         旧 ?deck= も受ける（TODO-058。公開済みのリンクが切れるため）。 -->
     <script>
-        const deckName = (new URLSearchParams(location.search).get('deck')
+        const params = new URLSearchParams(location.search);
+        const slidesName = (params.get('slides') || params.get('deck')
             || 'readme').replace(/[^\w-]/g, '');
-        document.write(`<script src="slides/${deckName}.js"><\/script>`);
+        document.write(`<script src="slides/${slidesName}.js"><\/script>`);
     </script>
 
     <script>
-        // デッキの読み込みに失敗したら、白画面ではなく理由を出して止める（TODO-041）。
+        // スライドの読み込みに失敗したら、白画面ではなく理由を出して止める（TODO-041）。
         // この下は読み込み時に slideData を読むので、ここで止めないと間に合わない
         if (typeof slideData === 'undefined') {
             const canvas = document.getElementById('slide-canvas');
             canvas.className = 'flex-grow z-10 flex items-center justify-center'
                 + ' text-slate-200 text-sm';
             canvas.textContent =
-                `スライドのデータ slides/${deckName}.js を読み込めませんでした。`;
-            throw new Error(`deck not found: ${deckName}`);
+                `スライドのデータ slides/${slidesName}.js を読み込めませんでした。`;
+            throw new Error(`slides not found: ${slidesName}`);
         }
 
         let currentIndex = 0;
@@ -602,11 +604,11 @@
         const captionIcon = document.getElementById('caption-icon');
 
         // Pronunciation map for Japanese Speech Engine.
-        // デッキだけの語（deckConfig.rules）を先に当て、共通表（SPEECH_RULES、
+        // スライド一式だけの語（slidesConfig.rules）を先に当て、共通表（SPEECH_RULES、
         // slides/_rules.js）を後に当てる（TODO-054）。
         function prepareSpeechText(text) {
             if (!text) return "";
-            const rules = (deckConfig.rules || []).concat(SPEECH_RULES);
+            const rules = (slidesConfig.rules || []).concat(SPEECH_RULES);
             return rules.reduce(
                 (acc, [pattern, replacement]) => acc.replace(pattern, replacement),
                 text);
@@ -1310,8 +1312,8 @@
         }
 
         function startApp() {
-            document.title = deckConfig.title;
-            document.getElementById('deck-heading').textContent = deckConfig.heading;
+            document.title = slidesConfig.title;
+            document.getElementById('slides-heading').textContent = slidesConfig.heading;
             setupViewportScale();
             initPlaylist();
             renderSlide(0, true);

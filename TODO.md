@@ -1,54 +1,8 @@
 # TODO
 
-**残っている項目: TODO-058、TODO-059、TODO-060、TODO-061。**
-これまでに 57 件を決着させた。
+**残っている項目: TODO-059、TODO-060、TODO-061。**
+これまでに 58 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-062` から。**
-
----
-
-## TODO-058. 「デッキ」をやめ、識別子の `deck` も `slides` に変える
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | implementer + wording + verifier + reviewer |
-
-- [ ] 識別子の `deck` を `slides` に変える（`?slides=`、`slidesConfig`、`--slides`）
-- [ ] 旧 `?deck=` も受けるようにする
-- [ ] `slides/_rules.js` から `deck` と `deckConfig` の読みの置換を外す
-- [ ] 日本語の文章の「デッキ」を「スライド一式」に言い換える
-- [ ] ナレーションが変わったスライドの `duration` を測り直す
-
-「デッキ」はスライドの束を指すつもりで使ってきたが、一般的な日本語ではない。
-カセットデッキやカードゲームを連想されやすく、特に**読み上げでは耳で意味が
-取れない**。`slides/_rules.js` に `deck`→「デッキ」の読みの置換があること自体、
-識別子が音声に漏れている証拠になっている。
-`deckConfig` は `docs/User.md` で利用者に書かせる名前なので、
-**文章側だけを直しても「デッキ」は消せない。**
-
-**日本語は「スライド一式」、識別子は `slides` に統一する。**
-
-### 変えるもの
-
-| いま | あと | 場所 |
-|------|------|------|
-| `?deck=<名前>` | `?slides=<名前>` | `player.html` |
-| `deckConfig` | `slidesConfig` | `player.html`、`slides/*.js` 4 本、`tools/` 2 本 |
-| `--deck` | `--slides` | `tools/measure-duration.py` |
-| `deck-heading` | `slides-heading` | `player.html` |
-
-- **旧 `?deck=` も受ける。** 公開済みのリンクが切れるため。`player.html` で
-  `slides` を先に見て、無ければ `deck` を見る
-- **`slides/claude-memo.js` も対象。** 日本語の文章は変えないが、
-  `deckConfig` を持っているため
-- **`CLAUDE.md` も対象。** 識別子を 1 箇所書いている
-- `slidesConfig` と `slideData` が 1 文字違いで並ぶのは承知のうえ。
-  `slideData` は変えない
-- **`docs/User.md` に「旧 `?deck=` も動く」とは書かない。** 書くと利用者が
-  古い書き方を使い続ける。動くが、文書には出さない。
-  `player.html` のコメントにだけ、旧名を受ける理由を残す
-
-分岐が 1 つ増える（`slides` が無ければ `deck` を見る）ので reviewer を入れる。
-**TODO-057 が決着してから着手する。** 同じ 3 ファイルを触るため。
 
 ---
 
@@ -77,7 +31,7 @@ TODO-041 で `player.html` とスライドデータを分け、TODO-054 で置�
 | ファイル | 箇所 |
 |----------|------|
 | `README.md:3` | 冒頭の一文 |
-| `slides/readme.js:5` | `deckConfig.title`（ブラウザのタブに出る） |
+| `slides/readme.js:5` | `slidesConfig.title`（ブラウザのタブに出る） |
 | `slides/readme.js:23,31` | スライド 1 のナレーションと `h1` |
 | `slides/readme.js:260,270` | まとめスライドのナレーションと本文 |
 
@@ -85,7 +39,6 @@ TODO-041 で `player.html` とスライドデータを分け、TODO-054 で置�
 - `README.md:40` と `tools/test_measure_duration.py:19` の `'1 枚目'` は
   サンプルの題名なので**対象外**
 - 事実の言い換えだけで分岐は変わらないので reviewer は入れない
-- **TODO-057 が決着してから着手する。** `slides/readme.js` を触るため
 
 ---
 
@@ -101,21 +54,19 @@ TODO-054 で共通の置換表を `player.html` から `slides/_rules.js` へ出
 その結果、動かすのに 3 ファイルが要るようになり、TODO-059 で
 「HTML 1 枚で動く」という記述を直すことになった。**戻せば 2 ファイルになる。**
 
-デッキごとに読みを足せるのは `deckConfig.rules`（各スライドのファイル側）の
+スライド一式ごとに読みを足せるのは `slidesConfig.rules`（各スライドのファイル側）の
 働きで、共通表が別ファイルであることには依存しない。つまり TODO-054 の目的は、
 共通表を `player.html` に戻しても失われない。
 
 ### 検討する点
 
 - 共通表を直すのに `player.html` を触ることになる。利用者に共通表を直させる
-  場面が実際にあるか（`docs/User.md` の「読みを直す」は `deckConfig.rules` を
+  場面が実際にあるか（`docs/User.md` の「読みを直す」は `slidesConfig.rules` を
   足す手順）
 - `tools/measure-duration.py` が共通表を `slides/_rules.js` から読んでいる。
   `player.html` から切り出す形にできるか
 
 **決めるだけの項目なので担当は付けない。** 戻すと決まったら、実装は別項目を立てる。
-**TODO-058 が決着してから着手する。** TODO-058 が `slides/_rules.js` から
-`deck` の読みの置換を外すため。
 
 ---
 
@@ -142,6 +93,7 @@ TODO-054 で共通の置換表を `player.html` から `slides/_rules.js` へ出
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由も記載してある。** 蒸し返す前に読むこと。
 
+- [**TODO-058.** 「デッキ」をやめ、識別子の `deck` も `slides` に変える](archives/todo/TODO-058.%20「デッキ」をやめ、識別子の%20deck%20も%20slides%20に変える.md)
 - [**TODO-057.** 3 デッキに wording を通す](archives/todo/TODO-057.%203%20デッキに%20wording%20を通す.md)
 - [**TODO-056.** 他のサーバーへ公開するときに要るファイルを `docs/User.md` に書く](archives/todo/TODO-056.%20%E4%BB%96%E3%81%AE%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%B8%E5%85%AC%E9%96%8B%E3%81%99%E3%82%8B%E3%81%A8%E3%81%8D%E3%81%AB%E8%A6%81%E3%82%8B%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%92%20docs%20User.md%20%E3%81%AB%E6%9B%B8%E3%81%8F.md)
 - [**TODO-055.** 各ドキュメントに wording を通す](archives/todo/TODO-055.%20各ドキュメントに%20wording%20を通す.md)

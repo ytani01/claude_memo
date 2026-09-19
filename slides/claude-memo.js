@@ -1,10 +1,10 @@
-// スライドのデータ。player.html?deck=claude-memo から読まれる（TODO-041）。
+// スライドのデータ。player.html?slides=claude-memo から読まれる（TODO-041）。
 // 共通の再生エンジンは player.html の中にある。
 
-const deckConfig = {
+const slidesConfig = {
     title: 'Claude Code 活用法 - プレゼン動画プレイヤー',
     heading: '私の Claude Code の使い方',
-    // このデッキだけの読みの置換表（TODO-054）。共通は slides/_rules.js
+    // このスライド一式だけの読みの置換表（TODO-054）。共通は slides/_rules.js
     rules: [
         [/ccstatusline/gi, 'シーシー ステータス ライン'],
         [/\/clear/gi, 'スラッシュ クリア'],

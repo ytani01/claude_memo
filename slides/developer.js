@@ -1,11 +1,11 @@
-// スライドのデータ。player.html?deck=developer から読まれる（TODO-051）。
+// スライドのデータ。player.html?slides=developer から読まれる（TODO-051）。
 // 共通の再生エンジンは player.html の中にある。
 // 読み手は「player.html を直す人」。docs/Developer.md の要点だけを載せる。
 
-const deckConfig = {
+const slidesConfig = {
     title: 'player.html を直す人へ - 開発者向けガイド',
     heading: 'player.html を直す人へ',
-    // このデッキだけの読みの置換表（TODO-054）。共通は slides/_rules.js
+    // このスライド一式だけの読みの置換表（TODO-054）。共通は slides/_rules.js
     rules: [
         [/archives\/todo/gi, 'アーカイブズ スラッシュ トゥードゥー'],
         [/public_html/gi, 'パブリック エイチティーエムエル'],
@@ -109,8 +109,8 @@ const slideData = [
     // Slide 4
     {
         title: '全体の作り',
-        duration: 16,
-        narration: '全体はHTMLとslideDataと再生ロジックの3段構成です。player.htmlはdeckの名前からslides配下のファイルを読み込み、その中のslideDataを再生ロジックが参照します。読み込む順番は入れ替えられません。',
+        duration: 18,
+        narration: '全体はHTMLとslideDataと再生ロジックの3段構成です。player.htmlはURLで指定された名前から、slides配下のファイルを読み込み、その中のslideDataを再生ロジックが参照します。読み込む順番は入れ替えられません。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -132,7 +132,7 @@ const slideData = [
                         </div>
                     </div>
                     <div class="bg-slate-900 border border-slate-800 rounded-xl p-[1.2cqw] text-slate-200 font-medium" style="font-size: clamp(0.9rem, 1.9cqw, 1.4rem);">
-                        <code class="text-lime-300">?deck=&lt;名前&gt;</code> から <code class="text-lime-300">slides/&lt;名前&gt;.js</code> を document.write で先に読み込む。
+                        <code class="text-lime-300">?slides=&lt;名前&gt;</code> から <code class="text-lime-300">slides/&lt;名前&gt;.js</code> を document.write で先に読み込む。
                         再生ロジックより先に読ませる順番は入れ替えられない
                     </div>
                 </div>
@@ -179,7 +179,7 @@ const slideData = [
                         Online TTS の音声を BASE_SPEED_MULTIPLIER 倍で再生した実測秒数を入れる。目分量ではない。
                     </p>
                     <div class="bg-slate-900 border border-slate-800 rounded-xl p-[1.2cqw] font-mono text-slate-200 mb-[1.2cqw]" style="font-size: clamp(0.85rem, 1.8cqw, 1.3rem);">
-                        tools/measure-duration.py --deck &lt;名前&gt; --all --write
+                        tools/measure-duration.py --slides &lt;名前&gt; --all --write
                     </div>
                     <div class="bg-amber-950/40 border border-amber-500/40 rounded-xl p-[1.2cqw] text-amber-300 font-medium flex items-center gap-[1cqw]" style="font-size: clamp(0.9rem, 1.85cqw, 1.35rem);">
                         <i class="fa-solid fa-triangle-exclamation text-amber-400 flex-shrink-0"></i>
@@ -301,7 +301,7 @@ const slideData = [
     // Slide 11
     {
         title: 'まとめ',
-        duration: 14,
+        duration: 15,
         narration: 'player.htmlを直すときは、再生ロジックと読み上げの仕組み、副作用のある3つの注意点、cqwによるレイアウトを押さえてください。細かい経緯はarchives/todo以下にあります。',
         render: function() {
             return `

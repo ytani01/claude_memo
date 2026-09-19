@@ -25,7 +25,7 @@ python3 -m http.server 8000
 # => http://localhost:8000/player.html
 ```
 
-`player.html?deck=<名前>` で `slides/<名前>.js` を読む。`?deck=` を省くと
+`player.html?slides=<名前>` で `slides/<名前>.js` を読む。`?slides=` を省くと
 このリポジトリの紹介（`slides/readme.js`）が流れる。
 
 ## 自分のスライドを作る
@@ -33,7 +33,7 @@ python3 -m http.server 8000
 **`player.html` は触らない。** `slides/` に JavaScript を 1 つ足すだけ。
 
 ```javascript
-const deckConfig = { title: 'ブラウザのタブに出る名前', heading: '画面上部の見出し' };
+const slidesConfig = { title: 'ブラウザのタブに出る名前', heading: '画面上部の見出し' };
 
 const slideData = [
     {
@@ -47,12 +47,12 @@ const slideData = [
 ];
 ```
 
-`duration` は目分量で決めず、`tools/measure-duration.py --deck <名前> --all --write`
+`duration` は目分量で決めず、`tools/measure-duration.py --slides <名前> --all --write`
 で実測値を入れる。手順は [docs/User.md](docs/User.md) にある。
 
 ## 入っているスライド
 
-| デッキ | 中身 |
+| 名前 | 中身 |
 |--------|------|
 | `readme` | このリポジトリの紹介（既定） |
 | `user` | スライドの作り方 |
@@ -66,8 +66,8 @@ const slideData = [
 | ファイル・ディレクトリ | 中身 |
 |------------------------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
-| `slides/<名前>.js` | スライドのデータ。`player.html?deck=<名前>` で読まれる |
-| `slides/_rules.js` | 全デッキ共通の読みの置換表 |
+| `slides/<名前>.js` | スライドのデータ。`player.html?slides=<名前>` で読まれる |
+| `slides/_rules.js` | 全スライド共通の読みの置換表 |
 | `docs/` | 説明（下記） |
 | `tools/measure-duration.py` | 読み上げ秒数を測り、`duration` に書き戻す |
 | `tools/test_measure_duration.py` | 書き戻しの置換を確かめる自己テスト |

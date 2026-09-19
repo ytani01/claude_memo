@@ -8,19 +8,19 @@
     tools/measure-duration.py 2 17          # スライド 2 と 17 を測る
     tools/measure-duration.py --all         # すべて
     tools/measure-duration.py --all --write # すべて測って duration を書き戻す
-    tools/measure-duration.py --deck user --all --write
+    tools/measure-duration.py --slides user --all --write
     tools/measure-duration.py --text 'ここに下書き'
 
-`--text` は、差し替える前に案の長さを見るためのもの。デッキごとに置換表が
-違うので、測りたいデッキと `--deck` を揃えないと違う秒数が出る（既定は
+`--text` は、差し替える前に案の長さを見るためのもの。スライド一式ごとに置換表が
+違うので、測りたいスライド一式と `--slides` を揃えないと違う秒数が出る（既定は
 `readme`）。
 `--write` は測った値を `duration` に書き込む（変わった枚だけ `17 -> 16` と
-出す。戻すのは git の差分で足りる）。`--deck` はどのデッキを読むかで、
-既定は `DEFAULT_DECK`（下で定める）のデッキ。
+出す。戻すのは git の差分で足りる）。`--slides` はどのスライド一式を読むかで、
+既定は `DEFAULT_SLIDES`（下で定める）のスライド一式。
 
-読みの置換表は `slides/_rules.js`（共通）と `slides/<デッキ名>.js` の
-`deckConfig.rules`（デッキだけの語）から読む。`prepareSpeechText()` と同じく
-デッキ側を先、共通を後に当てる。表そのものはここには持たない。
+読みの置換表は `slides/_rules.js`（共通）と `slides/<スライド一式名>.js` の
+`slidesConfig.rules`（スライド一式だけの語）から読む。`prepareSpeechText()` と同じく
+スライド一式側を先、共通を後に当てる。表そのものはここには持たない。
 
 `curl` と `ffprobe` が要る。
 """
@@ -34,7 +34,7 @@ import tempfile
 import urllib.parse
 
 SLIDES = pathlib.Path(__file__).resolve().parent.parent / 'slides'
-DEFAULT_DECK = 'readme'
+DEFAULT_SLIDES = 'readme'
 
 # player.html の写し ---------------------------------------------------
 TTS_MAX_CHARS = 180
@@ -63,15 +63,15 @@ def load_rules(text):
     return rules
 
 
-def deck_rules_from_text(text):
-    """deckConfig の本文から rules: の中身を読む（無ければ空）。"""
+def slides_rules_from_text(text):
+    """slidesConfig の本文から rules: の中身を読む（無ければ空）。"""
     m = re.search(r'rules:\s*\[(.*?)\n\s*\],', text, re.S)
     return load_rules(m.group(1)) if m else []
 
 
-def load_deck_rules(deck):
-    """`slides/<deck>.js` の deckConfig.rules を読む（無ければ空）。"""
-    return deck_rules_from_text((SLIDES / f'{deck}.js').read_text(encoding='utf-8'))
+def load_slides_rules(slides):
+    """`slides/<slides>.js` の slidesConfig.rules を読む（無ければ空）。"""
+    return slides_rules_from_text((SLIDES / f'{slides}.js').read_text(encoding='utf-8'))
 
 
 def load_common_rules():
@@ -80,18 +80,18 @@ def load_common_rules():
     return load_rules(text)
 
 
-def prepare(text, deck=DEFAULT_DECK):
-    """prepareSpeechText() と同じ置換を掛ける（デッキ側を先、共通を後）。"""
+def prepare(text, slides=DEFAULT_SLIDES):
+    """prepareSpeechText() と同じ置換を掛ける（スライド一式側を先、共通を後）。"""
     # re.A が要る。付けないと Python の \b は日本語を語の一部と見なすので、
     # 「slidesフォルダ」のように和文が続く語で JS と結果が食い違う。
-    for pattern, replacement, flags in load_deck_rules(deck) + load_common_rules():
+    for pattern, replacement, flags in load_slides_rules(slides) + load_common_rules():
         text = re.sub(pattern, replacement, text, flags=flags | re.A)
     return text
 
 
-def measure(text, deck=DEFAULT_DECK):
+def measure(text, slides=DEFAULT_SLIDES):
     """読み上げ音声を取ってきて、実測秒数と BASE_SPEED_MULTIPLIER 倍での秒数を返す。"""
-    spoken = prepare(text, deck)
+    spoken = prepare(text, slides)
     clean = spoken[:TTS_MAX_CHARS]
     url = ('https://translate.google.com/translate_tts?ie=UTF-8&tl=ja'
            '&client=tw-ob&q=' + urllib.parse.quote(clean, safe=''))
@@ -114,7 +114,7 @@ DURATION_RE = re.compile(r"(duration: )(\d+)(,\n *narration: ')")
 
 
 def narrations(text):
-    """デッキの本文から narration を並び順に取り出す。"""
+    """スライド一式の本文から narration を並び順に取り出す。"""
     return re.findall(r"narration: '(.*?)',\n", text)
 
 
@@ -154,12 +154,14 @@ def main():
     parser.add_argument('--text', help='下書きの文字列を直接測る')
     parser.add_argument('--all', action='store_true', help='すべてのスライド')
     parser.add_argument('--write', action='store_true',
-                        help='測った値をデッキの duration に書き戻す')
-    parser.add_argument('--deck', default=DEFAULT_DECK,
-                        help=f'slides/<名前>.js の <名前>（既定は {DEFAULT_DECK}）')
+                        help='測った値をスライド一式の duration に書き戻す')
+    # dest を slides_name にする。位置引数の 'slides'（スライド番号のリスト）と
+    # dest が衝突するため（TODO-058）。
+    parser.add_argument('--slides', dest='slides_name', default=DEFAULT_SLIDES,
+                        help=f'slides/<名前>.js の <名前>（既定は {DEFAULT_SLIDES}）')
     args = parser.parse_args()
 
-    src = SLIDES / f'{args.deck}.js'
+    src = SLIDES / f'{args.slides_name}.js'
     if (args.slides or args.all) and not src.exists():
         parser.error(f'{src} が無い')
 
@@ -178,7 +180,7 @@ def main():
 
     updates = {}
     for number, label, text in jobs:
-        spoken, raw, scaled = measure(text, args.deck)
+        spoken, raw, scaled = measure(text, args.slides_name)
         cut = (f' ★TTS_MAX_CHARS={TTS_MAX_CHARS} 字で切れる'
                if len(spoken) > TTS_MAX_CHARS else '')
         print(f'{label}: 原文 {len(text)} 字 / 読み {len(spoken)} 字{cut}'

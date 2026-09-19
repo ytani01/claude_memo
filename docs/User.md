@@ -1,6 +1,6 @@
 # スライドを作る
 
-**同じ内容をスライドでも見られる**（`player.html?deck=user`）。
+**同じ内容をスライドでも見られる**（`player.html?slides=user`）。
 
 `player.html` は再生エンジンだけで、スライドのデータは
 `slides/<名前>.js` に分かれている。新しいスライドを作るときは、
@@ -11,10 +11,10 @@
 
 1. `player.html` と同じディレクトリの `slides/` に `<名前>.js` を作る
    （`<名前>` は英数字・`_`・`-` のみ。その他は無視される）
-2. `deckConfig` と `slideData` を書く（下記）
-3. ブラウザで `player.html?deck=<名前>` を開く
+2. `slidesConfig` と `slideData` を書く（下記）
+3. ブラウザで `player.html?slides=<名前>` を開く
 
-`?deck=` を省くと `slides/readme.js` を読む。読み込みに失敗した場合、
+`?slides=` を省くと `slides/readme.js` を読む。読み込みに失敗した場合、
 白画面ではなく「スライドのデータ slides/<名前>.js を読み込めませんでした。」
 と表示して停止する。
 
@@ -23,7 +23,7 @@
 グローバルに 2 つ定義する。いずれも `const` で、この名前でなければ認識されない。
 
 ```js
-const deckConfig = {
+const slidesConfig = {
     title: 'ブラウザのタブに出る文字列',
     heading: 'ヘッダーに出る見出し',
 };
@@ -82,7 +82,7 @@ const slideData = [
 待たされたりする。
 
 測るには `tools/measure-duration.py` を使う。**`--text` に文章を渡すと、
-どのデッキでも測定できる。**
+どのスライド一式でも測定できる。**
 
 ```bash
 $ tools/measure-duration.py --text 'ここに読み上げる文章'
@@ -91,11 +91,11 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 
 最後に出る `duration: 2` をそのまま書く。`curl` と `ffprobe` が必要。
 
-`--deck <名前>` を付けると、どのデッキのスライドでも指定できる
+`--slides <名前>` を付けると、どのスライド一式のスライドでも指定できる
 （省くと `readme`）。`--write` を付けると、`duration` を直接書き換える。
 
 ```bash
-$ tools/measure-duration.py --deck user --all --write
+$ tools/measure-duration.py --slides user --all --write
 （11 枚の測定結果）
 スライド 7: duration 23 -> 12
 user.js: 1 枚を書き換えた
@@ -116,14 +116,14 @@ user.js: 1 枚を書き換えた
 
 | 表 | 置き場所 | 役割 |
 |----|----------|-----------|
-| 共通 | `slides/_rules.js` の `SPEECH_RULES` | すべてのデッキで用いる語 |
-| デッキ | `slides/<名前>.js` の `deckConfig.rules` | 該当デッキだけの語 |
+| 共通 | `slides/_rules.js` の `SPEECH_RULES` | すべてのスライド一式で用いる語 |
+| スライド一式 | `slides/<名前>.js` の `slidesConfig.rules` | 該当スライド一式だけの語 |
 
-**当たる順はデッキが先、共通が後。** 同じ語に両方が当たるときはデッキ側が
-優先されるため、共通の読みをこのデッキだけ変えたい場合は `rules` に書く。
+**当たる順はスライド一式が先、共通が後。** 同じ語に両方が当たるときはスライド一式側が
+優先されるため、共通の読みをこのスライド一式だけ変えたい場合は `rules` に書く。
 
 ```js
-const deckConfig = {
+const slidesConfig = {
     title: 'タブに出る名前',
     heading: '画面の見出し',
     rules: [
@@ -139,11 +139,11 @@ const deckConfig = {
 
 - **短い語が先に当たると、長い語に届かない。** 長いほうを先に書く。
   `Claude Code` は `Claude` より先に書く必要がある。
-- **複数のデッキで使う語は共通に足す。** 1 つのデッキにだけ書くと、別のデッキで
+- **複数のスライド一式で使う語は共通に足す。** 1 つのスライド一式にだけ書くと、別のスライド一式で
   同じ語を使ったときに読みがずれる。
 - **読みを変えたら `duration` を測り直す**（長さが変わる）。
-  `tools/measure-duration.py --deck <名前> --all --write`
-- `--text` で下書きを測るときは `--deck <名前>` も付ける。表はデッキごとに
+  `tools/measure-duration.py --slides <名前> --all --write`
+- `--text` で下書きを測るときは `--slides <名前>` も付ける。表はスライド一式ごとに
   異なるため、付けないと既定の `readme` の表で測定してしまう。
 
 ## 公開
@@ -158,7 +158,7 @@ const deckConfig = {
 ```
 player.html
 slides/_rules.js
-slides/<名前>.js    ← 公開したいデッキの分だけ
+slides/<名前>.js    ← 公開したいスライド一式の分だけ
 ```
 
 `player.html` がローカルから読むのはこの 2 種類の `.js` だけで、参照は
@@ -176,10 +176,10 @@ slides/<名前>.js    ← 公開したいデッキの分だけ
 
 ## 最小の例
 
-`slides/sample.js` として保存し、`player.html?deck=sample` で開く。
+`slides/sample.js` として保存し、`player.html?slides=sample` で開く。
 
 ```js
-const deckConfig = {
+const slidesConfig = {
     title: 'サンプル',
     heading: 'サンプルのスライド',
 };

@@ -1,6 +1,6 @@
-// 全デッキ共通の読みの置換表（TODO-054）。
-// デッキだけの語は slides/<名前>.js の deckConfig.rules に書く。
-// 当てる順はデッキ側が先、ここが後（デッキ側で読みを上書きできる）。
+// 全スライド共通の読みの置換表（TODO-054）。
+// スライド一式だけの語は slides/<名前>.js の slidesConfig.rules に書く。
+// 当てる順はスライド一式側が先、ここが後（スライド一式側で読みを上書きできる）。
 // tools/measure-duration.py もこのファイルを読む。
 const SPEECH_RULES = [
     [/TODO\.md/gi, 'トゥードゥー ドット エムディー'],
@@ -15,9 +15,8 @@ const SPEECH_RULES = [
     [/player\.html/gi, 'プレイヤー ドット エイチティーエムエル'],
     [/User\.md/gi, 'ユーザー ドット エムディー'],
     [/slideData/gi, 'スライドデータ'],
+    [/slidesConfig/gi, 'スライズ コンフィグ'],
     [/\bslides\b/gi, 'スライズ'],
-    [/deckConfig/gi, 'デッキ コンフィグ'],
-    [/\bdeck\b/gi, 'デッキ'],
     [/\bduration\b/gi, 'デュレーション'],
     [/\bclamp\b/gi, 'クランプ'],
     [/\bcqw\b/gi, 'シーキューダブリュー'],

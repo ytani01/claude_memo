@@ -1,6 +1,6 @@
 # player.html を直す人へ
 
-**同じ内容をスライドでも見られる**（`player.html?deck=developer`）。
+**同じ内容をスライドでも見られる**（`player.html?slides=developer`）。
 
 再生エンジン `player.html` を直すときに、先に知っておきたいことをまとめる。
 **スライドを足したい・作りたいだけなら [User.md](User.md) を読む。**
@@ -12,7 +12,7 @@
 |----------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。本体 |
 | `slides/<名前>.js` | スライドデータ。`readme`・`user`・`developer`・`claude-memo` |
-| `slides/_rules.js` | 全デッキ共通の読み置換表 |
+| `slides/_rules.js` | 全スライド共通の読み置換表 |
 | `tools/measure-duration.py` | 読み上げ秒数の測定と `duration` への書き込み |
 | `tools/test_measure_duration.py` | 書き込みと置換表の読み込みの自動確認 |
 
@@ -49,11 +49,11 @@ python3 -m http.server 8000
 
 **HTML → `slideData` → 再生ロジック** の 3 段。データは別ファイルに分かれている。
 
-`player.html` は `?deck=<名前>` から `slides/<名前>.js` を読み込む
+`player.html` は `?slides=<名前>` から `slides/<名前>.js` を読み込む
 （既定は `readme`）。読み込みは `</main>` 直後の `document.write` で、
 **再生ロジックの `<script>` より前に実行する**。その下の `<script>` は
 読み込み時点で `slideData` を参照するため、順番を変えると動かない。
-デッキが読めなかった場合、白画面にせず理由を表示して `throw` で停止する。
+スライド一式が読めなかった場合、白画面にせず理由を表示して `throw` で停止する。
 
 `slideData` の各要素は `{ title, duration, narration, render() }`。
 スライド番号は持たず、並び順から計算する（TODO-048）。
@@ -85,13 +85,13 @@ python3 -m http.server 8000
 
 **読み置換表を変えると読み上げの長さも変わる。**
 対象スライドの `duration` を測り直す。測定には
-`tools/measure-duration.py` を使う（`--deck <名前>` でデッキを指定、
+`tools/measure-duration.py` を使う（`--slides <名前>` でスライド一式を指定、
 下書き確認は `--text`）。**`--write` を付けると、測定値を
-そのデッキの `duration` に書き込む**（TODO-050、TODO-051）。
+そのスライド一式の `duration` に書き込む**（TODO-050、TODO-051）。
 ナレーション編集後は
-`tools/measure-duration.py --deck <名前> --all --write` でまとめて更新できる。
+`tools/measure-duration.py --slides <名前> --all --write` でまとめて更新できる。
 
-置換表は `player.html` と同じものを `slides/_rules.js` とデッキのファイルから
+置換表は `player.html` と同じものを `slides/_rules.js` とスライド一式のファイルから
 読み込むため、複製ではない（TODO-054）。ただし **`TTS_MAX_CHARS` と
 `BASE_SPEED_MULTIPLIER` は `player.html` と同じ値**なため、どちらか一方を変えたら
 もう一方も変える。片方だけ変えると測定値が実際とずれる。
@@ -106,8 +106,8 @@ python3 -m http.server 8000
 | `speech` | Web Speech API（`SpeechSynthesisUtterance`） | 長い発話が途中で切れる |
 
 `narration` は `prepareSpeechText()` を通してから読み上げられる。置換表は
-**デッキの `deckConfig.rules` が先、`slides/_rules.js` の `SPEECH_RULES` が後**
-の順に適用される。`_rules.js` はデッキより先に読む必要があるため、
+**スライド一式の `slidesConfig.rules` が先、`slides/_rules.js` の `SPEECH_RULES` が後**
+の順に適用される。`_rules.js` はスライド一式より先に読む必要があるため、
 `document.write` 前の `<script>` タグで読み込む（`fetch` にすると `file://` で
 開けなくなる）。方法は `docs/User.md` の「読みを直す」にある。
 

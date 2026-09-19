@@ -1,10 +1,10 @@
-// スライドのデータ。player.html?deck=readme から読まれる（TODO-051）。
-// このリポジトリ自体の紹介デッキ。共通の再生エンジンは player.html の中にある。
+// スライドのデータ。player.html?slides=readme から読まれる（TODO-051）。
+// このリポジトリ自体の紹介スライド一式。共通の再生エンジンは player.html の中にある。
 
-const deckConfig = {
+const slidesConfig = {
     title: 'yt_slide - HTML1枚で動くナレーション付きプレゼン',
     heading: 'yt_slide の紹介',
-    // このデッキだけの読みの置換表（TODO-054）。共通は slides/_rules.js
+    // このスライド一式だけの読みの置換表（TODO-054）。共通は slides/_rules.js
     rules: [
         [/claude-memo/gi, 'クロード メモ'],
         [/yt_slide/gi, 'ワイティー スライド'],
@@ -79,7 +79,7 @@ const slideData = [
     {
         title: 'すぐ試す',
         duration: 11,
-        narration: 'すぐ試すには、Pythonの簡易サーバーを立てて player.html を開くだけです。deckにスライドの名前を指定すると、そのスライドが再生されます。',
+        narration: 'すぐ試すには、Pythonの簡易サーバーを立てて player.html を開くだけです。URLにスライドの名前を指定すると、そのスライドが再生されます。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -91,7 +91,7 @@ const slideData = [
                         <div class="text-slate-400"># =&gt; http://localhost:8000/player.html</div>
                     </div>
                     <p class="text-slate-200 font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">
-                        <code class="bg-slate-900 px-[0.6cqw] py-[0.2cqw] rounded text-sky-300 font-mono">player.html?deck=&lt;名前&gt;</code>
+                        <code class="bg-slate-900 px-[0.6cqw] py-[0.2cqw] rounded text-sky-300 font-mono">player.html?slides=&lt;名前&gt;</code>
                         で <code class="bg-slate-900 px-[0.6cqw] py-[0.2cqw] rounded text-sky-300 font-mono">slides/&lt;名前&gt;.js</code> を読む。
                     </p>
                 </div>
@@ -119,17 +119,17 @@ const slideData = [
     },
     // Slide 5
     {
-        title: 'deckConfig と slideData',
+        title: 'slidesConfig と slideData',
         duration: 10,
-        narration: '足すファイルには、タブに出る名前を書く deckConfig と、スライドを並べた slideData を定義します。番号や総枚数は自動で数えられます。',
+        narration: '足すファイルには、タブに出る名前を書く slidesConfig と、スライドを並べた slideData を定義します。番号や総枚数は自動で数えられます。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
                     <h2 class="font-bold text-sky-400 mb-[1.4cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                        <i class="fa-solid fa-code text-lime-400"></i> deckConfig と slideData
+                        <i class="fa-solid fa-code text-lime-400"></i> slidesConfig と slideData
                     </h2>
                     <div class="bg-slate-950 border border-slate-800 rounded-xl p-[1.4cqw] font-mono text-slate-200 leading-normal" style="font-size: clamp(0.85rem, 1.9cqw, 1.35rem);">
-<pre class="whitespace-pre-wrap"><span class="text-sky-400">const</span> deckConfig = { title: <span class="text-lime-300">'...'</span>, heading: <span class="text-lime-300">'...'</span> };
+<pre class="whitespace-pre-wrap"><span class="text-sky-400">const</span> slidesConfig = { title: <span class="text-lime-300">'...'</span>, heading: <span class="text-lime-300">'...'</span> };
 
 <span class="text-sky-400">const</span> slideData = [
   { title: <span class="text-lime-300">'1枚目'</span>, duration: <span class="text-amber-300">10</span>, narration: <span class="text-lime-300">'...'</span>, render() { <span class="text-slate-500">/* HTML を返す */</span> } },
@@ -214,7 +214,7 @@ const slideData = [
                         <i class="fa-solid fa-stopwatch text-lime-400"></i> duration の測り方
                     </h2>
                     <div class="bg-slate-950 border border-slate-800 rounded-xl p-[1.4cqw] font-mono text-slate-200 space-y-[0.5cqw]" style="font-size: clamp(0.82rem, 1.75cqw, 1.3rem);">
-                        <div><span class="text-lime-400">$</span> tools/measure-duration.py --deck user --all --write</div>
+                        <div><span class="text-lime-400">$</span> tools/measure-duration.py --slides user --all --write</div>
                         <div class="text-slate-400">スライド 7: duration 23 -&gt; 12</div>
                         <div class="text-slate-400">user.js: 1 枚を書き換えた</div>
                     </div>
@@ -229,7 +229,7 @@ const slideData = [
     {
         title: '入っているスライド',
         duration: 12,
-        narration: 'このリポジトリには、紹介用のreadme、作り方を説明するuser、内部の作りを説明するdeveloper、実例のclaude-memoの4つのデッキが入っています。',
+        narration: 'このリポジトリには、紹介用のreadme、作り方を説明するuser、内部の作りを説明するdeveloper、実例のclaude-memoの4つのスライド一式が入っています。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -239,7 +239,7 @@ const slideData = [
                     <div class="overflow-x-auto rounded-xl border border-slate-700/80">
                         <table class="w-full text-left text-slate-200" style="font-size: clamp(0.95rem, 2.0cqw, 1.5rem);">
                             <thead class="bg-slate-800 text-sky-400 font-bold border-b border-slate-700">
-                                <tr><th class="p-[1cqw]">デッキ</th><th class="p-[1cqw]">中身</th></tr>
+                                <tr><th class="p-[1cqw]">名前</th><th class="p-[1cqw]">中身</th></tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800 bg-slate-900/40 font-medium">
                                 <tr><td class="p-[1cqw] font-mono font-bold text-lime-400">readme</td><td class="p-[1cqw]">このリポジトリの紹介（既定）</td></tr>
