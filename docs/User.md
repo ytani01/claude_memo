@@ -1,6 +1,6 @@
 # player.html で別のスライドを作る
 
-**同じ内容をスライドでも見られる**（`player.html?deck=usage`）。
+**同じ内容をスライドでも見られる**（`player.html?deck=user`）。
 
 `player.html` は再生エンジンだけを持っていて、スライドの中身は
 `slides/<名前>.js` に分かれている。新しいスライドを作るときは、
@@ -96,10 +96,10 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 直接書き換える。
 
 ```bash
-$ tools/measure-duration.py --deck usage --all --write
+$ tools/measure-duration.py --deck user --all --write
 （11 枚の測定結果）
 スライド 7: duration 23 -> 12
-usage.js: 1 枚を書き換えた
+user.js: 1 枚を書き換えた
 ```
 
 変わった枚だけ出る。書き換えた結果が気に入らなければ `git checkout` で戻す。

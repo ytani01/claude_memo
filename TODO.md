@@ -1,6 +1,6 @@
 # TODO
 
-**残っている項目: TODO-052、TODO-053。** これまでに 51 件を決着させた。
+**残っている項目: TODO-052。** これまでに 52 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-054` から。**
 
 ---
@@ -35,29 +35,6 @@ TODO-051 で作った 3 デッキのナレーションには、置換表に無�
 
 ---
 
-## TODO-053. `docs/Usage.md` を `docs/User.md` に変える
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | verifier |
-
-- [ ] `git mv docs/Usage.md docs/User.md`
-- [ ] `git mv slides/usage.js slides/user.js`（デッキ名も `user` に揃える）
-- [ ] `README.md`・`docs/Developer.md`・`CLAUDE.md`・`slides/*.js` の中の
-      `Usage.md` と `?deck=usage` を直す
-- [ ] `player.html?deck=user` で開けることを確かめる
-
-「使い方」よりも「この文書は誰向けか」が分かる名前にする。
-`Developer.md`（`player.html` を直す人）と並べたときに、`User.md`
-（スライドを作る人）のほうが対になる。
-
-利用者と決めたこと:
-
-- **デッキ名も `user` に揃える。** `slides/usage.js` は `slides/user.js` に、
-  URL は `player.html?deck=user` になる
-- 旧 URL（`?deck=usage`）のリダイレクトは用意しない。公開してまだ間もなく、
-  外から参照されていないため
-
 ---
 
 ## 完了済み
@@ -65,6 +42,7 @@ TODO-051 で作った 3 デッキのナレーションには、置換表に無�
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-053.** `docs/Usage.md` を `docs/User.md` に変える](archives/todo/TODO-053.%20docs%20Usage.md%20を%20docs%20User.md%20に変える.md)
 - [**TODO-051.** `README.md` と `docs/` の内容をスライドにする](archives/todo/TODO-051.%20README.md%20と%20docs%20の内容をスライドにする.md)
 - [**TODO-050.** 測った `duration` をスライドデータへ自動で書き戻す](archives/todo/TODO-050.%20測った%20duration%20をスライドデータへ自動で書き戻す.md)
 - [**TODO-049.** ドキュメントとスクリプトの数値を定数名に置き換える](archives/todo/TODO-049.%20ドキュメントとスクリプトの数値を定数名に置き換える.md)

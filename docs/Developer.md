@@ -3,7 +3,7 @@
 **同じ内容をスライドでも見られる**（`player.html?deck=developer`）。
 
 再生エンジン `player.html` を直すときに、先に知っておきたいことをまとめる。
-**スライドを足したい・作りたいだけなら [Usage.md](Usage.md) を読めばよい。**
+**スライドを足したい・作りたいだけなら [User.md](User.md) を読めばよい。**
 こちらを読む必要は無い。
 
 ## リポジトリの構成
@@ -11,7 +11,7 @@
 | ファイル | 中身 |
 |----------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
-| `slides/<名前>.js` | スライドのデータ。`readme`・`usage`・`developer`・`claude-memo` |
+| `slides/<名前>.js` | スライドのデータ。`readme`・`user`・`developer`・`claude-memo` |
 | `tools/measure-duration.py` | 読み上げ秒数を測り、`duration` に書き戻す |
 | `tools/test_measure_duration.py` | 書き戻しの置換を確かめる自己テスト |
 
@@ -57,7 +57,7 @@ python3 -m http.server 8000
 
 `slideData` の 1 要素は `{ title, duration, narration, render() }`。
 スライド番号は持たせず、並び順から出す（TODO-048）。
-それぞれの意味は [Usage.md](Usage.md) にある。
+それぞれの意味は [User.md](User.md) にある。
 
 ## 再生ロジック
 

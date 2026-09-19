@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 構成
 
 `player.html`（外枠と再生エンジン）、`slides/*.js`（スライドのデータ。
-`readme`・`usage`・`developer`・`claude-memo` の 4 デッキ）と、
+`readme`・`user`・`developer`・`claude-memo` の 4 デッキ）と、
 `tools/` の補助スクリプトだけ。ビルドも依存関係のインストールも
 無く、テストは `tools/test_measure_duration.py` の 1 本だけ。
 配置場所が `public_html/` なので、これらのファイルがそのまま公開される。
@@ -24,7 +24,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   再生ロジックと `duration` の決まり、読み上げの 2 系統と安全タイマー、
   container query と狭い画面の縮小経路、擬似フルスクリーン、触ると鳴らなく
   なるもの。**直す前に必ず目を通すこと**
-- **スライドを足す・作るだけなら [`docs/Usage.md`](docs/Usage.md)。**
+- **スライドを足す・作るだけなら [`docs/User.md`](docs/User.md)。**
   `slides/<名前>.js` の書き方と `duration` の測り方
 
 個々の変更の経緯は `archives/todo/` にある。`docs/` は利用者向けなので

@@ -205,9 +205,9 @@ const slideData = [
                         <i class="fa-solid fa-stopwatch text-lime-400"></i> duration の測り方
                     </h2>
                     <div class="bg-slate-950 border border-slate-800 rounded-xl p-[1.4cqw] font-mono text-slate-200 space-y-[0.5cqw]" style="font-size: clamp(0.82rem, 1.75cqw, 1.3rem);">
-                        <div><span class="text-lime-400">$</span> tools/measure-duration.py --deck usage --all --write</div>
+                        <div><span class="text-lime-400">$</span> tools/measure-duration.py --deck user --all --write</div>
                         <div class="text-slate-400">スライド 7: duration 23 -&gt; 12</div>
-                        <div class="text-slate-400">usage.js: 1 枚を書き換えた</div>
+                        <div class="text-slate-400">user.js: 1 枚を書き換えた</div>
                     </div>
                     <p class="text-slate-200 mt-[1.4cqw] font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">
                         目分量ではなく、<span class="text-lime-400 font-bold">Online TTS の実測秒数</span>を書き戻す。
@@ -220,7 +220,7 @@ const slideData = [
     {
         title: '入っているスライド',
         duration: 12,
-        narration: 'このリポジトリには、紹介用のreadme、作り方を説明するusage、内部の作りを説明するdeveloper、実例のclaude-memoの4つのデッキが入っています。',
+        narration: 'このリポジトリには、紹介用のreadme、作り方を説明するuser、内部の作りを説明するdeveloper、実例のclaude-memoの4つのデッキが入っています。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -234,7 +234,7 @@ const slideData = [
                             </thead>
                             <tbody class="divide-y divide-slate-800 bg-slate-900/40 font-medium">
                                 <tr><td class="p-[1cqw] font-mono font-bold text-lime-400">readme</td><td class="p-[1cqw]">このリポジトリの紹介（既定）</td></tr>
-                                <tr><td class="p-[1cqw] font-mono font-bold text-sky-400">usage</td><td class="p-[1cqw]">スライドの作り方</td></tr>
+                                <tr><td class="p-[1cqw] font-mono font-bold text-sky-400">user</td><td class="p-[1cqw]">スライドの作り方</td></tr>
                                 <tr><td class="p-[1cqw] font-mono font-bold text-sky-400">developer</td><td class="p-[1cqw]">player.html の作り</td></tr>
                                 <tr><td class="p-[1cqw] font-mono font-bold text-lime-400">claude-memo</td><td class="p-[1cqw]">実例。Claude Code の使い方 17 枚</td></tr>
                             </tbody>

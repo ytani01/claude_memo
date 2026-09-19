@@ -49,14 +49,14 @@ const slideData = [
 ```
 
 `duration` は目分量で決めず、`tools/measure-duration.py --deck <名前> --all --write`
-で実測して入れる。手順は [docs/Usage.md](docs/Usage.md) にある。
+で実測して入れる。手順は [docs/User.md](docs/User.md) にある。
 
 ## 入っているスライド
 
 | デッキ | 中身 |
 |--------|------|
 | `readme` | このリポジトリの紹介（既定） |
-| `usage` | スライドの作り方 |
+| `user` | スライドの作り方 |
 | `developer` | `player.html` の作り |
 | `claude-memo` | 実例。「私の Claude Code の使い方」17 枚 |
 
@@ -81,7 +81,7 @@ HTTP で配るのが確実。
 
 ## 説明
 
-- [docs/Usage.md](docs/Usage.md) — **スライドを作る人へ。**
+- [docs/User.md](docs/User.md) — **スライドを作る人へ。**
   `player.html` は編集せず、`slides/<名前>.js` を 1 つ足す手順
 - [docs/Developer.md](docs/Developer.md) — **`player.html` を直す人へ。**
   全体の作り、再生ロジック、読み上げ、レイアウトの事情

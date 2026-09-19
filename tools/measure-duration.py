@@ -8,7 +8,7 @@
     tools/measure-duration.py 2 17          # スライド 2 と 17 を測る
     tools/measure-duration.py --all         # すべて
     tools/measure-duration.py --all --write # すべて測って duration を書き戻す
-    tools/measure-duration.py --deck usage --all --write
+    tools/measure-duration.py --deck user --all --write
     tools/measure-duration.py --text 'ここに下書き'
 
 `--text` は、差し替える前に案の長さを見るためのもの。

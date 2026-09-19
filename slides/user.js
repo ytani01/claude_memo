@@ -1,5 +1,5 @@
-// スライドのデータ。player.html?deck=usage から読まれる（TODO-051）。
-// docs/Usage.md（スライドを作る人向けの手順）の要点をスライドにしたもの。
+// スライドのデータ。player.html?deck=user から読まれる（TODO-051、TODO-053）。
+// docs/User.md（スライドを作る人向けの手順）の要点をスライドにしたもの。
 // 共通の再生エンジンは player.html の中にある。
 
 const deckConfig = {
@@ -201,8 +201,8 @@ const slideData = [
     // Slide 8
     {
         title: '近い見た目をコピーする',
-        duration: 10,
-        narration: '近い見た目の既存スライドをコピーして、中身を差し替えるのが早い方法です。細かい書き方は Usage.md にまとまっています。',
+        duration: 9,
+        narration: '近い見た目の既存スライドをコピーして、中身を差し替えるのが早い方法です。細かい書き方は User.md にまとまっています。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -217,7 +217,7 @@ const slideData = [
                         </div>
                         <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.8cqw] text-center">
                             <i class="fa-solid fa-book text-lime-400 mb-[0.8cqw]" style="font-size: clamp(1.8rem, 4cqw, 2.8rem);"></i>
-                            <div class="text-slate-100 font-bold" style="font-size: clamp(1.05rem, 2.3cqw, 1.7rem);">docs/Usage.md</div>
+                            <div class="text-slate-100 font-bold" style="font-size: clamp(1.05rem, 2.3cqw, 1.7rem);">docs/User.md</div>
                             <div class="text-slate-300 mt-[0.4cqw] font-medium" style="font-size: clamp(0.85rem, 1.8cqw, 1.3rem);">細かい書き方はこちらを見る</div>
                         </div>
                     </div>
@@ -272,7 +272,7 @@ const slideData = [
     {
         title: 'まとめ',
         duration: 10,
-        narration: 'player.html は触らず、slides に名前.js を1つ足すだけです。細かい注意点は Usage.md を見てください。',
+        narration: 'player.html は触らず、slides に名前.js を1つ足すだけです。細かい注意点は User.md を見てください。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -290,7 +290,7 @@ const slideData = [
                         </div>
                         <div class="bg-slate-800/60 p-[1.1cqw] rounded-lg border border-slate-700 flex items-center gap-[1.2cqw]">
                             <i class="fa-solid fa-book text-sky-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.4cqw, 1.7rem);"></i>
-                            <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">細かい注意点は <strong>docs/Usage.md</strong> へ</span>
+                            <span style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">細かい注意点は <strong>docs/User.md</strong> へ</span>
                         </div>
                     </div>
                 </div>
