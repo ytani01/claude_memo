@@ -39,6 +39,7 @@ TTS_MAX_CHARS = 180
 BASE_SPEED_MULTIPLIER = 1.4
 
 RULES = [
+    (r'archives/todo', 'アーカイブズ スラッシュ トゥードゥー', re.I),
     (r'TODO\.md', 'トゥードゥー ドット エムディー', re.I),
     (r'TODO-([0-9]+)', r'トゥードゥー \1', re.I),
     (r'TODO', 'トゥードゥー', re.I),
@@ -48,6 +49,8 @@ RULES = [
     (r'/doctor', 'スラッシュ ドクター', re.I),
     (r'/rc', 'スラッシュ アールシー', re.I),
     (r'/login', 'スラッシュ ログイン', re.I),
+    (r'CLAUDE\.md', 'クロード ドット エムディー', re.I),
+    (r'claude-memo', 'クロード メモ', re.I),
     (r'Claude Code', 'クロード コード', re.I),
     (r'Claude', 'クロード', re.I),
     (r'tmux', 'ティーマックス', re.I),
@@ -60,14 +63,50 @@ RULES = [
     (r'使い方', 'つかいかた', 0),
     (r'\bmain\b', 'メイン', re.I),
     (r'\bimplementer\b', 'インプリメンター', re.I),
+    (r'measure-duration\.py', 'メジャー デュレーション ドット パイ', re.I),
+    (r'player\.html', 'プレイヤー ドット エイチティーエムエル', re.I),
+    (r'public_html', 'パブリック エイチティーエムエル', re.I),
+    (r'User\.md', 'ユーザー ドット エムディー', re.I),
+    (r'yt_slide', 'ワイティー スライド', re.I),
+    (r'\.js\b', ' ドット ジェイエス', re.I),
+    (r'slideData', 'スライドデータ', re.I),
+    (r'\bslides\b', 'スライズ', re.I),
+    (r'deckConfig', 'デッキ コンフィグ', re.I),
+    (r'\bdeck\b', 'デッキ', re.I),
+    (r'\bduration\b', 'デュレーション', re.I),
+    (r'Online TTS', 'オンライン ティーティーエス', re.I),
+    (r'Web Speech', 'ウェブ スピーチ', re.I),
+    (r'requestAnimationFrame', 'リクエスト アニメーション フレーム', re.I),
+    (r'container query', 'コンテナ クエリ', re.I),
+    (r'no-referrer', 'ノー リファラー', re.I),
+    (r'\bmeta\b', 'メタ', re.I),
+    (r'\bAudio\b', 'オーディオ', re.I),
+    (r'\btransform\b', 'トランスフォーム', re.I),
+    (r'\bclamp\b', 'クランプ', re.I),
+    (r'\bcqw\b', 'シーキューダブリュー', re.I),
+    (r'px\b', 'ピクセル', re.I),
+    (r'\brem\b', 'レム', re.I),
+    (r'\bwrite\b', 'ライト', re.I),
+    (r'Tailwind', 'テイルウィンド', re.I),
+    (r'\bCDN\b', 'シーディーエヌ', re.I),
+    (r'JavaScript', 'ジャバスクリプト', re.I),
+    (r'HTML', 'エイチティーエムエル', re.I),
+    (r'\bURL\b', 'ユーアールエル', re.I),
+    (r'\bPython\b', 'パイソン', re.I),
+    (r'\btools\b', 'ツールズ', re.I),
+    (r'\breadme\b', 'リードミー', re.I),
+    (r'\buser\b', 'ユーザー', re.I),
+    (r'\bdeveloper\b', 'デベロッパー', re.I),
 ]
 # --------------------------------------------------------------------------
 
 
 def prepare(text):
     """prepareSpeechText() と同じ置換を掛ける。"""
+    # re.A が要る。付けないと Python の \b は日本語を語の一部と見なすので、
+    # 「slidesフォルダ」のように和文が続く語で JS と結果が食い違う。
     for pattern, replacement, flags in RULES:
-        text = re.sub(pattern, replacement, text, flags=flags)
+        text = re.sub(pattern, replacement, text, flags=flags | re.A)
     return text
 
 
