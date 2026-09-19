@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """ナレーションの読み上げ秒数を測り、`duration` に入れる値を出す。
 
-`slideData` の `duration` には「Online TTS の音声を 1.4 倍速で再生した
-実測秒数」が入っている（TODO-018）。ナレーションや読みの置換表を変えると
-長さが変わるので、当たるスライドを測り直す必要がある。
+`slideData` の `duration` には「Online TTS の音声を `BASE_SPEED_MULTIPLIER`
+倍で再生した実測秒数」が入っている（TODO-018）。ナレーションや読みの置換表を
+変えると長さが変わるので、当たるスライドを測り直す必要がある。
 
     tools/measure-duration.py 2 17     # スライド 2 と 17 を測る
-    tools/measure-duration.py --all    # 17 枚すべて
+    tools/measure-duration.py --all    # すべて
     tools/measure-duration.py --text 'ここに下書き'
 
 `--text` は、差し替える前に案の長さを見るためのもの。
@@ -65,7 +65,7 @@ def prepare(text):
 
 
 def measure(text):
-    """読み上げ音声を取ってきて、実測秒数と 1.4 倍速での秒数を返す。"""
+    """読み上げ音声を取ってきて、実測秒数と BASE_SPEED_MULTIPLIER 倍での秒数を返す。"""
     spoken = prepare(text)
     clean = spoken[:TTS_MAX_CHARS]
     url = ('https://translate.google.com/translate_tts?ie=UTF-8&tl=ja'
@@ -94,7 +94,7 @@ def main():
         description='ナレーションの読み上げ秒数を測る')
     parser.add_argument('slides', nargs='*', type=int, help='スライド番号')
     parser.add_argument('--text', help='下書きの文字列を直接測る')
-    parser.add_argument('--all', action='store_true', help='17 枚すべて')
+    parser.add_argument('--all', action='store_true', help='すべてのスライド')
     args = parser.parse_args()
 
     jobs = []
@@ -110,10 +110,12 @@ def main():
 
     for label, text in jobs:
         spoken, raw, scaled = measure(text)
-        cut = ' ★180 字で切れる' if len(spoken) > TTS_MAX_CHARS else ''
+        cut = (f' ★TTS_MAX_CHARS={TTS_MAX_CHARS} 字で切れる'
+               if len(spoken) > TTS_MAX_CHARS else '')
         print(f'{label}: 原文 {len(text)} 字 / 読み {len(spoken)} 字{cut}'
-              f' / 実測 {raw:.3f}s / 1.4 倍速 {scaled:.2f}s'
-              f' -> duration: {round(scaled)}')
+              f' / 実測 {raw:.3f}s'
+              f' / BASE_SPEED_MULTIPLIER={BASE_SPEED_MULTIPLIER} 倍速'
+              f' {scaled:.2f}s -> duration: {round(scaled)}')
 
 
 if __name__ == '__main__':

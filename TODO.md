@@ -1,74 +1,7 @@
 # TODO
 
-**残っている項目: TODO-049。** これまでに 48 件を決着させた。
+**残っている項目: 無し。** これまでに 49 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-050` から。**
-
----
-
-## TODO-049. ドキュメントとスクリプトの数値を定数名に置き換える
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Sonnet 5 / effort medium | verifier |
-
-- [ ] `docs/Developer.md` の 6 箇所を定数名に直す
-- [ ] `docs/Usage.md` の 3 箇所を定数名に直す
-- [ ] `docs/Developer.md:66` の `baseSpeedMultiplier` を正しい名前に直す
-- [ ] `tools/measure-duration.py` の docstring・help・結果表示を直す
-- [ ] `docs/Usage.md` の実行例を、直したあとの出力に合わせる
-
-`player.html` で定数に名前が付いている値（TODO-024）が、文書には数値のまま
-書いてある。コードを直したときに文書だけ古くなる。**文書では定数名だけを書き、
-数値は併記しない**（併記すると片方だけ古くなるので、直す意味が薄れる）。
-
-| 場所 | 今の記述 | 定数 |
-|------|----------|------|
-| `Developer.md` 63・66・67・76 | `1.4` | `BASE_SPEED_MULTIPLIER` |
-| `Developer.md` 96 | `180 文字で切る` | `TTS_MAX_CHARS` |
-| `Developer.md` 105 | `4.5` | `SPEECH_CHARS_PER_SECOND` |
-| `Developer.md` 108 | `3 秒足した` | `TTS_END_MARGIN_MS` |
-| `Developer.md` 118 | `40 文字程度` | `splitForSpeech()` の `maxLen` の既定値 |
-| `Developer.md` 144 | `960x540` | `SLIDE_BASE_WIDTH_PX`（`SLIDE_ASPECT_RATIO` と組）|
-| `Usage.md` 56 | `960x540` | 同上 |
-| `Usage.md` 77 | `1.4 倍速` | `BASE_SPEED_MULTIPLIER` |
-| `Usage.md` 97 | `180 文字で切れる` | `TTS_MAX_CHARS` |
-
-`Developer.md:66` の `baseSpeedMultiplier` は実在しない名前（正しくは
-`BASE_SPEED_MULTIPLIER`）。
-
-### `tools/measure-duration.py`
-
-スクリプトの側にも、31・32 行の定数と別に数値が書いてある。
-
-| 行 | 今の記述 | 直し方 |
-|----|----------|--------|
-| 4 | docstring の `1.4 倍速` | 定数名で書く |
-| 9・97 | `17 枚すべて` | 枚数はデータ次第なので「すべて」に変える |
-| 68 | docstring の `1.4 倍速` | 定数名で書く |
-| 113 | `★180 字で切れる` | 定数から埋め込む |
-| 115 | `1.4 倍速` | 定数から埋め込む |
-
-**結果表示は `定数名=値` の形で、実際の値も一緒に出す。** 定数から
-埋め込むので、`player.html` に合わせて写しを直せば表示も追従する。
-
-```
-スライド 2: 原文 78 字 / 読み 92 字 / 実測 29.760s
-  / BASE_SPEED_MULTIPLIER=1.4 倍速 21.26s -> duration: 21
-
-スライド 5: 原文 210 字 / 読み 245 字 ★TTS_MAX_CHARS=180 字で切れる
-  / 実測 55.200s / BASE_SPEED_MULTIPLIER=1.4 倍速 39.43s -> duration: 39
-```
-
-`docs/Usage.md` 87 行の実行例と 98 行の `★180 字で切れる` は、この出力に
-合わせて書き直す。ここは**実際に動かした出力を貼る**（手で書かない）。
-
-**定数に対応しない数値はそのまま残す。** `767.98px`（CSS に直接書く値）、
-`324 秒`・`0.34〜0.77`・`3px`（実測値）、`15 秒`（Chrome の挙動）。
-
-確認の担当には、書いた定数名が `player.html` に実在するか、値の対応が
-合っているか、`docs/Usage.md` の実行例が実際の出力と一致するかを見てもらう。
-
----
 
 ---
 
@@ -77,6 +10,7 @@
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-049.** ドキュメントとスクリプトの数値を定数名に置き換える](archives/todo/TODO-049.%20ドキュメントとスクリプトの数値を定数名に置き換える.md)
 - [**TODO-048.** スライドデータから `id` を外す](archives/todo/TODO-048.%20スライドデータから%20id%20を外す.md)
 - [**TODO-047.** 旧 URL 用の `claude_memo.html` を削除する](archives/todo/TODO-047.%20旧%20URL%20用の%20claude_memo.html%20を削除する.md)
 - [**TODO-046.** スライドのデータを `slides/` に置く](archives/todo/TODO-046.%20スライドのデータを%20slides%20に置く.md)

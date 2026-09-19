@@ -73,7 +73,8 @@ const slideData = [
 
 ## `narration` と `duration`
 
-`duration` には **Online TTS の音声を 1.4 倍速で再生した実測秒数**が入る。
+`duration` には **Online TTS の音声を `BASE_SPEED_MULTIPLIER` 倍で再生した
+実測秒数**が入る。
 進行バーと残り時間はこの値で描かれる。実際のスライド送りは
 読み上げの終了で起きるので、値がずれてもスライドは飛ばないが、
 バーが先に 100% になったり、読み終わってから待たされたりする。
@@ -83,7 +84,7 @@ const slideData = [
 
 ```bash
 $ tools/measure-duration.py --text 'ここに読み上げる文章'
-下書き: 原文 10 字 / 読み 10 字 / 実測 2.376s / 1.4 倍速 1.70s -> duration: 2
+下書き: 原文 10 字 / 読み 10 字 / 実測 2.376s / BASE_SPEED_MULTIPLIER=1.4 倍速 1.70s -> duration: 2
 ```
 
 最後に出る `duration: 2` をそのまま書けばよい。`curl` と `ffprobe` が要る。
@@ -93,8 +94,8 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 
 書くときの注意:
 
-- **1 文が長いと 180 文字で切れる**（Online TTS の制限）。
-  `measure-duration.py` は超えると `★180 字で切れる` と出す
+- **1 文が長いと `TTS_MAX_CHARS` で切れる**（Online TTS の制限）。
+  `measure-duration.py` は超えると `★TTS_MAX_CHARS=180 字で切れる` と出す
 - 記号や英単語の読みは `player.html` の `prepareSpeechText()` の置換表を
   通してから読み上げられる。読みがおかしいときはそこを見る。
   **置換表を直したら `tools/measure-duration.py` の `RULES` も直す**

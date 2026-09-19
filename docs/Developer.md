@@ -61,12 +61,12 @@ python3 -m http.server 8000
 イベントで起きる**。`duration` を待ち時間として使うのは、消音中と、音声が
 鳴らせなかったとき（`onerror`・`play()` の拒否）だけ。
 
-### 時間軸に 1.4 を掛けない
+### 時間軸に `BASE_SPEED_MULTIPLIER` を掛けない
 
 進行バーと時間表示は**実時間**（`deltaTime * playbackRate`）で進める。
-**1.4 倍が掛かるのは読み上げの速度だけ**（`playbackRate * baseSpeedMultiplier`）。
-時間軸のほうに 1.4 を掛けるとバーだけが先走り、`duration` で頭打ちになって
-読み終わりまで止まって見える。
+**`BASE_SPEED_MULTIPLIER` が掛かるのは読み上げの速度だけ**
+（`playbackRate * BASE_SPEED_MULTIPLIER`）。時間軸のほうにも掛けると
+バーだけが先走り、`duration` で頭打ちになって読み終わりまで止まって見える。
 
 音声が `duration` より長ければ、バーは 100% のまま読み終わりを待つ。
 これは仕様として受け入れている。Web Speech に切り替えると音声の長さが
@@ -74,8 +74,8 @@ python3 -m http.server 8000
 
 ### `duration` は実測値
 
-`duration` には **Online TTS の音声を 1.4 倍速で再生した実測秒数**が入って
-いる。`slides/claude-memo.js` の 17 枚は `ffprobe` で測って入れた値
+`duration` には **Online TTS の音声を `BASE_SPEED_MULTIPLIER` 倍で再生した
+実測秒数**が入っている。`slides/claude-memo.js` の 17 枚は `ffprobe` で測って入れた値
 （合計 324 秒）で、目分量の数字ではない。
 
 **`prepareSpeechText()` の置換表を変えると読み上げの長さも変わる。**
@@ -94,7 +94,7 @@ python3 -m http.server 8000
 
 | モード | 実装 | 制限 |
 |--------|------|------|
-| `online` | Google Translate TTS の URL を `Audio` で再生 | 180 文字で切る |
+| `online` | Google Translate TTS の URL を `Audio` で再生 | `TTS_MAX_CHARS` で切る |
 | `speech` | Web Speech API（`SpeechSynthesisUtterance`） | 長い発話が途中で切れる |
 
 `narration` は `prepareSpeechText()` を通してから読み上げられる。記号や
@@ -103,10 +103,10 @@ python3 -m http.server 8000
 どちらにも安全タイマーがある。読み終わりのイベントが来なくても次へ進むため。
 
 - **Web Speech**: **文字数**から計算する
-  （`textToSpeak.length / 4.5 / getEffectiveSpeed()`）。Web Speech は
+  （`textToSpeak.length / SPEECH_CHARS_PER_SECOND / getEffectiveSpeed()`）。Web Speech は
   読み終わりのイベントが来ないことがある
 - **Online TTS**: **音声の実長**（`loadedmetadata` で取る。取れなければ
-  スライドの `duration`）に 3 秒足した時点で進める
+  スライドの `duration`）に `TTS_END_MARGIN_MS` 足した時点で進める
 
 ### 触ると鳴らなくなるもの
 
@@ -116,7 +116,8 @@ python3 -m http.server 8000
 - **`Audio` 要素（`fallbackAudioElement`）は 1 個を使い回す。**
   再生ボタンのクリックの中で unlock しているので、`null` にして作り直すと
   Android Chrome で自動再生がブロックされて鳴らなくなる
-- **Web Speech は `splitForSpeech()` で 40 文字程度に分けて順に読ませる。**
+- **Web Speech は `splitForSpeech()` で `maxLen` の既定値ぶんに分けて順に
+  読ませる。**
   Chrome は PC も Android も、長い発話を 15 秒ほどで打ち切る。1 つにまとめる
   と途中で切れる
 - **`<meta name="referrer" content="no-referrer">` を外さない。**
