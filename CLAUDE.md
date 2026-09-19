@@ -6,14 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `player.html`（外枠と再生エンジン）、`slides/*.js`（スライドのデータ。
 `readme`・`user`・`developer`・`claude-memo` の 4 デッキ）と、
-`tools/` の補助スクリプトだけ。ビルドも依存関係のインストールも
-無く、テストは `tools/test_measure_duration.py` の 1 本だけ。
-配置場所が `public_html/` なので、これらのファイルがそのまま公開される。
-確認はブラウザで `player.html` を開くだけでよい。
+`tools/` の補助スクリプトだけ。ビルドも依存関係のインストールも不要。
+テストは `tools/test_measure_duration.py` の 1 本だけ。
+配置場所が `public_html/` なので、ファイルがそのまま公開される。
+確認はブラウザで `player.html` を開くだけ。
 
-日本語のスライドを、ナレーション付きで自動再生する動画プレイヤー風のページ。
+日本語のスライドをナレーション付きで自動再生するプレイヤーページ。
 `player.html` は `?deck=<名前>` で `slides/<名前>.js` を読む（既定は `readme`）。
-`claude-memo` は「Claude Code の使い方」を紹介する実例のデッキ。
+`claude-memo` は「Claude Code の使い方」を紹介するデッキ。
 
 ## 触る前に読むもの
 
@@ -22,8 +22,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **`player.html` を直すなら [`docs/Developer.md`](docs/Developer.md)。**
   再生ロジックと `duration` の決まり、読み上げの 2 系統と安全タイマー、
-  container query と狭い画面の縮小経路、擬似フルスクリーン、触ると鳴らなく
-  なるもの。**直す前に必ず目を通すこと**
+  container query と狭い画面の縮小経路、擬似フルスクリーン、副作用のある
+  変更など。**直す前に必ず目を通すこと**
 - **スライドを足す・作るだけなら [`docs/User.md`](docs/User.md)。**
   `slides/<名前>.js` の書き方と `duration` の測り方
 

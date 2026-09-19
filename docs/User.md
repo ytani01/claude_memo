@@ -1,26 +1,26 @@
-# player.html で別のスライドを作る
+# スライドを作る
 
 **同じ内容をスライドでも見られる**（`player.html?deck=user`）。
 
-`player.html` は再生エンジンだけを持っていて、スライドの中身は
+`player.html` は再生エンジンだけで、スライドのデータは
 `slides/<名前>.js` に分かれている。新しいスライドを作るときは、
-**`player.html` は触らず、`slides/<名前>.js` を 1 つ足すだけでよい。**
-再生エンジンのほうを直すなら [Developer.md](Developer.md) を読む。
+**`player.html` は触らず、`slides/<名前>.js` を足すだけ。**
+再生エンジンを直すなら [Developer.md](Developer.md) を読む。
 
 ## 手順
 
 1. `player.html` と同じディレクトリの `slides/` に `<名前>.js` を作る
-   （`<名前>` に使えるのは英数字・`_`・`-` だけ。それ以外は捨てられる）
-2. 中に `deckConfig` と `slideData` を書く（下記）
+   （`<名前>` は英数字・`_`・`-` のみ。その他は無視される）
+2. `deckConfig` と `slideData` を書く（下記）
 3. ブラウザで `player.html?deck=<名前>` を開く
 
-`?deck=` を省くと `slides/readme.js` を読む。読み込みに失敗すると、
-白画面ではなく「スライドのデータ slides/<名前>.js を読み込めませんでした。」と
-表示して止まる。
+`?deck=` を省くと `slides/readme.js` を読む。読み込みに失敗した場合、
+白画面ではなく「スライドのデータ slides/<名前>.js を読み込めませんでした。」
+と表示して停止する。
 
 ## `slides/<名前>.js` の中身
 
-グローバルに 2 つ定義する。どちらも `const` で、この名前でないと読まれない。
+グローバルに 2 つ定義する。いずれも `const` で、この名前でなければ認識されない。
 
 ```js
 const deckConfig = {
@@ -48,52 +48,51 @@ const slideData = [
 | `narration` | 読み上げる文章。字幕にもそのまま出る |
 | `render()` | スライドの HTML を**文字列で返す関数**。`#slide-canvas` の `innerHTML` に入る |
 
-**スライドの番号も枚数もどこにも書かない。** `SLIDE 01 / 17` の番号は
+**スライドの番号と枚数は書かない。** `SLIDE 01 / 17` の番号は
 `slideData` の並び順から、総枚数と総時間は `slideData.length` と
-`duration` の合計から自動で出る。
+`duration` の合計から自動で計算される。
 
 ## `render()` の書き方
 
-差し込み先の `#slide-canvas` は縦に伸びる箱で、その外側が **960x540 の
-16:9 の枠**になっている。Tailwind・Google Fonts・FontAwesome は
-`player.html` が CDN から読んでいるので、クラス名とアイコンはそのまま使える
+差し込み先の `#slide-canvas` は縦に伸びる領域で、外側が **960x540 の
+16:9 枠**。Tailwind・Google Fonts・FontAwesome は
+`player.html` が CDN から読み込むため、クラス名とアイコンはそのまま使える
 （オフラインでは崩れる）。
 
 - **サイズは `cqw` と `clamp()` で書く。** 枠は container query
-  （`container-type: inline-size`）で拡大縮小するので、`px` や `rem` の
+  （`container-type: inline-size`）で拡大縮小するため、`px` や `rem` の
   直書きは 16:9 を縮めたときに崩れる。
   例: `style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);"`、
   余白は `px-[3cqw]` `gap-[1.2cqw]` のように書く
 - **`md:` などのブレークポイントは枠の中では使わない。** 幅 768px 未満と
-  タッチ画面では枠ごと `transform: scale()` で縮める別経路に入るため、
-  画面幅で分岐させると意図しない側が選ばれる
-- 高さは 540px 相当しかない。既存のスライドは
+  タッチ画面では枠ごと `transform: scale()` で縮める別経路になるため、
+  画面幅で分岐させるとずれる
+- 高さは 540px 相当。既存のスライドは
   `flex flex-col h-full justify-center` で縦に詰めている
 
-既存の 17 枚が `slides/claude-memo.js` にあるので、**近い見た目のものを
-コピーして中身を差し替えるのが早い。**
+既存の 17 枚が `slides/claude-memo.js` にあるため、**近い見た目のものを
+コピーして中身を差し替えると早い。**
 
 ## `narration` と `duration`
 
 `duration` には **Online TTS の音声を `BASE_SPEED_MULTIPLIER` 倍で再生した
-実測秒数**が入る。
-進行バーと残り時間はこの値で描かれる。実際のスライド送りは
-読み上げの終了で起きるので、値がずれてもスライドは飛ばないが、
-バーが先に 100% になったり、読み終わってから待たされたりする。
+実測秒数**を入れる。
+進行バーと残り時間はこの値で描かれる。スライド送りは読み上げの終了で起きるため、
+値がずれてもスライドは飛ばないが、バーが先に 100% になったり、読み終わってから
+待たされたりする。
 
-測るには `tools/measure-duration.py` を使う。**`--text` に文章を渡せば、
-どのデッキでも測れる。**
+測るには `tools/measure-duration.py` を使う。**`--text` に文章を渡すと、
+どのデッキでも測定できる。**
 
 ```bash
 $ tools/measure-duration.py --text 'ここに読み上げる文章'
 下書き: 原文 10 字 / 読み 10 字 / 実測 2.376s / BASE_SPEED_MULTIPLIER=1.4 倍速 1.70s -> duration: 2
 ```
 
-最後に出る `duration: 2` をそのまま書けばよい。`curl` と `ffprobe` が要る。
+最後に出る `duration: 2` をそのまま書く。`curl` と `ffprobe` が必要。
 
-`--deck <名前>` を付ければ、どのデッキのスライド番号でも指定できる
-（省くと `readme`）。`--write` を付けると、書き写す代わりに `duration` を
-直接書き換える。
+`--deck <名前>` を付けると、どのデッキのスライドでも指定できる
+（省くと `readme`）。`--write` を付けると、`duration` を直接書き換える。
 
 ```bash
 $ tools/measure-duration.py --deck user --all --write
@@ -102,26 +101,26 @@ $ tools/measure-duration.py --deck user --all --write
 user.js: 1 枚を書き換えた
 ```
 
-変わった枚だけ出る。書き換えた結果が気に入らなければ `git checkout` で戻す。
+変わったスライドだけ出力される。結果が気に入らなければ `git checkout` で戻す。
 
 書くときの注意:
 
 - **1 文が長いと `TTS_MAX_CHARS` で切れる**（Online TTS の制限）。
-  `measure-duration.py` は超えると `★TTS_MAX_CHARS=180 字で切れる` と出す
+  `measure-duration.py` は超えると `★TTS_MAX_CHARS=180 字で切れる` と出力する
 - 記号や英単語の読みは置換表を通してから読み上げられる。読みがおかしい
-  ときは下の「読みを直す」を見る
+  ときは下の「読みを直す」を参照する
 
 ## 読みを直す
 
-`narration` は、読み上げる前に置換表を通る。表は 2 つある。
+`narration` は読み上げの前に置換表を通る。表は 2 つ。
 
-| 表 | 置き場所 | 何を書くか |
+| 表 | 置き場所 | 役割 |
 |----|----------|-----------|
-| 共通 | `slides/_rules.js` の `SPEECH_RULES` | どのデッキでも出る語 |
-| デッキ | `slides/<名前>.js` の `deckConfig.rules` | そのデッキだけの語 |
+| 共通 | `slides/_rules.js` の `SPEECH_RULES` | すべてのデッキで用いる語 |
+| デッキ | `slides/<名前>.js` の `deckConfig.rules` | 該当デッキだけの語 |
 
 **当たる順はデッキが先、共通が後。** 同じ語に両方が当たるときはデッキ側が
-勝つので、共通の読みをこのデッキだけ変えたい、というときも `rules` に書く。
+優先されるため、共通の読みをこのデッキだけ変えたい場合は `rules` に書く。
 
 ```js
 const deckConfig = {
@@ -133,24 +132,24 @@ const deckConfig = {
 };
 ```
 
-`rules` は省いてよい（そのデッキは共通の表だけを使う）。書き方は
-**1 行 1 ルールで `[/パターン/フラグ, '読み']`** に揃える。
-`tools/measure-duration.py` が同じファイルを読むので、この形を崩すと
-測った秒数がずれる。
+`rules` は省いてもよい（共通の表だけを使う）。形式は
+**1 行 1 ルール `[/パターン/フラグ, '読み']`**。
+`tools/measure-duration.py` が同じファイルを読むため、この形を崩すと
+測定値がずれる。
 
-- **短い語が先に当たると、長い語に届かない。** `Claude Code` は `Claude` より
-  先に当たる必要がある。長いほうを先に書く
-- **他のデッキでも使いそうな語は共通に足す。** 片方のデッキにだけ書くと、
-  同じ語を別のデッキで使ったときに読みが崩れる
+- **短い語が先に当たると、長い語に届かない。** 長いほうを先に書く。
+  `Claude Code` は `Claude` より先に書く必要がある。
+- **複数のデッキで使う語は共通に足す。** 1 つのデッキにだけ書くと、別のデッキで
+  同じ語を使ったときに読みがずれる。
 - **読みを変えたら `duration` を測り直す**（長さが変わる）。
   `tools/measure-duration.py --deck <名前> --all --write`
-- `--text` で下書きを測るときは `--deck <名前>` も付ける。表がデッキごとに
-  違うので、付けないと既定の `readme` の表で測ってしまう
+- `--text` で下書きを測るときは `--deck <名前>` も付ける。表はデッキごとに
+  異なるため、付けないと既定の `readme` の表で測定してしまう。
 
 ## 公開
 
-このディレクトリは `public_html/` の下なので、ファイルを置けばそのまま
-公開される。ビルドも依存関係のインストールも無い。
+このディレクトリは `public_html/` 下なので、ファイルを置くだけで公開される。
+ビルドも依存関係のインストールも不要。
 
 ## 最小の例
 
