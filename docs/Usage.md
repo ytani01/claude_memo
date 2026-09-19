@@ -106,9 +106,6 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 このディレクトリは `public_html/` の下なので、ファイルを置けばそのまま
 公開される。ビルドも依存関係のインストールも無い。
 
-`claude_memo.html` は旧 URL からのリダイレクト用。新しいデッキに短い URL を
-付けたいときは、これを真似た 3 行の HTML を置けばよい。
-
 ## 最小の例
 
 `slides/sample.js` として保存し、`player.html?deck=sample` で開く。

@@ -18,7 +18,6 @@
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
 | `slides/<名前>.js` | スライドのデータ。`player.html?deck=<名前>` で読まれる |
 | `slides/claude-memo.js` | 実例のスライド 17 枚（既定のデッキ） |
-| `claude_memo.html` | 旧 URL から `player.html?deck=claude-memo` へのリダイレクト |
 | `docs/` | 説明（下記） |
 | `tools/measure-duration.py` | ナレーションの読み上げ秒数を測る |
 | `archives/` | 決着した TODO 項目と、サブエージェントの報告。**現行仕様ではない** |

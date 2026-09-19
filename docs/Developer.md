@@ -10,7 +10,6 @@
 |----------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
 | `slides/<名前>.js` | スライドのデータ。`slides/claude-memo.js` が 17 枚の実例 |
-| `claude_memo.html` | 旧 URL からのリダイレクト |
 | `tools/measure-duration.py` | ナレーションの読み上げ秒数を測る |
 
 **ビルドも、依存関係のインストールも、テストも無い。** Tailwind・Google Fonts・
@@ -23,8 +22,7 @@ FontAwesome は CDN から読む（オフラインでは崩れる）。置き場
 
 `player.html` がローカルを指しているのは `slides/<名前>.js` の 1 か所だけで、
 しかも相対パス。残りは全部 CDN の https。**`player.html` と `slides/` を
-同じディレクトリに置けば、`public_html/` の外でもそのまま動く**
-（`claude_memo.html` のリダイレクトも相対）。
+同じディレクトリに置けば、`public_html/` の外でもそのまま動く**。
 
 手元で試すなら、そのディレクトリで:
 

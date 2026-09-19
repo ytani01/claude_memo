@@ -1,21 +1,7 @@
 # TODO
 
-**残っている項目: TODO-047。** これまでに 46 件を決着させた。
+**残っている項目: 無し。** これまでに 47 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-048` から。**
-
----
-
-## TODO-047. 旧 URL 用の `claude_memo.html` を削除する
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | main のみ |
-
-- [ ] `claude_memo.html` を削除する
-- [ ] `README.md` のファイル構成の表から外す
-
-TODO-041 の分割で `player.html` へ飛ばすだけになったもの。旧 URL の
-リンクは切れる。確かめるのはリンク切れが無いかだけなので main のみ。
 
 ---
 
@@ -24,6 +10,7 @@ TODO-041 の分割で `player.html` へ飛ばすだけになったもの。旧 U
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-047.** 旧 URL 用の `claude_memo.html` を削除する](archives/todo/TODO-047.%20旧%20URL%20用の%20claude_memo.html%20を削除する.md)
 - [**TODO-046.** スライドのデータを `slides/` に置く](archives/todo/TODO-046.%20スライドのデータを%20slides%20に置く.md)
 - [**TODO-045.** リポジトリの入口として `README.md` を作る](archives/todo/TODO-045.%20リポジトリの入口として%20README.md%20を作る.md)
 - [**TODO-044.** `public_html/` 以外へ移しても動くことを `docs/Developer.md` に書く](archives/todo/TODO-044.%20public_html%20以外へ移しても動くことを%20docs%20Developer.md%20に書く.md)
