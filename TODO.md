@@ -1,31 +1,7 @@
 # TODO
 
-**残っている項目: TODO-042。** これまでに 41 件を決着させた。
+**残っている項目: 無し。** これまでに 42 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-043` から。**
-
----
-
-## TODO-042. `player.html` で他のスライドを作る手順を `docs/Usage.md` に書く
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | verifier |
-
-- [ ] `docs/Usage.md` を新規に書く
-
-`player.html` は `?deck=<名前>` で `slides-<名前>.js` を読む（TODO-041）が、
-新しいデッキの作り方はどこにも書いていない。`CLAUDE.md` は Claude 向けの
-注意書きなので、人が手順として読めるものを `docs/Usage.md` に置く。
-
-範囲は**新しいスライドの作り方に絞る**（利用者と決めた）。`deckConfig` と
-`slideData` の形、`?deck=` での開き方、`duration` の測り方、書くときの注意
-（`cqw`・`clamp()`、枚数を直書きしない）まで。再生ロジックや TTS の仕組みの
-解説は `CLAUDE.md` にあるので書かない。
-
-`tools/measure-duration.py` は `slides-claude-memo.js` を直接見ているので、
-他のデッキでは `--text` を使うことになる。その旨を書く。
-
-書いたとおりに試せる手順なので、再現の確認は verifier に分ける。
 
 ---
 
@@ -34,6 +10,7 @@
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-042.** `player.html` で他のスライドを作る手順を `docs/Usage.md` に書く](archives/todo/TODO-042.%20player.html%20で他のスライドを作る手順を%20docs%20Usage.md%20に書く.md)
 - [**TODO-041.** プレイヤーの共通部分とスライドのデータを別ファイルに分ける](archives/todo/TODO-041.%20プレイヤーの共通部分とスライドのデータを別ファイルに分ける.md)
 - [**TODO-040.** Inworld AI の声に差し替えるか検討する（対応しない）](archives/todo/TODO-040.%20Inworld%20AI%20の声に差し替えるか検討する.md)
 - [**TODO-035.** 字幕を ON にしたとき全文を表示する](archives/todo/TODO-035.%20字幕を%20ON%20にしたとき全文を表示する.md)
