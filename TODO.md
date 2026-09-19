@@ -32,32 +32,51 @@ TODO-055 で `README.md` / `docs/User.md` / `docs/Developer.md` を推敲した�
 
 ---
 
-## TODO-058. 日本語の文章の「デッキ」を「スライド一式」に言い換える
+## TODO-058. 「デッキ」をやめ、識別子の `deck` も `slides` に変える
 
 |      | main | 担当 |
 |------|------|------|
-| 見込み | Opus 5 / effort high | wording + verifier |
+| 見込み | Opus 5 / effort high | implementer + wording + verifier + reviewer |
 
-- [ ] `README.md` / `docs/User.md` / `docs/Developer.md` の「デッキ」を言い換える
-- [ ] `slides/readme.js` / `slides/user.js` / `slides/developer.js` の
-      表示テキストとナレーションを言い換える
+- [ ] 識別子の `deck` を `slides` に変える（`?slides=`、`slidesConfig`、`--slides`）
+- [ ] 旧 `?deck=` も受けるようにする
+- [ ] `slides/_rules.js` から `deck` と `deckConfig` の読みの置換を外す
+- [ ] 日本語の文章の「デッキ」を「スライド一式」に言い換える
 - [ ] ナレーションが変わったスライドの `duration` を測り直す
 
 「デッキ」はスライドの束を指すつもりで使ってきたが、一般的な日本語ではない。
 カセットデッキやカードゲームを連想されやすく、特に**読み上げでは耳で意味が
-取れない**。
+取れない**。`slides/_rules.js` に `deck`→「デッキ」の読みの置換があること自体、
+識別子が音声に漏れている証拠になっている。
+`deckConfig` は `docs/User.md` で利用者に書かせる名前なので、
+**文章側だけを直しても「デッキ」は消せない。**
 
-**訳語は「スライド一式」に統一する。**
+**日本語は「スライド一式」、識別子は `slides` に統一する。**
 
-- **識別子としての `deck` は変えない。** `player.html?deck=<名前>` は利用者が
-  打つ URL で、変えると公開済みのリンクが切れる。`--deck` オプション、
-  `deckConfig`、`slides/_rules.js` の読みの置換表も変えない
-- **`CLAUDE.md` は対象外。** Claude が読む文書で、識別子の `deck` と
-  対応が取れているほうがよい
-- 今の出現数は `docs/User.md` 9、`docs/Developer.md` 7、`README.md` 2、
-  スライド 6（うちナレーション 1）
-- **TODO-057 が決着してから着手する。** 同じ 3 ファイルを触るため
-- 文言だけで分岐は変わらないので reviewer は入れない
+### 変えるもの
+
+| いま | あと | 場所 |
+|------|------|------|
+| `?deck=<名前>` | `?slides=<名前>` | `player.html` |
+| `deckConfig` | `slidesConfig` | `player.html`、`slides/*.js` 4 本、`tools/` 2 本 |
+| `--deck` | `--slides` | `tools/measure-duration.py` |
+| `deck-heading` | `slides-heading` | `player.html` |
+
+- **旧 `?deck=` も受ける。** 公開済みのリンクが切れるため。`player.html` で
+  `slides` を先に見て、無ければ `deck` を見る
+- **`slides/claude-memo.js` も対象。** 日本語の文章は変えないが、
+  `deckConfig` を持っているため
+- **`CLAUDE.md` も対象。** 識別子を 1 箇所書いている
+- `slidesConfig` と `slideData` が 1 文字違いで並ぶのは承知のうえ。
+  `slideData` は変えない
+
+### 決まっていないこと
+
+- **`docs/User.md` に「旧 `?deck=` も動く」と書くかどうか。** 書けば利用者が
+  古い書き方を使い続ける。実装が済んでから決める
+
+分岐が 1 つ増える（`slides` が無ければ `deck` を見る）ので reviewer を入れる。
+**TODO-057 が決着してから着手する。** 同じ 3 ファイルを触るため。
 
 ---
 
