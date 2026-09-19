@@ -1,34 +1,7 @@
 # TODO
 
-**残っている項目: TODO-057、TODO-058、TODO-059。** これまでに 56 件を決着させた。
+**残っている項目: TODO-058、TODO-059。** これまでに 57 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-060` から。**
-
----
-
-## TODO-057. 3 デッキに wording を通す
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | wording + verifier |
-
-- [ ] `slides/readme.js` / `slides/user.js` / `slides/developer.js` の表示テキストと
-      ナレーションを推敲する
-- [ ] ナレーションが変わったスライドの `duration` を測り直す
-- [ ] 3 デッキをブラウザで開いて確かめる
-
-TODO-055 で `README.md` / `docs/User.md` / `docs/Developer.md` を推敲したが、
-同じ内容を載せた 3 デッキは手つかずで、語が食い違っている。例:
-`docs/Developer.md` の見出しは「副作用のある実装」に直したが、
-`slides/developer.js` のスライド 8 は「触ると鳴らなくなるもの」のまま。
-
-- **用語は文書に揃えるが、キャッチコピー的な文は残す。** スライド 1 の
-  「動き出す」は `README.md` では「動く」に直したが、表題としてはそのまま
-- `slides/claude-memo.js` は対応する文書が無いので対象外。`slides/_rules.js` も触らない
-- `duration` は `tools/measure-duration.py --deck <名前> --all --write` で測り直す
-- 文言だけで分岐は変わらないので reviewer は入れない
-- wording への依頼文に、TODO-055 の振り返りどおり
-  **「簡潔化のために文を削らない。1 文に 2 つ書いてあるときは両方残して分ける」**
-  を明記する
 
 ---
 
@@ -120,6 +93,7 @@ TODO-041 で `player.html` とスライドデータを分け、TODO-054 で置�
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由も記載してある。** 蒸し返す前に読むこと。
 
+- [**TODO-057.** 3 デッキに wording を通す](archives/todo/TODO-057.%203%20デッキに%20wording%20を通す.md)
 - [**TODO-056.** 他のサーバーへ公開するときに要るファイルを `docs/User.md` に書く](archives/todo/TODO-056.%20%E4%BB%96%E3%81%AE%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%81%B8%E5%85%AC%E9%96%8B%E3%81%99%E3%82%8B%E3%81%A8%E3%81%8D%E3%81%AB%E8%A6%81%E3%82%8B%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%92%20docs%20User.md%20%E3%81%AB%E6%9B%B8%E3%81%8F.md)
 - [**TODO-055.** 各ドキュメントに wording を通す](archives/todo/TODO-055.%20各ドキュメントに%20wording%20を通す.md)
 - [**TODO-052.** ナレーションの読みの置換表を、プレイヤー共通の語まで広げる](archives/todo/TODO-052.%20ナレーションの読みの置換表を、プレイヤー共通の語まで広げる.md)

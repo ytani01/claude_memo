@@ -49,7 +49,7 @@ const slideData = [
     {
         title: 'リポジトリの構成',
         duration: 15,
-        narration: 'リポジトリの中身は player.html が本体、slides の下にスライドデータ、tools に duration を測るスクリプトがあります。ビルドや依存関係のインストールは無く、CDN から Tailwind などを読み込みます。',
+        narration: 'リポジトリの中身は player.html が本体、slides の下にスライドデータ、tools に duration を測るスクリプトがあります。ビルドも依存関係のインストールも不要で、CDN から Tailwind などを読み込みます。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -59,18 +59,18 @@ const slideData = [
                     <div class="overflow-x-auto rounded-xl border border-slate-700/80 mb-[1.2cqw]">
                         <table class="w-full text-left text-slate-200" style="font-size: clamp(0.9rem, 1.95cqw, 1.4rem);">
                             <thead class="bg-slate-800 text-sky-400 font-bold border-b border-slate-700">
-                                <tr><th class="p-[1cqw]">ファイル</th><th class="p-[1cqw]">中身</th></tr>
+                                <tr><th class="p-[1cqw]">ファイル</th><th class="p-[1cqw]">役割</th></tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800 bg-slate-900/40 font-medium">
                                 <tr><td class="p-[1cqw] font-mono text-lime-400">player.html</td><td class="p-[1cqw]">外枠の HTML・CSS と再生ロジック。これ1つが本体</td></tr>
                                 <tr><td class="p-[1cqw] font-mono text-lime-400">slides/&lt;名前&gt;.js</td><td class="p-[1cqw]">スライドのデータ</td></tr>
-                                <tr><td class="p-[1cqw] font-mono text-sky-400">tools/measure-duration.py</td><td class="p-[1cqw]">読み上げ秒数を測り duration に書き戻す</td></tr>
+                                <tr><td class="p-[1cqw] font-mono text-sky-400">tools/measure-duration.py</td><td class="p-[1cqw]">読み上げ秒数を測り duration に書き込む</td></tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.2cqw] text-slate-200 font-medium" style="font-size: clamp(0.9rem, 1.9cqw, 1.35rem);">
                         <i class="fa-solid fa-circle-info text-sky-400 mr-[0.6cqw]"></i>
-                        ビルドも依存関係のインストールも無い。Tailwind・Google Fonts・FontAwesome は CDN 頼み
+                        ビルドも依存関係のインストールも不要。Tailwind・Google Fonts・FontAwesome は CDN 頼み
                     </div>
                 </div>
             `;
@@ -78,18 +78,18 @@ const slideData = [
     },
     // Slide 3
     {
-        title: '置き場所は選ばない',
-        duration: 15,
-        narration: 'player.htmlがローカルを指すのはslidesを読む1か所だけで、しかも相対パスです。両方を同じディレクトリに置けば、public_htmlの外でもそのまま動きます。ネット接続だけは必要です。',
+        title: '場所を選ばない',
+        duration: 17,
+        narration: 'player.html がローカルを指すのは slides/_rules.js とスライドデータの2つだけで、しかも相対パスです。両方を同じディレクトリに置けば、public_htmlの外でもそのまま動きます。ネット接続だけは必要です。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
                     <h2 class="font-bold text-sky-400 mb-[1.5cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                        <i class="fa-solid fa-location-dot text-lime-400"></i> 置き場所は選ばない
+                        <i class="fa-solid fa-location-dot text-lime-400"></i> 場所を選ばない
                     </h2>
                     <div class="bg-sky-950/40 border border-sky-500/40 rounded-xl p-[1.4cqw] mb-[1.4cqw] text-sky-300 font-bold" style="font-size: clamp(1.0rem, 2.2cqw, 1.6rem);">
                         <i class="fa-solid fa-lightbulb text-lime-400 mr-[0.8cqw]"></i>
-                        ローカルを指すのは slides を読む1か所だけ。しかも相対パス
+                        ローカルを指すのは slides/_rules.js と slides/&lt;名前&gt;.js の2つだけ。しかも相対パス
                     </div>
                     <div class="grid grid-cols-2 gap-[1.4cqw]">
                         <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.6cqw]">
@@ -98,10 +98,10 @@ const slideData = [
                         </div>
                         <div class="bg-slate-800/60 border border-slate-700 rounded-xl p-[1.6cqw]">
                             <i class="fa-solid fa-wifi text-sky-400 mb-[0.8cqw]" style="font-size: clamp(1.5rem, 3cqw, 2.2rem);"></i>
-                            <p class="text-slate-200 font-medium leading-relaxed" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">ネット接続は必須。TTS・フォント・アイコンを外から取るため</p>
+                            <p class="text-slate-200 font-medium leading-relaxed" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">ネット接続は必須。TTS・フォント・アイコンを外部から取得するため</p>
                         </div>
                     </div>
-                    <div class="mt-[1.2cqw] text-slate-400 font-medium" style="font-size: clamp(0.8rem, 1.6cqw, 1.15rem);">※ file:// で直接開くのは未確認。HTTP で配るのが確実</div>
+                    <div class="mt-[1.2cqw] text-slate-400 font-medium" style="font-size: clamp(0.8rem, 1.6cqw, 1.15rem);">※ file:// で直接開くのは試していない。HTTP 配信が確実</div>
                 </div>
             `;
         }
@@ -176,14 +176,14 @@ const slideData = [
                         <i class="fa-solid fa-stopwatch text-lime-400"></i> duration は実測値
                     </h2>
                     <p class="text-slate-200 mb-[1.5cqw] font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">
-                        Online TTS の音声を BASE_SPEED_MULTIPLIER 倍で再生した実測秒数を入れる。目分量の数字ではない。
+                        Online TTS の音声を BASE_SPEED_MULTIPLIER 倍で再生した実測秒数を入れる。目分量ではない。
                     </p>
                     <div class="bg-slate-900 border border-slate-800 rounded-xl p-[1.2cqw] font-mono text-slate-200 mb-[1.2cqw]" style="font-size: clamp(0.85rem, 1.8cqw, 1.3rem);">
                         tools/measure-duration.py --deck &lt;名前&gt; --all --write
                     </div>
                     <div class="bg-amber-950/40 border border-amber-500/40 rounded-xl p-[1.2cqw] text-amber-300 font-medium flex items-center gap-[1cqw]" style="font-size: clamp(0.9rem, 1.85cqw, 1.35rem);">
                         <i class="fa-solid fa-triangle-exclamation text-amber-400 flex-shrink-0"></i>
-                        prepareSpeechText の置換表を直したら、当たるスライドの duration を測り直す
+                        prepareSpeechText の置換表を直したら、対象スライドの duration を測り直す
                     </div>
                 </div>
             `;
@@ -206,7 +206,7 @@ const slideData = [
                                 <tr><th class="p-[1cqw]">モード</th><th class="p-[1cqw]">実装</th><th class="p-[1cqw]">制限</th></tr>
                             </thead>
                             <tbody class="divide-y divide-slate-800 bg-slate-900/40 font-medium">
-                                <tr><td class="p-[1cqw] font-bold text-lime-400">online（既定）</td><td class="p-[1cqw]">Google Translate TTS を Audio で再生</td><td class="p-[1cqw]">TTS_MAX_CHARS で切る</td></tr>
+                                <tr><td class="p-[1cqw] font-bold text-lime-400">online（既定）</td><td class="p-[1cqw]">Google Translate TTS を Audio で再生</td><td class="p-[1cqw]">TTS_MAX_CHARS で分割</td></tr>
                                 <tr><td class="p-[1cqw] font-bold text-sky-400">speech</td><td class="p-[1cqw]">Web Speech API</td><td class="p-[1cqw]">長い発話が途中で切れる</td></tr>
                             </tbody>
                         </table>
@@ -220,14 +220,14 @@ const slideData = [
     },
     // Slide 8
     {
-        title: '触ると鳴らなくなるもの',
-        duration: 13,
-        narration: '触ると鳴らなくなるものが3つあります。Audio要素は使い回すこと、Web Speechは文章を分けて読ませること、no-referrerのmetaタグを外さないことです。どれも実機で確かめて分かりました。',
+        title: '副作用のある実装',
+        duration: 14,
+        narration: '実装を直すときに気をつけることが3つあります。Audio要素は使い回すこと、Web Speechは文章を分けて読ませること、no-referrerのmetaタグを外さないことです。どれも実機で確かめて分かりました。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
                     <h2 class="font-bold text-rose-400 mb-[1.4cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.35rem, 3.0cqw, 2.4rem);">
-                        <i class="fa-solid fa-triangle-exclamation text-rose-400"></i> 触ると鳴らなくなるもの
+                        <i class="fa-solid fa-triangle-exclamation text-rose-400"></i> 副作用のある実装
                     </h2>
                     <div class="space-y-[1cqw] text-slate-200 font-medium">
                         <div class="bg-rose-950/30 border border-rose-500/40 rounded-xl p-[1.2cqw] flex items-start gap-[1cqw]">
@@ -240,7 +240,7 @@ const slideData = [
                         </div>
                         <div class="bg-rose-950/30 border border-rose-500/40 rounded-xl p-[1.2cqw] flex items-start gap-[1cqw]">
                             <i class="fa-solid fa-meta text-rose-400 mt-[0.15cqw] flex-shrink-0" style="font-size: clamp(1.1rem, 2.3cqw, 1.6rem);"></i>
-                            <div style="font-size: clamp(0.88rem, 1.85cqw, 1.35rem);"><strong class="text-rose-300">no-referrer の meta タグを外さない。</strong>外すと Online TTS が 404 で鳴らなくなる</div>
+                            <div style="font-size: clamp(0.88rem, 1.85cqw, 1.35rem);"><strong class="text-rose-300">no-referrer の meta タグを外さない。</strong>外すと Online TTS が 404 で出なくなる</div>
                         </div>
                     </div>
                 </div>
@@ -302,7 +302,7 @@ const slideData = [
     {
         title: 'まとめ',
         duration: 14,
-        narration: 'player.htmlを直すときは、再生ロジックと読み上げの仕組み、鳴らなくなる3つの注意点、cqwによるレイアウトを押さえてください。細かい経緯はarchives/todo以下にあります。',
+        narration: 'player.htmlを直すときは、再生ロジックと読み上げの仕組み、副作用のある3つの注意点、cqwによるレイアウトを押さえてください。細かい経緯はarchives/todo以下にあります。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -324,7 +324,7 @@ const slideData = [
                         </div>
                     </div>
                     <div class="bg-sky-950/60 border border-sky-500/60 rounded-xl p-[1cqw] text-center text-sky-300 font-bold" style="font-size: clamp(0.85rem, 1.9cqw, 1.4rem);">
-                        個々の経緯は archives/todo/ に1件1ファイルで残してある
+                        個々の経緯は archives/todo/ に1件1ファイルで記録されている
                     </div>
                 </div>
             `;

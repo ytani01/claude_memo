@@ -20,7 +20,7 @@ const slideData = [
     {
         title: 'yt_slide',
         duration: 11,
-        narration: 'yt_slide は、HTML1枚でナレーション付きのプレゼンが動き出す仕組みです。ビルドもインストールも要らず、URLを渡すだけでそのまま見てもらえます。',
+        narration: 'yt_slide は、HTML1枚でナレーション付きのプレゼンが動き出す仕組みです。ビルドもインストールも不要で、URLを渡すだけでそのまま見てもらえます。',
         render: function() {
             return `
                 <div class="flex flex-col items-start justify-center h-full px-[4cqw] py-[1.5cqw] space-y-[1.5cqw]">
@@ -32,7 +32,7 @@ const slideData = [
                         ナレーション付きのプレゼンが動き出す
                     </h1>
                     <p class="text-slate-200 font-medium leading-relaxed" style="font-size: clamp(1.15rem, 2.8cqw, 2.1rem);">
-                        ビルドもインストールも要らない。URL を渡せばそのまま見てもらえる。
+                        ビルドもインストールも不要。URL を渡せばそのまま見てもらえる。
                     </p>
                 </div>
             `;
@@ -41,8 +41,8 @@ const slideData = [
     // Slide 2
     {
         title: 'できること',
-        duration: 11,
-        narration: 'できることを紹介します。読み上げと字幕、自動再生、0.75倍から2倍の再生速度、フルスクリーン、スマホのスワイプ操作に対応しています。',
+        duration: 12,
+        narration: 'できることを紹介します。読み上げと字幕、自動再生、0.75倍から2.0倍の再生速度、フルスクリーン、スマホのスワイプ操作に対応しています。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -56,7 +56,7 @@ const slideData = [
                         </div>
                         <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.3cqw] flex items-center gap-[1cqw]">
                             <i class="fa-solid fa-forward text-sky-400" style="font-size: clamp(1.2rem, 2.4cqw, 1.8rem);"></i>
-                            <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">自動再生で次のスライドへ</div>
+                            <div class="text-slate-100 font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.45rem);">自動再生で次へ</div>
                         </div>
                         <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-[1.3cqw] flex items-center gap-[1cqw]">
                             <i class="fa-solid fa-gauge-high text-lime-400" style="font-size: clamp(1.2rem, 2.4cqw, 1.8rem);"></i>
@@ -205,8 +205,8 @@ const slideData = [
     // Slide 8
     {
         title: 'duration の測り方',
-        duration: 8,
-        narration: 'duration は目分量で決めません。measure-duration.py というツールで実際の読み上げ秒数を測り、書き戻します。',
+        duration: 7,
+        narration: 'duration は目分量で決めません。measure-duration.py というツールで実際の読み上げ秒数を測って入れます。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -219,7 +219,7 @@ const slideData = [
                         <div class="text-slate-400">user.js: 1 枚を書き換えた</div>
                     </div>
                     <p class="text-slate-200 mt-[1.4cqw] font-medium" style="font-size: clamp(1.0rem, 2.1cqw, 1.55rem);">
-                        目分量ではなく、<span class="text-lime-400 font-bold">Online TTS の実測秒数</span>を書き戻す。
+                        目分量ではなく、<span class="text-lime-400 font-bold">Online TTS の実測秒数</span>を入れる。
                     </p>
                 </div>
             `;

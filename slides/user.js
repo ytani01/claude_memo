@@ -17,7 +17,7 @@ const slideData = [
     {
         title: 'player.html で別のスライドを作る',
         duration: 7,
-        narration: 'このプレゼンでは、player.html を触らずに自分のスライドを作る手順をご紹介します。',
+        narration: 'このプレゼンでは、player.html を触らずに自分のスライドを作成する手順をご紹介します。',
         render: function() {
             return `
                 <div class="flex flex-col items-start justify-center h-full px-[4cqw] py-[1.5cqw] space-y-[1.5cqw]">
@@ -28,7 +28,7 @@ const slideData = [
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-lime-400">player.html</span> で別のスライドを作る
                     </h1>
                     <p class="text-slate-200 font-medium leading-relaxed" style="font-size: clamp(1.05rem, 2.5cqw, 1.9rem);">
-                        自分のスライドを作りたい人向けの手順
+                        スライド作成者向けの手順
                     </p>
                 </div>
             `;
@@ -77,7 +77,7 @@ const slideData = [
                     </div>
                     <div class="bg-amber-950/40 border border-amber-500/40 rounded-xl p-[1.3cqw] text-amber-300 flex items-center gap-[1.2cqw] font-medium" style="font-size: clamp(0.95rem, 2.0cqw, 1.5rem);">
                         <i class="fa-solid fa-circle-info text-amber-400 flex-shrink-0" style="font-size: clamp(1.2rem, 2.4cqw, 1.8rem);"></i>
-                        <span>名前に使えるのは<strong class="text-amber-200">英数字・アンダースコア・ハイフン</strong>だけ。それ以外は捨てられる</span>
+                        <span>名前に使えるのは<strong class="text-amber-200">英数字・アンダースコア・ハイフン</strong>だけ。その他は無視される</span>
                     </div>
                 </div>
             `;
@@ -207,7 +207,7 @@ const slideData = [
     {
         title: '近い見た目をコピーする',
         duration: 9,
-        narration: '近い見た目の既存スライドをコピーして、中身を差し替えるのが早い方法です。細かい書き方は User.md にまとまっています。',
+        narration: '近い見た目の既存スライドをコピーして、中身を差し替えるのが早い方法です。細かい書き方は User.md に書いてあります。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
@@ -253,14 +253,14 @@ const slideData = [
     },
     // Slide 10
     {
-        title: 'まとめて書き戻す',
+        title: 'まとめて書き換える',
         duration: 9,
         narration: 'measure-duration.py に write を付けて実行すると、測った結果で duration を直接書き換えてくれます。変わった枚だけ表示されます。',
         render: function() {
             return `
                 <div class="flex flex-col h-full justify-center px-[3cqw]">
                     <h2 class="font-bold text-sky-400 mb-[1.6cqw] flex items-center gap-[1cqw]" style="font-size: clamp(1.4rem, 3.2cqw, 2.5rem);">
-                        <i class="fa-solid fa-rotate text-lime-400"></i> まとめて書き戻す
+                        <i class="fa-solid fa-rotate text-lime-400"></i> まとめて書き換える
                     </h2>
                     <div class="bg-slate-900 border border-slate-800 rounded-xl p-[1.4cqw] font-mono text-slate-200 mb-[1.4cqw] break-all" style="font-size: clamp(0.85rem, 1.8cqw, 1.3rem);">
                         tools/measure-duration.py --deck &lt;名前&gt; --all --write
