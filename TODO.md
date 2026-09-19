@@ -1,7 +1,34 @@
 # TODO
 
-**残っている項目は無い。** これまでに 56 件を決着させた。
-新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-057` から。**
+**残っている項目: TODO-057。** これまでに 56 件を決着させた。
+新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-058` から。**
+
+---
+
+## TODO-057. 3 デッキに wording を通す
+
+|      | main | 担当 |
+|------|------|------|
+| 見込み | Opus 5 / effort high | wording + verifier |
+
+- [ ] `slides/readme.js` / `slides/user.js` / `slides/developer.js` の表示テキストと
+      ナレーションを推敲する
+- [ ] ナレーションが変わったスライドの `duration` を測り直す
+- [ ] 3 デッキをブラウザで開いて確かめる
+
+TODO-055 で `README.md` / `docs/User.md` / `docs/Developer.md` を推敲したが、
+同じ内容を載せた 3 デッキは手つかずで、語が食い違っている。例:
+`docs/Developer.md` の見出しは「副作用のある実装」に直したが、
+`slides/developer.js` のスライド 8 は「触ると鳴らなくなるもの」のまま。
+
+- **用語は文書に揃えるが、キャッチコピー的な文は残す。** スライド 1 の
+  「動き出す」は `README.md` では「動く」に直したが、表題としてはそのまま
+- `slides/claude-memo.js` は対応する文書が無いので対象外。`slides/_rules.js` も触らない
+- `duration` は `tools/measure-duration.py --deck <名前> --all --write` で測り直す
+- 文言だけで分岐は変わらないので reviewer は入れない
+- wording への依頼文に、TODO-055 の振り返りどおり
+  **「簡潔化のために文を削らない。1 文に 2 つ書いてあるときは両方残して分ける」**
+  を明記する
 
 ---
 
