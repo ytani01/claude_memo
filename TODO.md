@@ -1,7 +1,7 @@
 # TODO
 
-**残っている項目: TODO-052。** これまでに 52 件を決着させた。
-新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-054` から。**
+**残っている項目: TODO-052、TODO-054。** これまでに 52 件を決着させた。
+新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-055` から。**
 
 ---
 
@@ -34,6 +34,37 @@ TODO-051 で作った 3 デッキのナレーションには、置換表に無�
 `tools/measure-duration.py --deck <名前> --all --write` を 3 デッキ分やり直す。
 
 ---
+
+## TODO-054. 読みの置換表を外に出し、デッキごとに足せるようにする
+
+|      | main | 担当 |
+|------|------|------|
+| 見込み | Opus 5 / effort high | implementer + verifier + reviewer |
+
+- [ ] 共通の置換表を `slides/_rules.js` に出し、`player.html` の表と
+      `tools/measure-duration.py` の写しを消す
+- [ ] 各デッキは `deckConfig.rules` に自分の語を書く。当てる順は
+      **デッキ側が先、共通が後**（デッキ側で読みを上書きできる）
+- [ ] 今ある語を共通とデッキに振り分ける
+- [ ] `tools/measure-duration.py` は `_rules.js` とデッキファイルの両方から読む
+- [ ] `docs/User.md`（書き足し方）と `docs/Developer.md`（読み込みの順番）に書く
+
+置換表が `player.html` に直に書いてあるため、デッキごとの語まで 1 つの表に
+溜まっていく。`claude-memo` にしか出ない `tmux` や `Codex` と、`developer` に
+しか出ない `requestAnimationFrame` が同じ場所に並ぶ。`tools/measure-duration.py`
+が写しを持っている二重管理も、共通表を外に出せば無くなる。
+
+利用者と決めたこと:
+
+- **単位はデッキごと。** 1 枚ごとには持たせない
+- **共通表は `slides/_rules.js`。** JSON にしない（`player.html` が `fetch` で
+  読むことになり、`file://` で開けなくなる）
+- **振り分けの基準**は「プレイヤー自身を説明する語（`player.html`、
+  `slideData`、`duration`、`cqw` など）は共通、そのデッキにしか出ない語
+  （`tmux`、`Codex`、`requestAnimationFrame` など）はデッキ側」
+
+**TODO-052 の聴き確認と測り直しは、この項目のあとに 1 回でやる。** 外出しでは
+読みの内容が変わらないので `duration` に影響しない。
 
 ---
 
