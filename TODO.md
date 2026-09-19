@@ -1,7 +1,7 @@
 # TODO
 
-**残っている項目: TODO-051。** これまでに 50 件を決着させた。
-新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-052` から。**
+**残っている項目: TODO-051、TODO-052、TODO-053。** これまでに 50 件を決着させた。
+新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-054` から。**
 
 ---
 
@@ -46,6 +46,61 @@
 **スライドの中でスライドデータの書き方を見せるときは、`duration: 20,` の
 次の行に `narration: '` が来る書き方を避ける。** `--write` の置換が
 そこに当たってしまう（TODO-050 の reviewer の指摘）。
+
+---
+
+## TODO-052. ナレーションの読みの置換表を、プレイヤー共通の語まで広げる
+
+|      | main | 担当 |
+|------|------|------|
+| 見込み | Opus 5 / effort high | verifier + reviewer |
+
+- [ ] `player.html` の `prepareSpeechText()` の `RULES` に、頻出する語の読みを足す
+- [ ] `tools/measure-duration.py` の `RULES` にも同じものを写す
+- [ ] 3 デッキの `duration` を測り直す（読みが変わると長さも変わる）
+
+TODO-051 で作った 3 デッキのナレーションには、置換表に無い英単語が多く残って
+いる。読み上げると崩れる。数えたところ `player.html` が 12 回、`duration` が
+8 回、`slides` と `slideData` が各 7 回、ほかに `deckConfig`、`cqw`、`clamp`、
+`Online TTS`、`Web Speech`、`measure-duration.py`、`requestAnimationFrame` など。
+
+今の置換表は `claude-memo` のための語が中心で、**プレイヤー自身を説明する語が
+入っていない**。`usage` と `developer` のデッキはその語ばかり使う。
+
+利用者と決めたこと:
+
+- **先に一括で足してから聴く。** 頻出語をまとめて置換表に入れ、そのうえで
+  実際に再生して確かめる（1 語ずつ聴いて決めると回数がかさむ）
+- **置換表は `player.html` と `tools/measure-duration.py` の 2 か所にある。**
+  片方だけ直すと測った秒数が実際とずれるので、必ず両方直す
+
+**読みが変わるとナレーションの長さも変わる。** 最後に
+`tools/measure-duration.py --deck <名前> --all --write` を 3 デッキ分やり直す。
+
+---
+
+## TODO-053. `docs/Usage.md` を `docs/User.md` に変える
+
+|      | main | 担当 |
+|------|------|------|
+| 見込み | Opus 5 / effort high | verifier |
+
+- [ ] `git mv docs/Usage.md docs/User.md`
+- [ ] `git mv slides/usage.js slides/user.js`（デッキ名も `user` に揃える）
+- [ ] `README.md`・`docs/Developer.md`・`CLAUDE.md`・`slides/*.js` の中の
+      `Usage.md` と `?deck=usage` を直す
+- [ ] `player.html?deck=user` で開けることを確かめる
+
+「使い方」よりも「この文書は誰向けか」が分かる名前にする。
+`Developer.md`（`player.html` を直す人）と並べたときに、`User.md`
+（スライドを作る人）のほうが対になる。
+
+利用者と決めたこと:
+
+- **デッキ名も `user` に揃える。** `slides/usage.js` は `slides/user.js` に、
+  URL は `player.html?deck=user` になる
+- 旧 URL（`?deck=usage`）のリダイレクトは用意しない。公開してまだ間もなく、
+  外から参照されていないため
 
 ---
 
