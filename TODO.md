@@ -31,26 +31,34 @@
 
 ---
 
-## TODO-051. `docs/Usage.md` と `docs/Developer.md` をスライドにする
+## TODO-051. `README.md` と `docs/` の内容をスライドにする
 
 |      | main | 担当 |
 |------|------|------|
-| 見込み | Opus 5 / effort high | implementer × 2 + verifier + reviewer |
+| 見込み | Opus 5 / effort high | implementer × 3 + verifier + reviewer |
 
 - [ ] `tools/measure-duration.py` を `claude-memo.js` 以外のデッキでも使えるようにする
+- [ ] `README.md` を、このリポジトリの魅力が伝わる内容に書き直す
+- [ ] `slides/readme.js`（リポジトリの紹介、8〜12 枚）
 - [ ] `slides/usage.js`（別のスライドを作る人向け、8〜12 枚）
 - [ ] `slides/developer.js`（`player.html` を直す人向け、8〜12 枚）
-- [ ] 2 デッキの `duration` を測って入れる
+- [ ] 3 デッキの `duration` を測って入れる
 - [ ] `README.md` と `docs/` からリンクする
 
 `player.html` の使い方と作りは `docs/` の文章でしか読めない。
 このリポジトリ自身がプレゼンプレイヤーなので、同じ内容をスライドでも
-見られるようにする。
+見られるようにする。**リポジトリの紹介そのものをスライドで見せられるのが、
+このプレイヤーの一番分かりやすい実例になる。**
 
 利用者と決めたこと:
 
-- **デッキは 2 つに分ける。** `slides/usage.js` と `slides/developer.js`。
-  読み手が違うので、ドキュメントの分かれ方に揃える
+- **デッキは 3 つに分ける。** `slides/readme.js`、`slides/usage.js`、
+  `slides/developer.js`。読み手が違うので、ドキュメントの分かれ方に揃える
+- **`README.md` の本体も書き直す。** 今はファイル構成が中心なので、
+  「HTML 1 枚で、読み上げ付きのプレゼン動画が作れる」ことが先に伝わる
+  内容にする。**アピールする相手はプレゼンを作りたい人**で、道具としての
+  魅力を前に出す（Claude Code との作り方の話は後ろ）。
+  `slides/readme.js` は書き直した `README.md` と同じ内容にする
 - **ナレーションを付け、`duration` も測って入れる。** `claude-memo.js` と
   同じ形にする。そのため `tools/measure-duration.py` の書き戻しを
   デッキ指定できるようにする（今は `claude-memo.js` 固定）
