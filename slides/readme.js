@@ -19,7 +19,7 @@ const slideData = [
     // Slide 1
     {
         title: 'yt_slide',
-        duration: 12,
+        duration: 11,
         narration: 'yt_slide は、HTML1枚でナレーション付きのプレゼンが動き出す仕組みです。ビルドもインストールも要らず、URLを渡すだけでそのまま見てもらえます。',
         render: function() {
             return `
@@ -101,7 +101,7 @@ const slideData = [
     // Slide 4
     {
         title: '自分のスライドを作る',
-        duration: 8,
+        duration: 9,
         narration: '自分のスライドを作るときは、player.html は触りません。slidesディレクトリにJavaScriptを1つ足すだけです。',
         render: function() {
             return `
@@ -256,7 +256,7 @@ const slideData = [
     // Slide 10
     {
         title: 'まとめ',
-        duration: 10,
+        duration: 9,
         narration: 'まとめです。yt_slide を使えば、HTML 1枚でナレーション付きのプレゼンをすぐに作って公開できます。ぜひ試してみてください。',
         render: function() {
             return `

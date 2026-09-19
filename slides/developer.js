@@ -26,7 +26,7 @@ const slideData = [
     // Slide 1
     {
         title: 'player.html を直す人へ',
-        duration: 11,
+        duration: 12,
         narration: 'これはplayer.htmlの再生エンジンを直す人向けの説明です。スライドを足したいだけならUser.mdで足ります。こちらはコードを触るときに読んでください。',
         render: function() {
             return `

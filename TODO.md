@@ -1,40 +1,7 @@
 # TODO
 
-**残っている項目: TODO-052。** これまでに 53 件を決着させた。
+**残っている項目は無い。** これまでに 54 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-055` から。**
-
----
-
-## TODO-052. ナレーションの読みの置換表を、プレイヤー共通の語まで広げる
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | verifier + reviewer |
-
-- [x] `player.html` の `prepareSpeechText()` の置換表に、頻出する語の読みを足す
-- [x] `tools/measure-duration.py` の表にも同じものを写す
-- [ ] 実際に再生して読みを聴き、直すものがあれば直す
-- [ ] 4 デッキの `duration` を測り直す（読みが変わると長さも変わる）
-
-TODO-051 で作った 3 デッキのナレーションには、置換表に無い英単語が多く残って
-いる。読み上げると崩れる。数えたところ `player.html` が 12 回、`duration` が
-8 回、`slides` と `slideData` が各 7 回、ほかに `deckConfig`、`cqw`、`clamp`、
-`Online TTS`、`Web Speech`、`measure-duration.py`、`requestAnimationFrame` など。
-
-今の置換表は `claude-memo` のための語が中心で、**プレイヤー自身を説明する語が
-入っていない**。`usage` と `developer` のデッキはその語ばかり使う。
-
-利用者と決めたこと:
-
-- **先に一括で足してから聴く。** 頻出語をまとめて置換表に入れ、そのうえで
-  実際に再生して確かめる（1 語ずつ聴いて決めると回数がかさむ）
-- **置換表は `player.html` と `tools/measure-duration.py` の 2 か所にある。**
-  片方だけ直すと測った秒数が実際とずれるので、必ず両方直す
-  （**TODO-054 で `slides/_rules.js` へ外に出したので、今は 1 か所**）
-
-**読みが変わるとナレーションの長さも変わる。** 最後に
-`tools/measure-duration.py --deck <名前> --all --write` を**4 デッキ分**
-やり直す。`Python` と `CLAUDE.md` の読みも足したので、`claude-memo` も動く。
 
 ---
 
@@ -43,6 +10,7 @@ TODO-051 で作った 3 デッキのナレーションには、置換表に無�
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-052.** ナレーションの読みの置換表を、プレイヤー共通の語まで広げる](archives/todo/TODO-052.%20ナレーションの読みの置換表を、プレイヤー共通の語まで広げる.md)
 - [**TODO-054.** 読みの置換表を外に出し、デッキごとに足せるようにする](archives/todo/TODO-054.%20%E8%AA%AD%E3%81%BF%E3%81%AE%E7%BD%AE%E6%8F%9B%E8%A1%A8%E3%82%92%E5%A4%96%E3%81%AB%E5%87%BA%E3%81%97%E3%80%81%E3%83%87%E3%83%83%E3%82%AD%E3%81%94%E3%81%A8%E3%81%AB%E8%B6%B3%E3%81%9B%E3%82%8B%E3%82%88%E3%81%86%E3%81%AB%E3%81%99%E3%82%8B.md)
 - [**TODO-053.** `docs/Usage.md` を `docs/User.md` に変える](archives/todo/TODO-053.%20docs%20Usage.md%20を%20docs%20User.md%20に変える.md)
 - [**TODO-051.** `README.md` と `docs/` の内容をスライドにする](archives/todo/TODO-051.%20README.md%20と%20docs%20の内容をスライドにする.md)

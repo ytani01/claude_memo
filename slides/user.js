@@ -64,7 +64,7 @@ const slideData = [
     // Slide 3
     {
         title: '手順1 ファイルを作る',
-        duration: 10,
+        duration: 11,
         narration: 'player.html と同じディレクトリの slides フォルダに、名前.js を作ります。名前に使えるのは英数字とアンダースコアとハイフンだけです。',
         render: function() {
             return `
