@@ -1,38 +1,7 @@
 # TODO
 
-**残っている項目: TODO-045。** これまでに 44 件を決着させた。
+**残っている項目: 無し。** これまでに 45 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-046` から。**
-
----
-
-## TODO-045. リポジトリの入口として `README.md` を作る
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | verifier |
-
-- [ ] `README.md` を新規に作る
-
-`docs/Usage.md`（スライドを作る人向け）と `docs/Developer.md`
-（`player.html` を直す人向け）は揃ったが、リポジトリを開いた人が最初に
-読むものが無い。総括的な説明と、docs への振り分けを `README.md` に置く。
-
-書くのは次の 4 つ。
-
-- 何のリポジトリか（`player.html` は ナレーション付きスライドの再生
-  プレイヤー。実例は `slides-claude-memo.js` の 17 枚）
-- 各ディレクトリと主なファイルの説明（`player.html`・`slides-<名前>.js`・
-  `claude_memo.html`・`docs/`・`tools/`・`archives/`）
-- 手元で動かす手順（`python3 -m http.server`）
-- 読む人ごとの振り分け（スライドを作る → `docs/Usage.md`、
-  プレイヤーを直す → `docs/Developer.md`）
-
-含めないと決めたもの: プレイヤーの機能一覧（操作の説明）、公開 URL、
-`TODO.md` の運用への言及。言語は日本語のみ。
-
-docs 2 本と同じことを書き直さず、リンクで送る。手元で動かす手順のように
-書いたとおりに試せるものが入るので、再現は verifier に分ける。挙動は
-変わらないのでレビューは立てない。
 
 ---
 
@@ -41,6 +10,7 @@ docs 2 本と同じことを書き直さず、リンクで送る。手元で動�
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-045.** リポジトリの入口として `README.md` を作る](archives/todo/TODO-045.%20リポジトリの入口として%20README.md%20を作る.md)
 - [**TODO-044.** `public_html/` 以外へ移しても動くことを `docs/Developer.md` に書く](archives/todo/TODO-044.%20public_html%20以外へ移しても動くことを%20docs%20Developer.md%20に書く.md)
 - [**TODO-043.** `player.html` を直す人向けの `docs/Developer.md` を作る](archives/todo/TODO-043.%20player.html%20を直す人向けの%20docs%20Developer.md%20を作る.md)
 - [**TODO-042.** `player.html` で他のスライドを作る手順を `docs/Usage.md` に書く](archives/todo/TODO-042.%20player.html%20で他のスライドを作る手順を%20docs%20Usage.md%20に書く.md)
