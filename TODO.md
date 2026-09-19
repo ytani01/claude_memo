@@ -1,7 +1,44 @@
 # TODO
 
-**残っている項目: 無し。** これまでに 45 件を決着させた。
-新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-046` から。**
+**残っている項目: TODO-046 と TODO-047。** これまでに 45 件を決着させた。
+新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-048` から。**
+
+---
+
+## TODO-046. スライドのデータを `slides/` に置く
+
+|      | main | 担当 |
+|------|------|------|
+| 見込み | Opus 5 / effort high | verifier + reviewer |
+
+- [ ] `slides-claude-memo.js` を `git mv` で `slides/claude-memo.js` にする
+- [ ] `player.html` の読み込み先とエラーメッセージを `slides/<名前>.js` にする
+- [ ] `tools/measure-duration.py` の `SRC` を追従させる
+- [ ] `README.md`・`CLAUDE.md`・`docs/Usage.md`・`docs/Developer.md` の記述を直す
+
+デッキが増えるとリポジトリ直下が散らかるので、スライドのデータを
+`slides/` にまとめる。ファイル名は `slides/<名前>.js`（ディレクトリ名で
+種類が分かるので `slides-` の接頭辞は落とす）。URL は
+`player.html?deck=claude-memo` のままで変わらない。
+
+コードで直すのは `player.html:467`（`src=`）と `player.html:478`
+（エラーメッセージ）、`tools/measure-duration.py:28`（`SRC`）の 3 か所。
+
+読み込み先が変わる（挙動の変更）ので、確認とレビューを別々に立てる。
+
+---
+
+## TODO-047. 旧 URL 用の `claude_memo.html` を削除する
+
+|      | main | 担当 |
+|------|------|------|
+| 見込み | Opus 5 / effort high | main のみ |
+
+- [ ] `claude_memo.html` を削除する
+- [ ] `README.md` のファイル構成の表から外す
+
+TODO-041 の分割で `player.html` へ飛ばすだけになったもの。旧 URL の
+リンクは切れる。確かめるのはリンク切れが無いかだけなので main のみ。
 
 ---
 
