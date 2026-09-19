@@ -11,14 +11,16 @@
     tools/measure-duration.py --deck user --all --write
     tools/measure-duration.py --text 'ここに下書き'
 
-`--text` は、差し替える前に案の長さを見るためのもの。
+`--text` は、差し替える前に案の長さを見るためのもの。デッキごとに置換表が
+違うので、測りたいデッキと `--deck` を揃えないと違う秒数が出る（既定は
+`readme`）。
 `--write` は測った値を `duration` に書き込む（変わった枚だけ `17 -> 16` と
 出す。戻すのは git の差分で足りる）。`--deck` はどのデッキを読むかで、
 既定は `DEFAULT_DECK`（下で定める）のデッキ。
 
-**この下の定数と RULES は player.html の写し。**
-`prepareSpeechText()` の置換表、`TTS_MAX_CHARS`、`BASE_SPEED_MULTIPLIER` を
-変えたら、**ここも一緒に直す**。片方だけ直すと、測った秒数が実際とずれる。
+読みの置換表は `slides/_rules.js`（共通）と `slides/<デッキ名>.js` の
+`deckConfig.rules`（デッキだけの語）から読む。`prepareSpeechText()` と同じく
+デッキ側を先、共通を後に当てる。表そのものはここには持たない。
 
 `curl` と `ffprobe` が要る。
 """
@@ -37,82 +39,59 @@ DEFAULT_DECK = 'readme'
 # player.html の写し ---------------------------------------------------
 TTS_MAX_CHARS = 180
 BASE_SPEED_MULTIPLIER = 1.4
-
-RULES = [
-    (r'archives/todo', 'アーカイブズ スラッシュ トゥードゥー', re.I),
-    (r'TODO\.md', 'トゥードゥー ドット エムディー', re.I),
-    (r'TODO-([0-9]+)', r'トゥードゥー \1', re.I),
-    (r'TODO', 'トゥードゥー', re.I),
-    (r'ccstatusline', 'シーシー ステータス ライン', re.I),
-    (r'/clear', 'スラッシュ クリア', re.I),
-    (r'/goal', 'スラッシュ ゴール', re.I),
-    (r'/doctor', 'スラッシュ ドクター', re.I),
-    (r'/rc', 'スラッシュ アールシー', re.I),
-    (r'/login', 'スラッシュ ログイン', re.I),
-    (r'CLAUDE\.md', 'クロード ドット エムディー', re.I),
-    (r'claude-memo', 'クロード メモ', re.I),
-    (r'Claude Code', 'クロード コード', re.I),
-    (r'Claude', 'クロード', re.I),
-    (r'tmux', 'ティーマックス', re.I),
-    (r'pyright-lsp', 'パイライト エルエスピー', re.I),
-    (r'ponytail', 'ポニーテール', re.I),
-    (r'codegraph', 'コードグラフ', re.I),
-    (r'git worktree', 'ギット ワークツリー', re.I),
-    (r'auto-mode', 'オートモード', re.I),
-    (r'考え方', 'かんがえかた', 0),
-    (r'使い方', 'つかいかた', 0),
-    (r'\bmain\b', 'メイン', re.I),
-    (r'\bimplementer\b', 'インプリメンター', re.I),
-    (r'measure-duration\.py', 'メジャー デュレーション ドット パイ', re.I),
-    (r'player\.html', 'プレイヤー ドット エイチティーエムエル', re.I),
-    (r'public_html', 'パブリック エイチティーエムエル', re.I),
-    (r'User\.md', 'ユーザー ドット エムディー', re.I),
-    (r'yt_slide', 'ワイティー スライド', re.I),
-    (r'\.js\b', ' ドット ジェイエス', re.I),
-    (r'slideData', 'スライドデータ', re.I),
-    (r'\bslides\b', 'スライズ', re.I),
-    (r'deckConfig', 'デッキ コンフィグ', re.I),
-    (r'\bdeck\b', 'デッキ', re.I),
-    (r'\bduration\b', 'デュレーション', re.I),
-    (r'Online TTS', 'オンライン ティーティーエス', re.I),
-    (r'Web Speech', 'ウェブ スピーチ', re.I),
-    (r'requestAnimationFrame', 'リクエスト アニメーション フレーム', re.I),
-    (r'container query', 'コンテナ クエリ', re.I),
-    (r'no-referrer', 'ノー リファラー', re.I),
-    (r'\bmeta\b', 'メタ', re.I),
-    (r'\bAudio\b', 'オーディオ', re.I),
-    (r'\btransform\b', 'トランスフォーム', re.I),
-    (r'\bclamp\b', 'クランプ', re.I),
-    (r'\bcqw\b', 'シーキューダブリュー', re.I),
-    (r'px\b', 'ピクセル', re.I),
-    (r'\brem\b', 'レム', re.I),
-    (r'\bwrite\b', 'ライト', re.I),
-    (r'Tailwind', 'テイルウィンド', re.I),
-    (r'\bCDN\b', 'シーディーエヌ', re.I),
-    (r'JavaScript', 'ジャバスクリプト', re.I),
-    (r'HTML', 'エイチティーエムエル', re.I),
-    (r'\bURL\b', 'ユーアールエル', re.I),
-    (r'\bPython\b', 'パイソン', re.I),
-    (r'\btools\b', 'ツールズ', re.I),
-    (r'\breadme\b', 'リードミー', re.I),
-    (r'\buser\b', 'ユーザー', re.I),
-    (r'\bdeveloper\b', 'デベロッパー', re.I),
-]
 # --------------------------------------------------------------------------
 
+# JS の `[/pattern/flags, 'replacement'],` を 1 つずつ拾う。
+# 置換文の `'(?:\\.|[^'\\])*'` は、`\'` を含む文字列も 1 つの引用符として読む。
+JS_RULE_RE = re.compile(r"\[/(.+?)/([gi]*), '((?:\\.|[^'\\])*)'\]")
 
-def prepare(text):
-    """prepareSpeechText() と同じ置換を掛ける。"""
+
+def load_rules(text):
+    """JS の `[/pattern/flags, 'replacement']` の並びを RULES 形式に変える。
+
+    パターンの `\\/` は `/`、置換文の `$1` は `\\1`、フラグの `i` は re.I。
+    `// ...` で始まる行（コメントアウト）は読み飛ばす。
+    """
+    text = '\n'.join(
+        line for line in text.split('\n') if not line.strip().startswith('//'))
+    rules = []
+    for pattern, flags, replacement in JS_RULE_RE.findall(text):
+        pattern = pattern.replace(r'\/', '/')
+        replacement = replacement.replace(r"\'", "'")
+        replacement = re.sub(r'\$(\d+)', r'\\\1', replacement)
+        rules.append((pattern, replacement, re.I if 'i' in flags else 0))
+    return rules
+
+
+def deck_rules_from_text(text):
+    """deckConfig の本文から rules: の中身を読む（無ければ空）。"""
+    m = re.search(r'rules:\s*\[(.*?)\n\s*\],', text, re.S)
+    return load_rules(m.group(1)) if m else []
+
+
+def load_deck_rules(deck):
+    """`slides/<deck>.js` の deckConfig.rules を読む（無ければ空）。"""
+    return deck_rules_from_text((SLIDES / f'{deck}.js').read_text(encoding='utf-8'))
+
+
+def load_common_rules():
+    """`slides/_rules.js` の SPEECH_RULES を読む。"""
+    text = (SLIDES / '_rules.js').read_text(encoding='utf-8')
+    return load_rules(text)
+
+
+def prepare(text, deck=DEFAULT_DECK):
+    """prepareSpeechText() と同じ置換を掛ける（デッキ側を先、共通を後）。"""
     # re.A が要る。付けないと Python の \b は日本語を語の一部と見なすので、
     # 「slidesフォルダ」のように和文が続く語で JS と結果が食い違う。
-    for pattern, replacement, flags in RULES:
+    for pattern, replacement, flags in load_deck_rules(deck) + load_common_rules():
         text = re.sub(pattern, replacement, text, flags=flags | re.A)
     return text
 
 
-def measure(text):
+def measure(text, deck=DEFAULT_DECK):
     """読み上げ音声を取ってきて、実測秒数と BASE_SPEED_MULTIPLIER 倍での秒数を返す。"""
-    spoken = prepare(text)
+    spoken = prepare(text, deck)
     clean = spoken[:TTS_MAX_CHARS]
     url = ('https://translate.google.com/translate_tts?ie=UTF-8&tl=ja'
            '&client=tw-ob&q=' + urllib.parse.quote(clean, safe=''))
@@ -199,7 +178,7 @@ def main():
 
     updates = {}
     for number, label, text in jobs:
-        spoken, raw, scaled = measure(text)
+        spoken, raw, scaled = measure(text, args.deck)
         cut = (f' ★TTS_MAX_CHARS={TTS_MAX_CHARS} 字で切れる'
                if len(spoken) > TTS_MAX_CHARS else '')
         print(f'{label}: 原文 {len(text)} 字 / 読み {len(spoken)} 字{cut}'

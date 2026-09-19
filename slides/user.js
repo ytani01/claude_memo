@@ -5,6 +5,11 @@
 const deckConfig = {
     title: 'player.html で別のスライドを作る - 使い方',
     heading: '新しいスライドを作る手順',
+    // このデッキだけの読みの置換表（TODO-054）。共通は slides/_rules.js
+    rules: [
+        [/\.js\b/gi, ' ドット ジェイエス'],
+        [/\bwrite\b/gi, 'ライト'],
+    ],
 };
 
 const slideData = [

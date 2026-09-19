@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""apply_durations() の置換と、置換表が player.html と揃っているかを確かめる。
+"""apply_durations() の置換と、JS の置換表を読む関数を確かめる。
 `tools/test_measure_duration.py` で実行。
 
 ネットワークは要らない（測定そのものは Google TTS 任せなので見ない）。
 """
 import importlib.util
 import pathlib
-import re
 
 spec = importlib.util.spec_from_file_location(
     'measure_duration',
@@ -42,18 +41,59 @@ written, changed, found = md.apply_durations(SAMPLE, {})
 assert changed == [] and written == SAMPLE
 
 
-# RULES が player.html の prepareSpeechText() と一語一句そろっているか。
-# 片方だけ直すと測った秒数が実際とずれる（TODO-052）。
-html = (pathlib.Path(__file__).resolve().parent.parent
-        / 'player.html').read_text(encoding='utf-8')
-chain = html[html.index('function prepareSpeechText'):]
-chain = chain[:chain.index('\n        }')]
-found = [(pat.replace(r'\/', '/'), rep.replace('$1', r'\1'), 'i' in flags)
-         for pat, flags, rep
-         in re.findall(r"\.replace\(/(.+)/([gi]+), '(.*)'\)", chain)]
-mine = [(pat, rep, bool(flags & re.I)) for pat, rep, flags in md.RULES]
-assert found == mine, [
-    (a, b) for a, b in zip(found + [None] * len(mine), mine + [None] * len(found))
-    if a != b]
+# JS の [/pattern/flags, 'replacement'] を RULES 形式へ読み替える関数。
+JS_SAMPLE = """const SPEECH_RULES = [
+    [/TODO/gi, 'トゥードゥー'],
+    [/archives\\/todo/gi, 'アーカイブズ'],
+    [/TODO-([0-9]+)/gi, 'トゥードゥー $1'],
+    [/考え方/g, 'かんがえかた'],
+];
+"""
+rules = md.load_rules(JS_SAMPLE)
+assert rules == [
+    ('TODO', 'トゥードゥー', md.re.I),
+    ('archives/todo', 'アーカイブズ', md.re.I),
+    ('TODO-([0-9]+)', r'トゥードゥー \1', md.re.I),
+    ('考え方', 'かんがえかた', 0),
+], rules
+
+# コメントアウトした行（行頭が // ）は読み飛ばす（TODO-054 レビュー指摘 1）。
+COMMENTED_SAMPLE = """const SPEECH_RULES = [
+    [/TODO/gi, 'トゥードゥー'],
+    // [/foo/gi, 'コメントアウト'],
+    [/Claude/gi, 'クロード'],
+];
+"""
+rules = md.load_rules(COMMENTED_SAMPLE)
+assert rules == [
+    ('TODO', 'トゥードゥー', md.re.I),
+    ('Claude', 'クロード', md.re.I),
+], rules
+
+# 置換文に \' が入っても途中で切れない（レビュー指摘 2）。
+# エスケープした引用符の直後が `]` の形にする。ここが `'(.*?)'` のままだと
+# 手前で切れるので、直っていなければこの検査が落ちる。
+QUOTE_SAMPLE = r"""const SPEECH_RULES = [
+    [/it's/gi, 'イッツ\']'],
+];
+"""
+rules = md.load_rules(QUOTE_SAMPLE)
+assert rules == [("it's", "イッツ']", md.re.I)], rules
+
+# rules: を持たないデッキのテキストを渡すと空になる（レビュー指摘 5）。
+NO_RULES_SAMPLE = """const deckConfig = {
+    title: 'タイトル',
+    heading: '見出し',
+};
+"""
+assert md.deck_rules_from_text(NO_RULES_SAMPLE) == []
+
+# 4 デッキすべてが実際に読めること（デッキだけの語があるものは 1 つ以上）。
+for deck in ('readme', 'user', 'developer', 'claude-memo'):
+    deck_rules = md.load_deck_rules(deck)
+    assert deck_rules, f'{deck}: deckConfig.rules が読めていない'
+
+common_rules = md.load_common_rules()
+assert len(common_rules) == 24, common_rules
 
 print('OK')

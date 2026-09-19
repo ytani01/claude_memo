@@ -5,6 +5,21 @@
 const deckConfig = {
     title: 'player.html を直す人へ - 開発者向けガイド',
     heading: 'player.html を直す人へ',
+    // このデッキだけの読みの置換表（TODO-054）。共通は slides/_rules.js
+    rules: [
+        [/archives\/todo/gi, 'アーカイブズ スラッシュ トゥードゥー'],
+        [/public_html/gi, 'パブリック エイチティーエムエル'],
+        [/Online TTS/gi, 'オンライン ティーティーエス'],
+        [/Web Speech/gi, 'ウェブ スピーチ'],
+        [/requestAnimationFrame/gi, 'リクエスト アニメーション フレーム'],
+        [/container query/gi, 'コンテナ クエリ'],
+        [/no-referrer/gi, 'ノー リファラー'],
+        [/\bmeta\b/gi, 'メタ'],
+        [/\bAudio\b/gi, 'オーディオ'],
+        [/\btransform\b/gi, 'トランスフォーム'],
+        [/\bCDN\b/gi, 'シーディーエヌ'],
+        [/\btools\b/gi, 'ツールズ'],
+    ],
 };
 
 const slideData = [

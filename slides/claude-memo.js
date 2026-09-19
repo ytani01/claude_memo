@@ -4,6 +4,23 @@
 const deckConfig = {
     title: 'Claude Code 活用法 - プレゼン動画プレイヤー',
     heading: '私の Claude Code の使い方',
+    // このデッキだけの読みの置換表（TODO-054）。共通は slides/_rules.js
+    rules: [
+        [/ccstatusline/gi, 'シーシー ステータス ライン'],
+        [/\/clear/gi, 'スラッシュ クリア'],
+        [/\/goal/gi, 'スラッシュ ゴール'],
+        [/\/doctor/gi, 'スラッシュ ドクター'],
+        [/\/rc/gi, 'スラッシュ アールシー'],
+        [/\/login/gi, 'スラッシュ ログイン'],
+        [/tmux/gi, 'ティーマックス'],
+        [/pyright-lsp/gi, 'パイライト エルエスピー'],
+        [/ponytail/gi, 'ポニーテール'],
+        [/codegraph/gi, 'コードグラフ'],
+        [/git worktree/gi, 'ギット ワークツリー'],
+        [/auto-mode/gi, 'オートモード'],
+        [/\bmain\b/gi, 'メイン'],
+        [/\bimplementer\b/gi, 'インプリメンター'],
+    ],
 };
 
         const slideData = [

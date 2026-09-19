@@ -4,6 +4,15 @@
 const deckConfig = {
     title: 'yt_slide - HTML1枚で動くナレーション付きプレゼン',
     heading: 'yt_slide の紹介',
+    // このデッキだけの読みの置換表（TODO-054）。共通は slides/_rules.js
+    rules: [
+        [/claude-memo/gi, 'クロード メモ'],
+        [/yt_slide/gi, 'ワイティー スライド'],
+        [/JavaScript/gi, 'ジャバスクリプト'],
+        [/\bURL\b/gi, 'ユーアールエル'],
+        [/\breadme\b/gi, 'リードミー'],
+        [/\bdeveloper\b/gi, 'デベロッパー'],
+    ],
 };
 
 const slideData = [

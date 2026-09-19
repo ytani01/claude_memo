@@ -68,6 +68,7 @@ const slideData = [
 |------------------------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
 | `slides/<名前>.js` | スライドのデータ。`player.html?deck=<名前>` で読まれる |
+| `slides/_rules.js` | 全デッキ共通の読みの置換表 |
 | `docs/` | 説明（下記） |
 | `tools/measure-duration.py` | 読み上げ秒数を測り、`duration` に書き戻す |
 | `tools/test_measure_duration.py` | 書き戻しの置換を確かめる自己テスト |

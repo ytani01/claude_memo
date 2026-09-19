@@ -459,6 +459,10 @@
 
     </main>
 
+    <!-- 読みの置換表。デッキ共通（TODO-054）。デッキ側より先に読む必要があるので
+         ここで読む（fetch だと file:// で開けなくなる）。 -->
+    <script src="slides/_rules.js"></script>
+
     <!-- ?deck=<名前> で読み込むスライドのデータを選ぶ（TODO-041）。
          下の再生エンジンより先に読む必要があるので document.write を使う。 -->
     <script>
@@ -597,68 +601,15 @@
         const toggleCaptionBtn = document.getElementById('toggle-caption-btn');
         const captionIcon = document.getElementById('caption-icon');
 
-        // Pronunciation map for Japanese Speech Engine
+        // Pronunciation map for Japanese Speech Engine.
+        // デッキだけの語（deckConfig.rules）を先に当て、共通表（SPEECH_RULES、
+        // slides/_rules.js）を後に当てる（TODO-054）。
         function prepareSpeechText(text) {
             if (!text) return "";
-            return text
-                .replace(/archives\/todo/gi, 'アーカイブズ スラッシュ トゥードゥー')
-                .replace(/TODO\.md/gi, 'トゥードゥー ドット エムディー')
-                .replace(/TODO-([0-9]+)/gi, 'トゥードゥー $1')
-                .replace(/TODO/gi, 'トゥードゥー')
-                .replace(/ccstatusline/gi, 'シーシー ステータス ライン')
-                .replace(/\/clear/gi, 'スラッシュ クリア')
-                .replace(/\/goal/gi, 'スラッシュ ゴール')
-                .replace(/\/doctor/gi, 'スラッシュ ドクター')
-                .replace(/\/rc/gi, 'スラッシュ アールシー')
-                .replace(/\/login/gi, 'スラッシュ ログイン')
-                .replace(/CLAUDE\.md/gi, 'クロード ドット エムディー')
-                .replace(/claude-memo/gi, 'クロード メモ')
-                .replace(/Claude Code/gi, 'クロード コード')
-                .replace(/Claude/gi, 'クロード')
-                .replace(/tmux/gi, 'ティーマックス')
-                .replace(/pyright-lsp/gi, 'パイライト エルエスピー')
-                .replace(/ponytail/gi, 'ポニーテール')
-                .replace(/codegraph/gi, 'コードグラフ')
-                .replace(/git worktree/gi, 'ギット ワークツリー')
-                .replace(/auto-mode/gi, 'オートモード')
-                .replace(/考え方/g, 'かんがえかた')
-                .replace(/使い方/g, 'つかいかた')
-                .replace(/\bmain\b/gi, 'メイン')
-                .replace(/\bimplementer\b/gi, 'インプリメンター')
-                .replace(/measure-duration\.py/gi, 'メジャー デュレーション ドット パイ')
-                .replace(/player\.html/gi, 'プレイヤー ドット エイチティーエムエル')
-                .replace(/public_html/gi, 'パブリック エイチティーエムエル')
-                .replace(/User\.md/gi, 'ユーザー ドット エムディー')
-                .replace(/yt_slide/gi, 'ワイティー スライド')
-                .replace(/\.js\b/gi, ' ドット ジェイエス')
-                .replace(/slideData/gi, 'スライドデータ')
-                .replace(/\bslides\b/gi, 'スライズ')
-                .replace(/deckConfig/gi, 'デッキ コンフィグ')
-                .replace(/\bdeck\b/gi, 'デッキ')
-                .replace(/\bduration\b/gi, 'デュレーション')
-                .replace(/Online TTS/gi, 'オンライン ティーティーエス')
-                .replace(/Web Speech/gi, 'ウェブ スピーチ')
-                .replace(/requestAnimationFrame/gi, 'リクエスト アニメーション フレーム')
-                .replace(/container query/gi, 'コンテナ クエリ')
-                .replace(/no-referrer/gi, 'ノー リファラー')
-                .replace(/\bmeta\b/gi, 'メタ')
-                .replace(/\bAudio\b/gi, 'オーディオ')
-                .replace(/\btransform\b/gi, 'トランスフォーム')
-                .replace(/\bclamp\b/gi, 'クランプ')
-                .replace(/\bcqw\b/gi, 'シーキューダブリュー')
-                .replace(/px\b/gi, 'ピクセル')
-                .replace(/\brem\b/gi, 'レム')
-                .replace(/\bwrite\b/gi, 'ライト')
-                .replace(/Tailwind/gi, 'テイルウィンド')
-                .replace(/\bCDN\b/gi, 'シーディーエヌ')
-                .replace(/JavaScript/gi, 'ジャバスクリプト')
-                .replace(/HTML/gi, 'エイチティーエムエル')
-                .replace(/\bURL\b/gi, 'ユーアールエル')
-                .replace(/\bPython\b/gi, 'パイソン')
-                .replace(/\btools\b/gi, 'ツールズ')
-                .replace(/\breadme\b/gi, 'リードミー')
-                .replace(/\buser\b/gi, 'ユーザー')
-                .replace(/\bdeveloper\b/gi, 'デベロッパー');
+            const rules = (deckConfig.rules || []).concat(SPEECH_RULES);
+            return rules.reduce(
+                (acc, [pattern, replacement]) => acc.replace(pattern, replacement),
+                text);
         }
 
         // Android/desktop Chrome cut long utterances off after ~15s, so the

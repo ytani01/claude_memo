@@ -12,8 +12,9 @@
 |----------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
 | `slides/<名前>.js` | スライドのデータ。`readme`・`user`・`developer`・`claude-memo` |
+| `slides/_rules.js` | 全デッキ共通の読みの置換表 |
 | `tools/measure-duration.py` | 読み上げ秒数を測り、`duration` に書き戻す |
-| `tools/test_measure_duration.py` | 書き戻しの置換を確かめる自己テスト |
+| `tools/test_measure_duration.py` | 書き戻しの置換と、置換表の読み取りを確かめる自己テスト |
 
 **ビルドも、依存関係のインストールも無い。**
 テストは `tools/test_measure_duration.py` の 1 本だけで、`duration` の
@@ -83,7 +84,7 @@ python3 -m http.server 8000
 実測秒数**が入っている。`slides/claude-memo.js` の 17 枚は `ffprobe` で測って入れた値
 （合計 324 秒）で、目分量の数字ではない。
 
-**`prepareSpeechText()` の置換表を変えると読み上げの長さも変わる。**
+**読みの置換表を変えると読み上げの長さも変わる。**
 当たるスライドの `duration` を測り直すこと。測るには
 `tools/measure-duration.py` を使う（`--deck <名前>` でデッキを選び、
 案の下見は `--text`）。**`--write` を付けると、測った値を
@@ -91,10 +92,10 @@ python3 -m http.server 8000
 ナレーションを直したあとは
 `tools/measure-duration.py --deck <名前> --all --write` でまとめて合わせられる。
 
-**このスクリプトは `prepareSpeechText()` の置換表と `TTS_MAX_CHARS`・
-`BASE_SPEED_MULTIPLIER` を写している。** `player.html` 側を直したら、
-スクリプトの `RULES` と定数も一緒に直す。片方だけだと測った秒数が実際と
-ずれる。
+置換表は `player.html` と同じものを `slides/_rules.js` とデッキのファイルから
+読むので、写しではない（TODO-054）。ただし **`TTS_MAX_CHARS` と
+`BASE_SPEED_MULTIPLIER` の 2 つは `player.html` の写し**なので、片方を直したら
+もう片方も直す。片方だけだと測った秒数が実際とずれる。
 
 ## 読み上げ
 
@@ -105,8 +106,11 @@ python3 -m http.server 8000
 | `online` | Google Translate TTS の URL を `Audio` で再生 | `TTS_MAX_CHARS` で切る |
 | `speech` | Web Speech API（`SpeechSynthesisUtterance`） | 長い発話が途中で切れる |
 
-`narration` は `prepareSpeechText()` を通してから読み上げられる。記号や
-英単語の読みがおかしいときはここを見る。
+`narration` は `prepareSpeechText()` を通してから読み上げられる。置換表は
+**デッキの `deckConfig.rules` が先、`slides/_rules.js` の `SPEECH_RULES` が後**の
+順に当たる。`_rules.js` はデッキより先に読む必要があるので、`document.write` の
+前の `<script>` タグで読んでいる（`fetch` にすると `file://` で開けなくなる）。
+書き足し方は `docs/User.md` の「読みを直す」にある。
 
 どちらにも安全タイマーがある。読み終わりのイベントが来なくても次へ進むため。
 
