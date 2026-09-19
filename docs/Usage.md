@@ -1,22 +1,22 @@
 # player.html で別のスライドを作る
 
 `player.html` は再生エンジンだけを持っていて、スライドの中身は
-`slides-<名前>.js` に分かれている。新しいスライドを作るときは、
-**`player.html` は触らず、`slides-<名前>.js` を 1 つ足すだけでよい。**
+`slides/<名前>.js` に分かれている。新しいスライドを作るときは、
+**`player.html` は触らず、`slides/<名前>.js` を 1 つ足すだけでよい。**
 再生エンジンのほうを直すなら [Developer.md](Developer.md) を読む。
 
 ## 手順
 
-1. `slides-<名前>.js` を `player.html` と同じディレクトリに作る
+1. `player.html` と同じディレクトリの `slides/` に `<名前>.js` を作る
    （`<名前>` に使えるのは英数字・`_`・`-` だけ。それ以外は捨てられる）
 2. 中に `deckConfig` と `slideData` を書く（下記）
 3. ブラウザで `player.html?deck=<名前>` を開く
 
-`?deck=` を省くと `slides-claude-memo.js` を読む。読み込みに失敗すると、
-白画面ではなく「スライドのデータ slides-<名前>.js を読み込めませんでした。」と
+`?deck=` を省くと `slides/claude-memo.js` を読む。読み込みに失敗すると、
+白画面ではなく「スライドのデータ slides/<名前>.js を読み込めませんでした。」と
 表示して止まる。
 
-## `slides-<名前>.js` の中身
+## `slides/<名前>.js` の中身
 
 グローバルに 2 つ定義する。どちらも `const` で、この名前でないと読まれない。
 
@@ -69,7 +69,7 @@ const slideData = [
 - 高さは 540px 相当しかない。既存のスライドは
   `flex flex-col h-full justify-center` で縦に詰めている
 
-既存の 17 枚が `slides-claude-memo.js` にあるので、**近い見た目のものを
+既存の 17 枚が `slides/claude-memo.js` にあるので、**近い見た目のものを
 コピーして中身を差し替えるのが早い。**
 
 ## `narration` と `duration`
@@ -90,7 +90,7 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 最後に出る `duration: 2` をそのまま書けばよい。`curl` と `ffprobe` が要る。
 
 引数にスライド番号を渡す使い方（`tools/measure-duration.py 2 17`）は
-**`slides-claude-memo.js` 固定**なので、他のデッキでは使えない。
+**`slides/claude-memo.js` 固定**なので、他のデッキでは使えない。
 
 書くときの注意:
 
@@ -111,7 +111,7 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 
 ## 最小の例
 
-`slides-sample.js` として保存し、`player.html?deck=sample` で開く。
+`slides/sample.js` として保存し、`player.html?deck=sample` で開く。
 
 ```js
 const deckConfig = {

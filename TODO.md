@@ -1,30 +1,7 @@
 # TODO
 
-**残っている項目: TODO-046 と TODO-047。** これまでに 45 件を決着させた。
+**残っている項目: TODO-047。** これまでに 46 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-048` から。**
-
----
-
-## TODO-046. スライドのデータを `slides/` に置く
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | verifier + reviewer |
-
-- [ ] `slides-claude-memo.js` を `git mv` で `slides/claude-memo.js` にする
-- [ ] `player.html` の読み込み先とエラーメッセージを `slides/<名前>.js` にする
-- [ ] `tools/measure-duration.py` の `SRC` を追従させる
-- [ ] `README.md`・`CLAUDE.md`・`docs/Usage.md`・`docs/Developer.md` の記述を直す
-
-デッキが増えるとリポジトリ直下が散らかるので、スライドのデータを
-`slides/` にまとめる。ファイル名は `slides/<名前>.js`（ディレクトリ名で
-種類が分かるので `slides-` の接頭辞は落とす）。URL は
-`player.html?deck=claude-memo` のままで変わらない。
-
-コードで直すのは `player.html:467`（`src=`）と `player.html:478`
-（エラーメッセージ）、`tools/measure-duration.py:28`（`SRC`）の 3 か所。
-
-読み込み先が変わる（挙動の変更）ので、確認とレビューを別々に立てる。
 
 ---
 
@@ -47,6 +24,7 @@ TODO-041 の分割で `player.html` へ飛ばすだけになったもの。旧 U
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-046.** スライドのデータを `slides/` に置く](archives/todo/TODO-046.%20スライドのデータを%20slides%20に置く.md)
 - [**TODO-045.** リポジトリの入口として `README.md` を作る](archives/todo/TODO-045.%20リポジトリの入口として%20README.md%20を作る.md)
 - [**TODO-044.** `public_html/` 以外へ移しても動くことを `docs/Developer.md` に書く](archives/todo/TODO-044.%20public_html%20以外へ移しても動くことを%20docs%20Developer.md%20に書く.md)
 - [**TODO-043.** `player.html` を直す人向けの `docs/Developer.md` を作る](archives/todo/TODO-043.%20player.html%20を直す人向けの%20docs%20Developer.md%20を作る.md)

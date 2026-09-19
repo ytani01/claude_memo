@@ -9,7 +9,7 @@
 | ファイル | 中身 |
 |----------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
-| `slides-<名前>.js` | スライドのデータ。`slides-claude-memo.js` が 17 枚の実例 |
+| `slides/<名前>.js` | スライドのデータ。`slides/claude-memo.js` が 17 枚の実例 |
 | `claude_memo.html` | 旧 URL からのリダイレクト |
 | `tools/measure-duration.py` | ナレーションの読み上げ秒数を測る |
 
@@ -21,8 +21,8 @@ FontAwesome は CDN から読む（オフラインでは崩れる）。置き場
 
 ### 置き場所は選ばない
 
-`player.html` がローカルを指しているのは `slides-<名前>.js` の 1 か所だけで、
-しかも相対パス。残りは全部 CDN の https。**`player.html` と `slides-*.js` を
+`player.html` がローカルを指しているのは `slides/<名前>.js` の 1 か所だけで、
+しかも相対パス。残りは全部 CDN の https。**`player.html` と `slides/` を
 同じディレクトリに置けば、`public_html/` の外でもそのまま動く**
 （`claude_memo.html` のリダイレクトも相対）。
 
@@ -46,7 +46,7 @@ python3 -m http.server 8000
 **HTML → `slideData` → 再生ロジック** の 3 段で、データだけが別ファイルに
 分かれている。
 
-`player.html` は `?deck=<名前>` の `<名前>` から `slides-<名前>.js` を読む
+`player.html` は `?deck=<名前>` の `<名前>` から `slides/<名前>.js` を読む
 （既定は `claude-memo`）。読み込みは `</main>` の直後の `document.write` で、
 **再生ロジックの `<script>` より先に走らせている**。その下の `<script>` が
 読み込み時点で `slideData` を参照するので、順番を入れ替えると動かない。
@@ -76,7 +76,7 @@ python3 -m http.server 8000
 ### `duration` は実測値
 
 `duration` には **Online TTS の音声を 1.4 倍速で再生した実測秒数**が入って
-いる。`slides-claude-memo.js` の 17 枚は `ffprobe` で測って入れた値
+いる。`slides/claude-memo.js` の 17 枚は `ffprobe` で測って入れた値
 （合計 324 秒）で、目分量の数字ではない。
 
 **`prepareSpeechText()` の置換表を変えると読み上げの長さも変わる。**

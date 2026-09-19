@@ -25,7 +25,7 @@ import subprocess
 import tempfile
 import urllib.parse
 
-SRC = pathlib.Path(__file__).resolve().parent.parent / 'slides-claude-memo.js'
+SRC = pathlib.Path(__file__).resolve().parent.parent / 'slides' / 'claude-memo.js'
 
 # player.html の写し ---------------------------------------------------
 TTS_MAX_CHARS = 180
@@ -85,7 +85,7 @@ def measure(text):
 
 
 def narrations():
-    """slides-claude-memo.js から narration を並び順に取り出す。"""
+    """slides/claude-memo.js から narration を並び順に取り出す。"""
     return re.findall(r"narration: '(.*?)',\n", SRC.read_text(encoding='utf-8'))
 
 

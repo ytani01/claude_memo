@@ -464,7 +464,7 @@
     <script>
         const deckName = (new URLSearchParams(location.search).get('deck')
             || 'claude-memo').replace(/[^\w-]/g, '');
-        document.write(`<script src="slides-${deckName}.js"><\/script>`);
+        document.write(`<script src="slides/${deckName}.js"><\/script>`);
     </script>
 
     <script>
@@ -475,7 +475,7 @@
             canvas.className = 'flex-grow z-10 flex items-center justify-center'
                 + ' text-slate-200 text-sm';
             canvas.textContent =
-                `スライドのデータ slides-${deckName}.js を読み込めませんでした。`;
+                `スライドのデータ slides/${deckName}.js を読み込めませんでした。`;
             throw new Error(`deck not found: ${deckName}`);
         }
 
