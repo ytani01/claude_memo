@@ -463,7 +463,7 @@
          下の再生エンジンより先に読む必要があるので document.write を使う。 -->
     <script>
         const deckName = (new URLSearchParams(location.search).get('deck')
-            || 'claude-memo').replace(/[^\w-]/g, '');
+            || 'readme').replace(/[^\w-]/g, '');
         document.write(`<script src="slides/${deckName}.js"><\/script>`);
     </script>
 

@@ -8,11 +8,13 @@
     tools/measure-duration.py 2 17          # スライド 2 と 17 を測る
     tools/measure-duration.py --all         # すべて
     tools/measure-duration.py --all --write # すべて測って duration を書き戻す
+    tools/measure-duration.py --deck usage --all --write
     tools/measure-duration.py --text 'ここに下書き'
 
 `--text` は、差し替える前に案の長さを見るためのもの。
-`--write` は測った値を slides/claude-memo.js の `duration` に書き込む
-（変わった枚だけ `17 -> 16` と出す。戻すのは git の差分で足りる）。
+`--write` は測った値を `duration` に書き込む（変わった枚だけ `17 -> 16` と
+出す。戻すのは git の差分で足りる）。`--deck` はどのデッキを読むかで、
+既定は `DEFAULT_DECK`（下で定める）のデッキ。
 
 **この下の定数と RULES は player.html の写し。**
 `prepareSpeechText()` の置換表、`TTS_MAX_CHARS`、`BASE_SPEED_MULTIPLIER` を
@@ -29,7 +31,8 @@ import subprocess
 import tempfile
 import urllib.parse
 
-SRC = pathlib.Path(__file__).resolve().parent.parent / 'slides' / 'claude-memo.js'
+SLIDES = pathlib.Path(__file__).resolve().parent.parent / 'slides'
+DEFAULT_DECK = 'readme'
 
 # player.html の写し ---------------------------------------------------
 TTS_MAX_CHARS = 180
@@ -92,10 +95,8 @@ def measure(text):
 DURATION_RE = re.compile(r"(duration: )(\d+)(,\n *narration: ')")
 
 
-def narrations(text=None):
-    """slides/claude-memo.js から narration を並び順に取り出す。"""
-    if text is None:
-        text = SRC.read_text(encoding='utf-8')
+def narrations(text):
+    """デッキの本文から narration を並び順に取り出す。"""
     return re.findall(r"narration: '(.*?)',\n", text)
 
 
@@ -116,15 +117,15 @@ def apply_durations(text, updates):
     return written, changed, next(counter) - 1
 
 
-def write_durations(updates):
+def write_durations(src, updates):
     """{スライド番号: 秒数} を書き込み、変わった分を [(番号, 旧, 新)] で返す。"""
-    text = SRC.read_text(encoding='utf-8')
+    text = src.read_text(encoding='utf-8')
     written, changed, found = apply_durations(text, updates)
     if found != len(narrations(text)):
-        raise SystemExit(f'{SRC} の duration が {found} 個しか見つからない。'
+        raise SystemExit(f'{src} の duration が {found} 個しか見つからない。'
                          'slideData の書き方が変わっていないか確かめること')
     if changed:
-        SRC.write_text(written, encoding='utf-8')
+        src.write_text(written, encoding='utf-8')
     return changed
 
 
@@ -135,14 +136,20 @@ def main():
     parser.add_argument('--text', help='下書きの文字列を直接測る')
     parser.add_argument('--all', action='store_true', help='すべてのスライド')
     parser.add_argument('--write', action='store_true',
-                        help='測った値を slides/claude-memo.js に書き戻す')
+                        help='測った値をデッキの duration に書き戻す')
+    parser.add_argument('--deck', default=DEFAULT_DECK,
+                        help=f'slides/<名前>.js の <名前>（既定は {DEFAULT_DECK}）')
     args = parser.parse_args()
+
+    src = SLIDES / f'{args.deck}.js'
+    if (args.slides or args.all) and not src.exists():
+        parser.error(f'{src} が無い')
 
     jobs = []
     if args.text:
         jobs.append((None, '下書き', args.text))
     if args.slides or args.all:
-        found = narrations()
+        found = narrations(src.read_text(encoding='utf-8'))
         ids = range(1, len(found) + 1) if args.all else args.slides
         for i in ids:
             jobs.append((i, f'スライド {i}', found[i - 1]))
@@ -164,11 +171,11 @@ def main():
             updates[number] = round(scaled)
 
     if args.write:
-        changed = write_durations(updates)
+        changed = write_durations(src, updates)
         for number, old, new in changed:
             print(f'スライド {number}: duration {old} -> {new}')
-        print(f'{SRC.name}: {len(changed)} 枚を書き換えた'
-              if changed else f'{SRC.name}: 変更なし')
+        print(f'{src.name}: {len(changed)} 枚を書き換えた'
+              if changed else f'{src.name}: 変更なし')
 
 
 if __name__ == '__main__':

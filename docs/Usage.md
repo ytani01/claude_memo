@@ -1,5 +1,7 @@
 # player.html で別のスライドを作る
 
+**同じ内容をスライドでも見られる**（`player.html?deck=usage`）。
+
 `player.html` は再生エンジンだけを持っていて、スライドの中身は
 `slides/<名前>.js` に分かれている。新しいスライドを作るときは、
 **`player.html` は触らず、`slides/<名前>.js` を 1 つ足すだけでよい。**
@@ -12,7 +14,7 @@
 2. 中に `deckConfig` と `slideData` を書く（下記）
 3. ブラウザで `player.html?deck=<名前>` を開く
 
-`?deck=` を省くと `slides/claude-memo.js` を読む。読み込みに失敗すると、
+`?deck=` を省くと `slides/readme.js` を読む。読み込みに失敗すると、
 白画面ではなく「スライドのデータ slides/<名前>.js を読み込めませんでした。」と
 表示して止まる。
 
@@ -89,15 +91,15 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 
 最後に出る `duration: 2` をそのまま書けばよい。`curl` と `ffprobe` が要る。
 
-引数にスライド番号を渡す使い方（`tools/measure-duration.py 2 17`）と
-`--write` は **`slides/claude-memo.js` 固定**なので、他のデッキでは使えない。
-`--write` を付けると、書き写す代わりに `duration` を直接書き換える。
+`--deck <名前>` を付ければ、どのデッキのスライド番号でも指定できる
+（省くと `readme`）。`--write` を付けると、書き写す代わりに `duration` を
+直接書き換える。
 
 ```bash
-$ tools/measure-duration.py --all --write
-（17 枚の測定結果）
-スライド 15: duration 17 -> 16
-claude-memo.js: 1 枚を書き換えた
+$ tools/measure-duration.py --deck usage --all --write
+（11 枚の測定結果）
+スライド 7: duration 23 -> 12
+usage.js: 1 枚を書き換えた
 ```
 
 変わった枚だけ出る。書き換えた結果が気に入らなければ `git checkout` で戻す。

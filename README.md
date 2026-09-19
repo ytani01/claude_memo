@@ -1,15 +1,66 @@
 # yt_slide
 
-ナレーション付きのスライドをブラウザで再生するプレイヤー。スライドを順に
-表示しながら読み上げ、字幕・再生速度・フルスクリーンを切り替えられる。
+**HTML 1 枚で、ナレーション付きのプレゼンが動き出す。**
 
-再生エンジンの `player.html` と、スライドの中身の `slides/<名前>.js` に
-分かれていて、**プレイヤーを触らずにスライドだけ足せる。**
-実例として「私の Claude Code の使い方」17 枚が入っている。
+スライドを順に映しながら読み上げ、字幕を出し、時間どおりに次へ送る。
+動画に書き出す必要は無く、URL を渡せばそのまま見てもらえる。
 
-ビルドも依存関係のインストールも無い。ファイルを置けばそのまま動く
-（Tailwind・Google Fonts・FontAwesome・読み上げの音声は外から取るので、
-ネット接続は要る）。
+ビルドもインストールも要らない。`player.html` と `slides/` を Web サーバーに
+置くだけで公開できる。
+
+## できること
+
+- **読み上げ**。Google Translate TTS と、ブラウザの Web Speech API を
+  ボタンで切り替えられる
+- **字幕**。ナレーションの全文を画面下に出す。消すこともできる
+- **自動再生**。読み終わると数秒待って次のスライドへ。待ち時間は 1〜3 秒から選ぶ
+- **再生速度** 0.75〜2.0 倍。進行バーと残り時間は実際の再生時間に追従する
+- **フルスクリーン**と、前後送り・頭出し
+- **スマホでも操作しやすい**。左右のスワイプでスライドを送り、
+  タップで再生と一時停止
+
+## すぐ試す
+
+```bash
+python3 -m http.server 8000
+# => http://localhost:8000/player.html
+```
+
+`player.html?deck=<名前>` で `slides/<名前>.js` を読む。`?deck=` を省くと
+このリポジトリの紹介（`slides/readme.js`）が流れる。
+
+## 自分のスライドを作る
+
+**`player.html` は触らない。** `slides/` に JavaScript を 1 つ足すだけ。
+
+```javascript
+const deckConfig = { title: 'ブラウザのタブに出る名前', heading: '画面上部の見出し' };
+
+const slideData = [
+    {
+        title: '1 枚目',
+        duration: 10,                    // 読み上げにかかる秒数
+        narration: 'ここが読み上げられ、字幕にも出ます。',
+        render: function() {
+            return `<h1 class="text-4xl font-bold">好きな HTML を書く</h1>`;
+        }
+    },
+];
+```
+
+`duration` は目分量で決めず、`tools/measure-duration.py --deck <名前> --all --write`
+で実測して入れる。手順は [docs/Usage.md](docs/Usage.md) にある。
+
+## 入っているスライド
+
+| デッキ | 中身 |
+|--------|------|
+| `readme` | このリポジトリの紹介（既定） |
+| `usage` | スライドの作り方 |
+| `developer` | `player.html` の作り |
+| `claude-memo` | 実例。「私の Claude Code の使い方」17 枚 |
+
+`docs/` の説明と、同じ内容をスライドでも見られる。
 
 ## ファイル構成
 
@@ -17,25 +68,16 @@
 |------------------------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
 | `slides/<名前>.js` | スライドのデータ。`player.html?deck=<名前>` で読まれる |
-| `slides/claude-memo.js` | 実例のスライド 17 枚（既定のデッキ） |
 | `docs/` | 説明（下記） |
-| `tools/measure-duration.py` | ナレーションの読み上げ秒数を測り、`duration` に書き戻す |
-| `tools/test_measure_duration.py` | 書き戻しの置換だけを確かめる自己テスト |
+| `tools/measure-duration.py` | 読み上げ秒数を測り、`duration` に書き戻す |
+| `tools/test_measure_duration.py` | 書き戻しの置換を確かめる自己テスト |
 | `archives/` | 決着した TODO 項目と、サブエージェントの報告。**現行仕様ではない** |
 | `TODO.md` | 進行中の項目と、完了済みの目次 |
 | `CLAUDE.md` | Claude Code 向けのプロジェクト規約 |
 
-## 手元で動かす
-
-`player.html` と `slides/` があるディレクトリで:
-
-```bash
-python3 -m http.server 8000
-# => http://localhost:8000/player.html?deck=claude-memo
-```
-
-`?deck=` を省くと `slides/claude-memo.js` を読む。`file://` で直接開くのは
-試していないので、HTTP で配るのが確実。
+Tailwind・Google Fonts・FontAwesome・読み上げの音声は外から取るので、
+**見る側にネット接続が要る**。`file://` で直接開くのは試していないので、
+HTTP で配るのが確実。
 
 ## 説明
 

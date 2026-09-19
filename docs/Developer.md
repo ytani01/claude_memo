@@ -1,5 +1,7 @@
 # player.html を直す人へ
 
+**同じ内容をスライドでも見られる**（`player.html?deck=developer`）。
+
 再生エンジン `player.html` を直すときに、先に知っておきたいことをまとめる。
 **スライドを足したい・作りたいだけなら [Usage.md](Usage.md) を読めばよい。**
 こちらを読む必要は無い。
@@ -9,7 +11,7 @@
 | ファイル | 中身 |
 |----------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
-| `slides/<名前>.js` | スライドのデータ。`slides/claude-memo.js` が 17 枚の実例 |
+| `slides/<名前>.js` | スライドのデータ。`readme`・`usage`・`developer`・`claude-memo` |
 | `tools/measure-duration.py` | 読み上げ秒数を測り、`duration` に書き戻す |
 | `tools/test_measure_duration.py` | 書き戻しの置換を確かめる自己テスト |
 
@@ -19,7 +21,7 @@
 FontAwesome は CDN から読む（オフラインでは崩れる）。置き場所が `public_html/`
 なので、ファイルを置けばそのまま公開される。
 
-確認はブラウザで `player.html?deck=claude-memo` を開くだけ。
+確認はブラウザで `player.html` を開くだけ。
 
 ### 置き場所は選ばない
 
@@ -31,7 +33,7 @@ FontAwesome は CDN から読む（オフラインでは崩れる）。置き場
 
 ```bash
 python3 -m http.server 8000
-# => http://localhost:8000/player.html?deck=claude-memo
+# => http://localhost:8000/player.html
 ```
 
 - **`file://` で直接開くのは試していない。** `document.write` で足した相対の
@@ -48,7 +50,7 @@ python3 -m http.server 8000
 分かれている。
 
 `player.html` は `?deck=<名前>` の `<名前>` から `slides/<名前>.js` を読む
-（既定は `claude-memo`）。読み込みは `</main>` の直後の `document.write` で、
+（既定は `readme`）。読み込みは `</main>` の直後の `document.write` で、
 **再生ロジックの `<script>` より先に走らせている**。その下の `<script>` が
 読み込み時点で `slideData` を参照するので、順番を入れ替えると動かない。
 デッキが読めなかったときは、白画面にせず理由を出して `throw` で止めている。
@@ -83,11 +85,11 @@ python3 -m http.server 8000
 
 **`prepareSpeechText()` の置換表を変えると読み上げの長さも変わる。**
 当たるスライドの `duration` を測り直すこと。測るには
-`tools/measure-duration.py` を使う（`tools/measure-duration.py 2 17`、
+`tools/measure-duration.py` を使う（`--deck <名前>` でデッキを選び、
 案の下見は `--text`）。**`--write` を付けると、測った値を
-`slides/claude-memo.js` の `duration` に書き戻す**（TODO-050）。
-ナレーションを直したあとは `tools/measure-duration.py --all --write` で
-まとめて合わせられる。
+そのデッキの `duration` に書き戻す**（TODO-050、TODO-051）。
+ナレーションを直したあとは
+`tools/measure-duration.py --deck <名前> --all --write` でまとめて合わせられる。
 
 **このスクリプトは `prepareSpeechText()` の置換表と `TTS_MAX_CHARS`・
 `BASE_SPEED_MULTIPLIER` を写している。** `player.html` 側を直したら、
