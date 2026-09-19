@@ -1,0 +1,186 @@
+# player.html を直す人へ
+
+再生エンジン `player.html` を直すときに、先に知っておきたいことをまとめる。
+**スライドを足したい・作りたいだけなら [Usage.md](Usage.md) を読めばよい。**
+こちらを読む必要は無い。
+
+## リポジトリの構成
+
+| ファイル | 中身 |
+|----------|------|
+| `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
+| `slides-<名前>.js` | スライドのデータ。`slides-claude-memo.js` が 17 枚の実例 |
+| `claude_memo.html` | 旧 URL からのリダイレクト |
+| `tools/measure-duration.py` | ナレーションの読み上げ秒数を測る |
+
+**ビルドも、依存関係のインストールも、テストも無い。** Tailwind・Google Fonts・
+FontAwesome は CDN から読む（オフラインでは崩れる）。置き場所が `public_html/`
+なので、ファイルを置けばそのまま公開される。
+
+確認はブラウザで `player.html?deck=claude-memo` を開くだけ。
+
+## 全体の作り
+
+**HTML → `slideData` → 再生ロジック** の 3 段で、データだけが別ファイルに
+分かれている。
+
+`player.html` は `?deck=<名前>` の `<名前>` から `slides-<名前>.js` を読む
+（既定は `claude-memo`）。読み込みは `</main>` の直後の `document.write` で、
+**再生ロジックの `<script>` より先に走らせている**。その下の `<script>` が
+読み込み時点で `slideData` を参照するので、順番を入れ替えると動かない。
+デッキが読めなかったときは、白画面にせず理由を出して `throw` で止めている。
+
+`slideData` の 1 要素は `{ id, title, duration, narration, render() }`。
+それぞれの意味は [Usage.md](Usage.md) にある。
+
+## 再生ロジック
+
+`requestAnimationFrame` の `playbackLoop` が経過時間を進め、`duration` が
+尽きたら次のスライドへ移る。ただし**実際のスライド送りは、読み上げの終了
+イベントで起きる**。`duration` を待ち時間として使うのは、消音中と、音声が
+鳴らせなかったとき（`onerror`・`play()` の拒否）だけ。
+
+### 時間軸に 1.4 を掛けない
+
+進行バーと時間表示は**実時間**（`deltaTime * playbackRate`）で進める。
+**1.4 倍が掛かるのは読み上げの速度だけ**（`playbackRate * baseSpeedMultiplier`）。
+時間軸のほうに 1.4 を掛けるとバーだけが先走り、`duration` で頭打ちになって
+読み終わりまで止まって見える。
+
+音声が `duration` より長ければ、バーは 100% のまま読み終わりを待つ。
+これは仕様として受け入れている。Web Speech に切り替えると音声の長さが
+変わるので、バーとは必然的にずれる。
+
+### `duration` は実測値
+
+`duration` には **Online TTS の音声を 1.4 倍速で再生した実測秒数**が入って
+いる。`slides-claude-memo.js` の 17 枚は `ffprobe` で測って入れた値
+（合計 324 秒）で、目分量の数字ではない。
+
+**`prepareSpeechText()` の置換表を変えると読み上げの長さも変わる。**
+当たるスライドの `duration` を測り直すこと。測るには
+`tools/measure-duration.py` を使う（`tools/measure-duration.py 2 17`、
+案の下見は `--text`）。
+
+**このスクリプトは `prepareSpeechText()` の置換表と `TTS_MAX_CHARS`・
+`BASE_SPEED_MULTIPLIER` を写している。** `player.html` 側を直したら、
+スクリプトの `RULES` と定数も一緒に直す。片方だけだと測った秒数が実際と
+ずれる。
+
+## 読み上げ
+
+2 系統を `toggle-voice-engine-btn` で切り替える。**既定は `online`。**
+
+| モード | 実装 | 制限 |
+|--------|------|------|
+| `online` | Google Translate TTS の URL を `Audio` で再生 | 180 文字で切る |
+| `speech` | Web Speech API（`SpeechSynthesisUtterance`） | 長い発話が途中で切れる |
+
+`narration` は `prepareSpeechText()` を通してから読み上げられる。記号や
+英単語の読みがおかしいときはここを見る。
+
+どちらにも安全タイマーがある。読み終わりのイベントが来なくても次へ進むため。
+
+- **Web Speech**: **文字数**から計算する
+  （`textToSpeak.length / 4.5 / getEffectiveSpeed()`）。Web Speech は
+  読み終わりのイベントが来ないことがある
+- **Online TTS**: **音声の実長**（`loadedmetadata` で取る。取れなければ
+  スライドの `duration`）に 3 秒足した時点で進める
+
+### 触ると鳴らなくなるもの
+
+次の 3 つは、どれも実機で鳴らなくなって分かったもの。理由を知らずに
+「整理」すると再発する。
+
+- **`Audio` 要素（`fallbackAudioElement`）は 1 個を使い回す。**
+  再生ボタンのクリックの中で unlock しているので、`null` にして作り直すと
+  Android Chrome で自動再生がブロックされて鳴らなくなる
+- **Web Speech は `splitForSpeech()` で 40 文字程度に分けて順に読ませる。**
+  Chrome は PC も Android も、長い発話を 15 秒ほどで打ち切る。1 つにまとめる
+  と途中で切れる
+- **`<meta name="referrer" content="no-referrer">` を外さない。**
+  Google Translate TTS は Referer が付いた要求に 404 を返すので、外すと
+  Online TTS が鳴らなくなる
+
+## レイアウト
+
+### 拡大縮小は container query
+
+`.video-viewport` が `container-type: inline-size` で、`render()` の中は
+`cqw` と `clamp()` で書く。**`px` や `rem` の直書きは、16:9 を縮めたときに
+崩れる。**
+
+### 狭い画面とタッチ画面は別系統
+
+**幅 768px 未満とタッチ画面は、container query とは別の経路で縮小している。**
+条件は `@media screen and (max-width: 767.98px), screen and (pointer: coarse)`。
+
+タッチ画面を条件に加えたのは、横持ちのスマホ（844x390 など）が幅 768 以上で
+PC 扱いになり、レターボックスの中では `clamp()` の下限 px が効いて本文が
+縮まず、枠内上段に重なるため。**フルスクリーン中に限らず、タッチ画面なら
+通常表示でもこの経路に入る**（タブレットやタッチ対応 PC も同じ）。
+
+この経路では、`#viewport-frame` が 16:9 の外枠になり、`setupViewportScale()`
+が `--vp-scale` を入れて `#player-viewport`（中身は 960x540 のまま）を
+`transform: scale()` で縮める。
+
+**縮むのは枠の中身すべてで、`cqw` や `clamp()` で書いていない固定 px の
+ものも例外ではない。** 幅 768px 未満では `md:` が効かない
+（`md:` は `min-width: 768px`）ので、枠の中のクロームは `text-xs` などの
+小さい方が選ばれ、それがさらに `--vp-scale`（0.34〜0.77）倍される。実際、
+枠の上の `SLIDE nn / NN` は 390px 幅で 5px 前後になる。補助的な情報なので、
+**読めなくてよいものとして残している。**
+
+### 字幕バナーだけは枠の外
+
+`#subtitle-banner` は `#viewport-stage` の直下にあり、**縮小されない**。
+枠に重ねず、**画面幅によらず常に枠の下へ流す**（全文を出すので、重ねると
+スライドを隠してしまう）。
+
+通常表示はクラスの `mt-3` だけで足りるので、CSS に書いてあるのは擬似
+フルスクリーン中の位置（`position: absolute; top: 100%`）だけ。ラッパーが
+レターボックスそのものなので、`top: 100%` がそのまま枠の下端になる。
+
+### 擬似フルスクリーン
+
+レターボックスは `#viewport-stage.is-fullscreen` だけが持ち、**高さの基準は
+`100dvh`**（`vh` の行は dvh 非対応ブラウザ用に残してある）。スマホの
+`100vh` は URL バーを含んだ高さなので、`vh` のままだと横持ちで箱が画面の下へ
+はみ出す。
+
+中身（`.video-viewport.pseudo-fullscreen`、縮小経路では `#viewport-frame`）
+も字幕も、このラッパーを基準に置いている。**比率やサイズを変えるのは
+ここ 1 か所でよい。**
+
+字幕はフルスクリーン中、`top: 100%` で枠のすぐ下（暗幕の上）に出る。
+
+### `body.fs-lock` と暗幕
+
+裏のスクロール止め（`body.fs-lock`）と暗幕（`::before`）は、**幅 768px 未満
+または `(pointer: coarse)` のときだけ**掛ける。
+
+マウスの PC で裏をスクロール禁止にするとスクロールバーが消え、裏のページ
+全体がスクロールバー幅ぶん、`100vw` 基準のレターボックスがその半分だけ横に
+動く（実測でずれは 3px 程度。比率によっては掛けた方が正しい位置になる）。
+タッチ画面を条件に加えたのは、横持ちのスマホが幅 768 以上で PC 扱いになり、
+**フルスクリーンから抜けられなくなる**ため。
+
+暗幕をタップするとフルスクリーンを抜ける。ハンドラは `#viewport-stage` の
+click で、`e.target` がラッパー自身のときだけ反応する（枠の中身や字幕の
+タップでは閉じない）。
+
+**暗幕の帯の太さは画面の比率で決まる。** 16:9 ちょうどの画面では帯が 0px に
+なり、タップで抜ける出口が無くなる。**これは対応しないと決めている**
+（キーボードとボタンからは抜けられる）。
+
+## 直書きしない値
+
+- **スライドの枚数を書かない。** `total-slides` も `playlist-count` も
+  `initPlaylist()` が `slideData.length` で埋める
+- **総時間を書かない。** `total-time-display` の初期値は `--:--` で、
+  `initPlaylist()` が `duration` の合計で上書きする
+
+---
+
+個々の変更の経緯（なぜその条件式になったか、何を試して駄目だったか）は
+`archives/todo/` に 1 件 1 ファイルで残してある。

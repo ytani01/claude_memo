@@ -1,37 +1,7 @@
 # TODO
 
-**残っている項目: TODO-043。** これまでに 42 件を決着させた。
+**残っている項目: 無し。** これまでに 43 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-044` から。**
-
----
-
-## TODO-043. `player.html` を直す人向けの `docs/Developer.md` を作る
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | verifier |
-
-- [ ] `docs/Developer.md` を新規に書く
-- [ ] `CLAUDE.md` から移した節を削り、案内に置き換える
-
-`CLAUDE.md` の中身はほぼ全部が `player.html` を直す人向けの知識で、
-Claude しか読まない場所に置いておくものではない。TODO-042 で
-`docs/Usage.md`（スライドを作る人向け）を作ったので、同じ場所に
-`docs/Developer.md`（`player.html` を直す人向け）を置く。
-
-利用者と決めたこと:
-
-- **「構成」「中身」「触るときの注意」を丸ごと移す。** `CLAUDE.md` には
-  概要数行と「詳細は `docs/Developer.md`」の案内だけ残す
-- **移した内容は `CLAUDE.md` に残さない**（二重管理にしない）
-- `docs/Usage.md` はそのまま。Usage はスライドを作る人向け、Developer は
-  `player.html` を直す人向けとし、相互にリンクする
-
-`docs/` は利用者向けなので、移すときに TODO 番号の参照
-（`（TODO-009）` など）をどう扱うかを決める必要がある。
-
-書いたとおりに試せる記述を含むので、再現と、移した内容に漏れや変質が
-無いかの照合は verifier に分ける。
 
 ---
 
@@ -40,6 +10,7 @@ Claude しか読まない場所に置いておくものではない。TODO-042 �
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-043.** `player.html` を直す人向けの `docs/Developer.md` を作る](archives/todo/TODO-043.%20player.html%20を直す人向けの%20docs%20Developer.md%20を作る.md)
 - [**TODO-042.** `player.html` で他のスライドを作る手順を `docs/Usage.md` に書く](archives/todo/TODO-042.%20player.html%20で他のスライドを作る手順を%20docs%20Usage.md%20に書く.md)
 - [**TODO-041.** プレイヤーの共通部分とスライドのデータを別ファイルに分ける](archives/todo/TODO-041.%20プレイヤーの共通部分とスライドのデータを別ファイルに分ける.md)
 - [**TODO-040.** Inworld AI の声に差し替えるか検討する（対応しない）](archives/todo/TODO-040.%20Inworld%20AI%20の声に差し替えるか検討する.md)

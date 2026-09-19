@@ -1,8 +1,9 @@
 # player.html で別のスライドを作る
 
 `player.html` は再生エンジンだけを持っていて、スライドの中身は
-`slides-<名前>.js` に分かれている（TODO-041）。新しいスライドを作るときは、
+`slides-<名前>.js` に分かれている。新しいスライドを作るときは、
 **`player.html` は触らず、`slides-<名前>.js` を 1 つ足すだけでよい。**
+再生エンジンのほうを直すなら [Developer.md](Developer.md) を読む。
 
 ## 手順
 
@@ -48,7 +49,7 @@ const slideData = [
 | `render()` | スライドの HTML を**文字列で返す関数**。`#slide-canvas` の `innerHTML` に入る |
 
 **スライドの枚数はどこにも書かない。** 総枚数も総時間も
-`slideData.length` と `duration` の合計から自動で出る（TODO-041、TODO-018）。
+`slideData.length` と `duration` の合計から自動で出る。
 
 ## `render()` の書き方
 
@@ -73,8 +74,8 @@ const slideData = [
 
 ## `narration` と `duration`
 
-`duration` には **Online TTS の音声を 1.4 倍速で再生した実測秒数**が入る
-（TODO-018）。進行バーと残り時間はこの値で描かれる。実際のスライド送りは
+`duration` には **Online TTS の音声を 1.4 倍速で再生した実測秒数**が入る。
+進行バーと残り時間はこの値で描かれる。実際のスライド送りは
 読み上げの終了で起きるので、値がずれてもスライドは飛ばないが、
 バーが先に 100% になったり、読み終わってから待たされたりする。
 
@@ -98,7 +99,7 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 - 記号や英単語の読みは `player.html` の `prepareSpeechText()` の置換表を
   通してから読み上げられる。読みがおかしいときはそこを見る。
   **置換表を直したら `tools/measure-duration.py` の `RULES` も直す**
-  （写しなので、片方だけだと測った秒数がずれる。TODO-030）
+  （写しなので、片方だけだと測った秒数がずれる）
 
 ## 公開
 
