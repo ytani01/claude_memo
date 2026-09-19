@@ -19,6 +19,28 @@ FontAwesome は CDN から読む（オフラインでは崩れる）。置き場
 
 確認はブラウザで `player.html?deck=claude-memo` を開くだけ。
 
+### 置き場所は選ばない
+
+`player.html` がローカルを指しているのは `slides-<名前>.js` の 1 か所だけで、
+しかも相対パス。残りは全部 CDN の https。**`player.html` と `slides-*.js` を
+同じディレクトリに置けば、`public_html/` の外でもそのまま動く**
+（`claude_memo.html` のリダイレクトも相対）。
+
+手元で試すなら、そのディレクトリで:
+
+```bash
+python3 -m http.server 8000
+# => http://localhost:8000/player.html?deck=claude-memo
+```
+
+- **`file://` で直接開くのは試していない。** `document.write` で足した相対の
+  `<script>` の読み込みと、外部への音声要求がブラウザの制限に当たる可能性が
+  ある。HTTP で配るのが確実
+- **ネット接続は要る。** Tailwind・Google Fonts・FontAwesome・読み上げの音声を
+  外から取るので、オフラインでは崩れるし鳴らない
+- 公開 URL を変えたくないなら、元の場所にリダイレクトかシンボリックリンクを
+  残す
+
 ## 全体の作り
 
 **HTML → `slideData` → 再生ロジック** の 3 段で、データだけが別ファイルに

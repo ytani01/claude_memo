@@ -1,27 +1,7 @@
 # TODO
 
-**残っている項目: TODO-044。** これまでに 43 件を決着させた。
+**残っている項目: 無し。** これまでに 44 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-045` から。**
-
----
-
-## TODO-044. `public_html/` 以外へ移しても動くことを `docs/Developer.md` に書く
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Opus 5 / effort high | verifier |
-
-- [ ] `docs/Developer.md` の構成の節に、置き場所についての記述を足す
-
-`player.html` がローカルを指しているのは `slides-<名前>.js` の 1 か所だけで、
-相対パス。残りは CDN の https。`player.html` と `slides-*.js` を同じ
-ディレクトリに置けば `public_html/` の外でも動くが、どこにも書いていない。
-
-別ディレクトリへコピーして `python3 -m http.server` で配り、両方 200 で
-読めることは確認済み。**`file://` で直接開いた場合は未確認**なので、
-その旨も書く。
-
-手元で試せる手順を書くので、再現は verifier に分ける。
 
 ---
 
@@ -30,6 +10,7 @@
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-044.** `public_html/` 以外へ移しても動くことを `docs/Developer.md` に書く](archives/todo/TODO-044.%20public_html%20以外へ移しても動くことを%20docs%20Developer.md%20に書く.md)
 - [**TODO-043.** `player.html` を直す人向けの `docs/Developer.md` を作る](archives/todo/TODO-043.%20player.html%20を直す人向けの%20docs%20Developer.md%20を作る.md)
 - [**TODO-042.** `player.html` で他のスライドを作る手順を `docs/Usage.md` に書く](archives/todo/TODO-042.%20player.html%20で他のスライドを作る手順を%20docs%20Usage.md%20に書く.md)
 - [**TODO-041.** プレイヤーの共通部分とスライドのデータを別ファイルに分ける](archives/todo/TODO-041.%20プレイヤーの共通部分とスライドのデータを別ファイルに分ける.md)
