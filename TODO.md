@@ -1,7 +1,7 @@
 # TODO
 
-**残っている項目: TODO-057、TODO-058。** これまでに 56 件を決着させた。
-新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-059` から。**
+**残っている項目: TODO-057、TODO-058、TODO-059。** これまでに 56 件を決着させた。
+新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-060` から。**
 
 ---
 
@@ -77,6 +77,43 @@ TODO-055 で `README.md` / `docs/User.md` / `docs/Developer.md` を推敲した�
 
 分岐が 1 つ増える（`slides` が無ければ `deck` を見る）ので reviewer を入れる。
 **TODO-057 が決着してから着手する。** 同じ 3 ファイルを触るため。
+
+---
+
+## TODO-059. 「HTML 1 枚で動く」という誤りを直す
+
+|      | main | 担当 |
+|------|------|------|
+| 見込み | Opus 5 / effort high | wording + verifier |
+
+- [ ] `README.md` と `slides/readme.js` の 5 箇所を書き換える
+- [ ] ナレーションが変わったスライドの `duration` を測り直す
+
+**動かすのに要るのは 3 ファイル**で、「HTML 1 枚」は事実ではない。
+`docs/User.md` の「他のサーバーへ持っていくとき」自身が「渡すのは次の 3 つだけ」
+として `player.html` / `slides/_rules.js` / `slides/<名前>.js` を挙げている。
+`player.html` は `slides/_rules.js` を無条件に読み、`prepareSpeechText()` が
+その `SPEECH_RULES` を参照するため、欠けると読み上げで落ちる。
+
+TODO-041 で `player.html` とスライドデータを分け、TODO-054 で置換表を
+`_rules.js` に出した結果、**分割前の `claude_memo.html` 時代の言い方だけが
+残った。**
+
+**「ファイル 3 つを置くだけで、ナレーション付きのプレゼンが動く」に変える。**
+「ビルドもインストールも不要」はそのまま使える。
+
+| ファイル | 箇所 |
+|----------|------|
+| `README.md:3` | 冒頭の一文 |
+| `slides/readme.js:5` | `deckConfig.title`（ブラウザのタブに出る） |
+| `slides/readme.js:23,31` | スライド 1 のナレーションと `h1` |
+| `slides/readme.js:260,270` | まとめスライドのナレーションと本文 |
+
+- `slides/user.js` などの「1 枚のスライド」はスライドの枚数の話なので**対象外**
+- `README.md:40` と `tools/test_measure_duration.py:19` の `'1 枚目'` は
+  サンプルの題名なので**対象外**
+- 事実の言い換えだけで分岐は変わらないので reviewer は入れない
+- **TODO-057 が決着してから着手する。** `slides/readme.js` を触るため
 
 ---
 
