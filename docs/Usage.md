@@ -89,8 +89,18 @@ $ tools/measure-duration.py --text 'ここに読み上げる文章'
 
 最後に出る `duration: 2` をそのまま書けばよい。`curl` と `ffprobe` が要る。
 
-引数にスライド番号を渡す使い方（`tools/measure-duration.py 2 17`）は
-**`slides/claude-memo.js` 固定**なので、他のデッキでは使えない。
+引数にスライド番号を渡す使い方（`tools/measure-duration.py 2 17`）と
+`--write` は **`slides/claude-memo.js` 固定**なので、他のデッキでは使えない。
+`--write` を付けると、書き写す代わりに `duration` を直接書き換える。
+
+```bash
+$ tools/measure-duration.py --all --write
+（17 枚の測定結果）
+スライド 15: duration 17 -> 16
+claude-memo.js: 1 枚を書き換えた
+```
+
+変わった枚だけ出る。書き換えた結果が気に入らなければ `git checkout` で戻す。
 
 書くときの注意:
 

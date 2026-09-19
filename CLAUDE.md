@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 構成
 
 `player.html`（外枠と再生エンジン）、`slides/claude-memo.js`（スライドの
-データ）と、`tools/` の補助スクリプトだけ。ビルド、依存関係のインストール、
-テストは無い。配置場所が `public_html/` なので、これらのファイルが
-そのまま公開される。
+データ）と、`tools/` の補助スクリプトだけ。ビルドも依存関係のインストールも
+無く、テストは `tools/test_measure_duration.py` の 1 本だけ。
+配置場所が `public_html/` なので、これらのファイルがそのまま公開される。
 確認はブラウザで `player.html?deck=claude-memo` を開くだけでよい。
 
 「Claude Code の使い方」を紹介する日本語スライドを、動画プレイヤー風の UI で

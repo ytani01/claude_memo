@@ -10,9 +10,12 @@
 |----------|------|
 | `player.html` | 外枠の HTML・CSS と再生ロジック。**これ 1 つが本体** |
 | `slides/<名前>.js` | スライドのデータ。`slides/claude-memo.js` が 17 枚の実例 |
-| `tools/measure-duration.py` | ナレーションの読み上げ秒数を測る |
+| `tools/measure-duration.py` | 読み上げ秒数を測り、`duration` に書き戻す |
+| `tools/test_measure_duration.py` | 書き戻しの置換を確かめる自己テスト |
 
-**ビルドも、依存関係のインストールも、テストも無い。** Tailwind・Google Fonts・
+**ビルドも、依存関係のインストールも無い。**
+テストは `tools/test_measure_duration.py` の 1 本だけで、`duration` の
+書き戻しの置換を見る（実行に `python3` 以外は要らない）。 Tailwind・Google Fonts・
 FontAwesome は CDN から読む（オフラインでは崩れる）。置き場所が `public_html/`
 なので、ファイルを置けばそのまま公開される。
 
@@ -81,7 +84,10 @@ python3 -m http.server 8000
 **`prepareSpeechText()` の置換表を変えると読み上げの長さも変わる。**
 当たるスライドの `duration` を測り直すこと。測るには
 `tools/measure-duration.py` を使う（`tools/measure-duration.py 2 17`、
-案の下見は `--text`）。
+案の下見は `--text`）。**`--write` を付けると、測った値を
+`slides/claude-memo.js` の `duration` に書き戻す**（TODO-050）。
+ナレーションを直したあとは `tools/measure-duration.py --all --write` で
+まとめて合わせられる。
 
 **このスクリプトは `prepareSpeechText()` の置換表と `TTS_MAX_CHARS`・
 `BASE_SPEED_MULTIPLIER` を写している。** `player.html` 側を直したら、

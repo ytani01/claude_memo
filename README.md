@@ -19,7 +19,8 @@
 | `slides/<名前>.js` | スライドのデータ。`player.html?deck=<名前>` で読まれる |
 | `slides/claude-memo.js` | 実例のスライド 17 枚（既定のデッキ） |
 | `docs/` | 説明（下記） |
-| `tools/measure-duration.py` | ナレーションの読み上げ秒数を測る |
+| `tools/measure-duration.py` | ナレーションの読み上げ秒数を測り、`duration` に書き戻す |
+| `tools/test_measure_duration.py` | 書き戻しの置換だけを確かめる自己テスト |
 | `archives/` | 決着した TODO 項目と、サブエージェントの報告。**現行仕様ではない** |
 | `TODO.md` | 進行中の項目と、完了済みの目次 |
 | `CLAUDE.md` | Claude Code 向けのプロジェクト規約 |

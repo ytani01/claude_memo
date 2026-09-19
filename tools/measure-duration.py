@@ -5,11 +5,14 @@
 倍で再生した実測秒数」が入っている（TODO-018）。ナレーションや読みの置換表を
 変えると長さが変わるので、当たるスライドを測り直す必要がある。
 
-    tools/measure-duration.py 2 17     # スライド 2 と 17 を測る
-    tools/measure-duration.py --all    # すべて
+    tools/measure-duration.py 2 17          # スライド 2 と 17 を測る
+    tools/measure-duration.py --all         # すべて
+    tools/measure-duration.py --all --write # すべて測って duration を書き戻す
     tools/measure-duration.py --text 'ここに下書き'
 
 `--text` は、差し替える前に案の長さを見るためのもの。
+`--write` は測った値を slides/claude-memo.js の `duration` に書き込む
+（変わった枚だけ `17 -> 16` と出す。戻すのは git の差分で足りる）。
 
 **この下の定数と RULES は player.html の写し。**
 `prepareSpeechText()` の置換表、`TTS_MAX_CHARS`、`BASE_SPEED_MULTIPLIER` を
@@ -18,6 +21,7 @@
 `curl` と `ffprobe` が要る。
 """
 import argparse
+import itertools
 import os
 import pathlib
 import re
@@ -84,9 +88,44 @@ def measure(text):
     return spoken, raw, raw / BASE_SPEED_MULTIPLIER
 
 
-def narrations():
+# duration の直後に narration が来る並びを当てにしている（slideData の書き方）。
+DURATION_RE = re.compile(r"(duration: )(\d+)(,\n *narration: ')")
+
+
+def narrations(text=None):
     """slides/claude-memo.js から narration を並び順に取り出す。"""
-    return re.findall(r"narration: '(.*?)',\n", SRC.read_text(encoding='utf-8'))
+    if text is None:
+        text = SRC.read_text(encoding='utf-8')
+    return re.findall(r"narration: '(.*?)',\n", text)
+
+
+def apply_durations(text, updates):
+    """{スライド番号: 秒数} を当てた本文と、変わった分 [(番号, 旧, 新)] を返す。"""
+    changed = []
+    counter = itertools.count(1)
+
+    def replace(m):
+        number = next(counter)
+        old = int(m.group(2))
+        new = updates.get(number, old)
+        if new != old:
+            changed.append((number, old, new))
+        return f'{m.group(1)}{new}{m.group(3)}'
+
+    written = DURATION_RE.sub(replace, text)
+    return written, changed, next(counter) - 1
+
+
+def write_durations(updates):
+    """{スライド番号: 秒数} を書き込み、変わった分を [(番号, 旧, 新)] で返す。"""
+    text = SRC.read_text(encoding='utf-8')
+    written, changed, found = apply_durations(text, updates)
+    if found != len(narrations(text)):
+        raise SystemExit(f'{SRC} の duration が {found} 個しか見つからない。'
+                         'slideData の書き方が変わっていないか確かめること')
+    if changed:
+        SRC.write_text(written, encoding='utf-8')
+    return changed
 
 
 def main():
@@ -95,20 +134,25 @@ def main():
     parser.add_argument('slides', nargs='*', type=int, help='スライド番号')
     parser.add_argument('--text', help='下書きの文字列を直接測る')
     parser.add_argument('--all', action='store_true', help='すべてのスライド')
+    parser.add_argument('--write', action='store_true',
+                        help='測った値を slides/claude-memo.js に書き戻す')
     args = parser.parse_args()
 
     jobs = []
     if args.text:
-        jobs.append(('下書き', args.text))
+        jobs.append((None, '下書き', args.text))
     if args.slides or args.all:
         found = narrations()
         ids = range(1, len(found) + 1) if args.all else args.slides
         for i in ids:
-            jobs.append((f'スライド {i}', found[i - 1]))
+            jobs.append((i, f'スライド {i}', found[i - 1]))
     if not jobs:
         parser.error('スライド番号か --text か --all を渡す')
+    if args.write and not (args.slides or args.all):
+        parser.error('--write はスライド番号か --all と一緒に渡す')
 
-    for label, text in jobs:
+    updates = {}
+    for number, label, text in jobs:
         spoken, raw, scaled = measure(text)
         cut = (f' ★TTS_MAX_CHARS={TTS_MAX_CHARS} 字で切れる'
                if len(spoken) > TTS_MAX_CHARS else '')
@@ -116,6 +160,15 @@ def main():
               f' / 実測 {raw:.3f}s'
               f' / BASE_SPEED_MULTIPLIER={BASE_SPEED_MULTIPLIER} 倍速'
               f' {scaled:.2f}s -> duration: {round(scaled)}')
+        if number is not None:
+            updates[number] = round(scaled)
+
+    if args.write:
+        changed = write_durations(updates)
+        for number, old, new in changed:
+            print(f'スライド {number}: duration {old} -> {new}')
+        print(f'{SRC.name}: {len(changed)} 枚を書き換えた'
+              if changed else f'{SRC.name}: 変更なし')
 
 
 if __name__ == '__main__':
