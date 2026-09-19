@@ -151,6 +151,29 @@ const deckConfig = {
 このディレクトリは `public_html/` 下なので、ファイルを置くだけで公開される。
 ビルドも依存関係のインストールも不要。
 
+### 他のサーバーへ持っていくとき
+
+**渡すのは次の 3 つだけ。** 同じ位置関係のまま置く。
+
+```
+player.html
+slides/_rules.js
+slides/<名前>.js    ← 公開したいデッキの分だけ
+```
+
+`player.html` がローカルから読むのはこの 2 種類の `.js` だけで、参照は
+相対パス。残り（Tailwind・Google Fonts・FontAwesome・読み上げの音声）は
+すべて外部から取得する。
+
+- `tools/`・`docs/`・`archives/`・`README.md`・`TODO.md` は**要らない**。
+  `tools/measure-duration.py` は `duration` を測るためのもので、再生には
+  関わらない
+- **ネット接続が要る。** オフラインでは見た目が崩れ、音声も出ない
+- **HTTP で配信する。** `file://` で直接開くのは試していない
+
+置き場所の自由度や公開 URL を保つ方法は
+[Developer.md の「場所を選ばない」](Developer.md#場所を選ばない)にある。
+
 ## 最小の例
 
 `slides/sample.js` として保存し、`player.html?deck=sample` で開く。

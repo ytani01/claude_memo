@@ -26,9 +26,10 @@
 
 ### 場所を選ばない
 
-`player.html` がローカルを指すのは `slides/<名前>.js` だけで、相対パス。
-残りはすべて CDN の https。**`player.html` と `slides/` を同じディレクトリに置くと、
-`public_html/` の外でも動く**。
+`player.html` がローカルを指すのは `slides/_rules.js` と `slides/<名前>.js` の
+2 つだけで、相対パス。残りはすべて CDN の https。
+**`player.html` と `slides/` を同じディレクトリに置くと、`public_html/` の外でも
+動く**。
 
 手元で試すなら:
 
