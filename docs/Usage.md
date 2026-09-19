@@ -28,7 +28,6 @@ const deckConfig = {
 
 const slideData = [
     {
-        id: 1,
         title: 'プレイリストに出る題名',
         duration: 10,
         narration: '読み上げる文章。',
@@ -42,14 +41,14 @@ const slideData = [
 
 | キー | 中身 |
 |------|------|
-| `id` | スライド番号。**1 からの通し番号**。`SLIDE 01 / 17` の表示とプレイリストの番号に使う |
 | `title` | プレイリストと再生バーの上に出る題名 |
 | `duration` | このスライドの秒数。**読み上げの実測値を入れる**（後述） |
 | `narration` | 読み上げる文章。字幕にもそのまま出る |
 | `render()` | スライドの HTML を**文字列で返す関数**。`#slide-canvas` の `innerHTML` に入る |
 
-**スライドの枚数はどこにも書かない。** 総枚数も総時間も
-`slideData.length` と `duration` の合計から自動で出る。
+**スライドの番号も枚数もどこにも書かない。** `SLIDE 01 / 17` の番号は
+`slideData` の並び順から、総枚数と総時間は `slideData.length` と
+`duration` の合計から自動で出る。
 
 ## `render()` の書き方
 
@@ -118,7 +117,6 @@ const deckConfig = {
 
 const slideData = [
     {
-        id: 1,
         title: 'はじめに',
         duration: 5,
         narration: 'これはサンプルのスライドです。',

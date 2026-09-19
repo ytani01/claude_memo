@@ -50,7 +50,8 @@ python3 -m http.server 8000
 読み込み時点で `slideData` を参照するので、順番を入れ替えると動かない。
 デッキが読めなかったときは、白画面にせず理由を出して `throw` で止めている。
 
-`slideData` の 1 要素は `{ id, title, duration, narration, render() }`。
+`slideData` の 1 要素は `{ title, duration, narration, render() }`。
+スライド番号は持たせず、並び順から出す（TODO-048）。
 それぞれの意味は [Usage.md](Usage.md) にある。
 
 ## 再生ロジック

@@ -1,32 +1,7 @@
 # TODO
 
-**残っている項目: TODO-048、TODO-049。** これまでに 47 件を決着させた。
+**残っている項目: TODO-049。** これまでに 48 件を決着させた。
 新しく足すときは「完了済み」の上に節を作る。**番号は `TODO-050` から。**
-
----
-
-## TODO-048. スライドデータから `id` を外す
-
-|      | main | 担当 |
-|------|------|------|
-| 見込み | Sonnet 5 / effort medium | verifier |
-
-- [ ] `player.html` の 3 箇所を配列の添字から出すように直す
-- [ ] `slides/claude-memo.js` の `id:` 17 行を削る
-- [ ] `docs/Usage.md` の記述例 2 箇所とキーの表から `id` を外す
-
-スライドの番号は配列の順番で決まるのに、データにも `id` として持っている。
-二重に持っているので、スライドを差し替えたり間に足したりすると（TODO-025 で
-実際に並びを変えた）`id` を振り直す手間が出て、ずれも起きうる。
-
-`id` を読んでいるのは `player.html` の 3 箇所だけで、どれも表示用。
-
-- `player.html:895` `String(slide.id).padStart(2, '0')` → `currentIndex + 1` から
-- `player.html:896` `${slide.id}. ${slide.title}` → 同上
-- `player.html:1013` プレイリストの番号（ここは既に `idx` がある） → `idx + 1`
-
-`tools/measure-duration.py` は `id` を見ていない。表示は今までと同じになる
-はずなので、確認の担当には「番号の見た目が変わっていないか」を見てもらう。
 
 ---
 
@@ -95,11 +70,14 @@
 
 ---
 
+---
+
 ## 完了済み
 
 1 項目 1 ファイル。`archives/todo/` にある（新しい順）。
 **やらないと決めたものの理由もそこにある。** 蒸し返す前に読むこと。
 
+- [**TODO-048.** スライドデータから `id` を外す](archives/todo/TODO-048.%20スライドデータから%20id%20を外す.md)
 - [**TODO-047.** 旧 URL 用の `claude_memo.html` を削除する](archives/todo/TODO-047.%20旧%20URL%20用の%20claude_memo.html%20を削除する.md)
 - [**TODO-046.** スライドのデータを `slides/` に置く](archives/todo/TODO-046.%20スライドのデータを%20slides%20に置く.md)
 - [**TODO-045.** リポジトリの入口として `README.md` を作る](archives/todo/TODO-045.%20リポジトリの入口として%20README.md%20を作る.md)
